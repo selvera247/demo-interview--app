@@ -12,7 +12,10 @@ import {
   Zap,
 } from "lucide-react";
 import { toDealViews, type DealView } from "../src/data/deal-adapter";
+import { addDealFromIntake, type NewDealIntake } from "../src/data/create-deal";
+import { formatProjectCode } from "../src/domain/ids";
 import { createSeedState } from "../src/data/seed";
+import NewDealPanel from "./NewDealPanel";
 
 const categoryLabels = {
   materials: "Materials",
@@ -60,10 +63,30 @@ function statusText(status: string) {
 }
 
 export default function App() {
-  const deals = useMemo(() => toDealViews(createSeedState()), []);
+  const [state, setState] = useState(() => createSeedState());
+  const deals = useMemo(() => toDealViews(state), [state]);
   const [selectedId, setSelectedId] = useState(deals[0]?.id);
   const [view, setView] = useState<"spec" | "sourcing" | "cost">("spec");
+  const [intakeOpen, setIntakeOpen] = useState(false);
   const selected = deals.find((d) => d.id === selectedId);
+
+  const nextCode = useMemo(() => {
+    const year = new Date().getFullYear();
+    let max = 0;
+    for (const project of state.projects) {
+      const match = project.projectCode.match(/^GE-(\d{4})-(\d{4})$/);
+      if (match && Number(match[1]) === year) max = Math.max(max, Number(match[2]));
+    }
+    return formatProjectCode(year, max + 1);
+  }, [state.projects]);
+
+  function saveIntake(intake: NewDealIntake) {
+    const result = addDealFromIntake(state, intake, new Date().toISOString());
+    setState(result.state);
+    setSelectedId(result.projectCode);
+    setView("spec");
+    setIntakeOpen(false);
+  }
 
   const summarize = (deal: DealView) => {
     const vals = Object.values(deal.fields);
@@ -118,7 +141,12 @@ export default function App() {
             <span className="text-[11px] uppercase tracking-wide text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
               Active deals
             </span>
-            <button className="text-[#C9762E] hover:text-[#dd8a42] transition-colors" type="button" aria-label="Add deal">
+            <button
+              className="text-[#C9762E] hover:text-[#dd8a42] transition-colors"
+              type="button"
+              aria-label="Add deal"
+              onClick={() => setIntakeOpen(true)}
+            >
               <Plus size={16} />
             </button>
           </div>
@@ -172,6 +200,10 @@ export default function App() {
         {selected && view === "sourcing" && <SourcingView deal={selected} />}
         {selected && view === "cost" && <CostView deal={selected} />}
       </div>
+
+      {intakeOpen && (
+        <NewDealPanel nextCode={nextCode} onClose={() => setIntakeOpen(false)} onSave={saveIntake} />
+      )}
     </div>
   );
 }

@@ -78,12 +78,14 @@ export function createSeedState(): AppState {
     { id: "u-whitfield", name: "T. Whitfield", email: "twhitfield@internal", role: "commercial" },
     { id: "u-eng", name: "Engineering", email: "engineering@internal", role: "engineering" },
     { id: "u-contracts", name: "Contracts", email: "contracts@internal", role: "finance" },
+    { id: "u-singh", name: "K. Singh", email: "ksingh@internal", role: "finance" },
   ];
 
   const customers: Customer[] = [
     { id: "c-northgate", name: "Northgate AI Colocation", segment: "colo" },
     { id: "c-permian", name: "Permian Ridge Mining Co.", segment: "industrial" },
     { id: "c-cedar", name: "Cedar Point Data Partners", segment: "colo" },
+    { id: "c-lakeside", name: "Lakeside Inference Co.", segment: "colo" },
   ];
 
   const cole = "u-cole";
@@ -91,6 +93,7 @@ export function createSeedState(): AppState {
   const whitfield = "u-whitfield";
   const eng = "u-eng";
   const contracts = "u-contracts";
+  const singh = "u-singh";
 
   const projects: Project[] = [
     {
@@ -164,6 +167,31 @@ export function createSeedState(): AppState {
       expectedOutcome: "Firm spec and delivery target established before this moves to engineering.",
       tags: ["Other"],
       createdAt: "2026-09-01T12:00:00.000Z",
+      updatedAt: now,
+    },
+    {
+      id: "p-0422",
+      projectCode: "GE-2026-0422",
+      customerId: "c-lakeside",
+      siteName: "Austin vs Round Rock, TX",
+      dealName: "Colo block — HubSpot vs NetSuite mismatch",
+      stage: "intake",
+      status: "active",
+      quotedRevenue: 4_800_000,
+      currency: "USD",
+      customerRequestedDeliveryDate: "2026-12-15",
+      commercialOwnerId: cole,
+      opsOwnerId: eng,
+      quoteFrozenAt: null,
+      bomLocked: false,
+      requestorName: "R. Cole",
+      requestorTeam: "Sales — Enterprise",
+      problemStatement:
+        "Lakeside is in HubSpot as an 8 MW / $4.8M closed-won colo deal. NetSuite has a 5 MW / $3.2M sales order for Phase 1 only. Engineering cannot freeze a BOM until CRM and ERP agree on load, price, site, and what “closed” means.",
+      expectedOutcome:
+        "One system of record: HubSpot opportunity and NetSuite SO-10491 reconciled, then spec freeze on the agreed Phase 1 scope.",
+      tags: ["Revenue", "HubSpot", "NetSuite"],
+      createdAt: "2026-08-28T12:00:00.000Z",
       updatedAt: now,
     },
   ];
@@ -247,6 +275,85 @@ export function createSeedState(): AppState {
       timeline_pressure: { value: "Unclear — customer has given no firm date", status: "unresolved", ownerId: whitfield },
       control_impact: { value: "Not yet assessable", status: "unresolved", ownerId: null },
       downstream_dependencies: { value: "None yet — too early in lifecycle", status: "unresolved", ownerId: null },
+    }),
+    ...fieldsFor("p-0422", {
+      voltage: confirmed("13.8 kV primary / 480V secondary", cole, "HubSpot + NetSuite (agree)"),
+      load: {
+        value: "HubSpot 8 MW vs NetSuite 5 MW — not reconciled",
+        status: "conflicting",
+        ownerId: cole,
+        source: "HubSpot vs NetSuite",
+        conflict:
+          "HubSpot opportunity GE-0422: 8 MW critical IT, $4.8M amount. NetSuite sales order SO-10491: 5 MW Phase 1, $3.2M. Expansion MW was stored as committed load in CRM, not as an option on the SO.",
+      },
+      phase: confirmed("3-phase", cole, "HubSpot + NetSuite (agree)"),
+      coolingType: confirmed("Giga Box Air, liquid-ready", eng, "Engineering"),
+      spaceConstraints: {
+        value: "HubSpot Austin Metro vs NetSuite ship-to Round Rock",
+        status: "conflicting",
+        ownerId: cole,
+        source: "HubSpot vs NetSuite",
+        conflict:
+          "HubSpot company/site = Austin Metro campus. NetSuite customer ship-to = Round Rock pad (Lakeside Inference Holdings LLC). Different legal entity and pad dimensions; enclosure BOM cannot be issued.",
+      },
+      requestedDelivery: {
+        value: "HubSpot 15 Dec 2026 vs NetSuite 31 Mar 2027",
+        status: "conflicting",
+        ownerId: cole,
+        source: "HubSpot vs NetSuite",
+        conflict:
+          "HubSpot close date / customer requested delivery = 2026-12-15. NetSuite promised ship on SO-10491 = 2027-03-31. Transformer lead time was never pushed back in CRM.",
+      },
+      customerPowerReady: {
+        value: "",
+        status: "unresolved",
+        ownerId: singh,
+        source: "NetSuite",
+        conflict:
+          "NetSuite has no interconnect milestone. HubSpot custom field “Power ready” is blank. Neither system is source of truth.",
+      },
+      deliveryDefinition: {
+        value: "HubSpot closed-won ≠ NetSuite revenue event",
+        status: "conflicting",
+        ownerId: singh,
+        source: "HubSpot vs NetSuite",
+        conflict:
+          "HubSpot marks the deal Closed Won at contract signature. NetSuite recognizes revenue on item fulfill / invoice. FP&A is forecasting HubSpot $4.8M in Q4; backlog in NetSuite is $3.2M in Q1 2027.",
+      },
+      revenue_impact: {
+        value: "$4.8M HubSpot vs $3.2M NetSuite SO — $1.6M unexplained",
+        status: "conflicting",
+        ownerId: singh,
+        source: "HubSpot vs NetSuite",
+        conflict:
+          "Pipeline and bookings do not match. Do not freeze quote or issue POs until amount and MW are one number.",
+      },
+      audit_revrec_risk: confirmed(
+        "Elevated — CRM closed-won does not equal ERP booking. Dual amounts and dual dates will fail revenue cutoff testing.",
+        singh,
+        "NetSuite / Audit"
+      ),
+      customer_impact: confirmed(
+        "Customer believes 8 MW is committed (HubSpot quote PDF). NetSuite SO they countersigned is 5 MW Phase 1 with an unpriced expansion rider.",
+        cole,
+        "HubSpot"
+      ),
+      complexity: confirmed("Custom — not technical complexity; master-data conflict between CRM and ERP", singh),
+      cross_functional_effort: confirmed("High — Sales, RevOps, NetSuite admin, Contracts, FP&A, Audit", singh),
+      timeline_pressure: confirmed(
+        "High — HubSpot date is inside transformer lead time if 8 MW is real; NetSuite date is not",
+        cole
+      ),
+      control_impact: confirmed(
+        "HubSpot is not the revenue subledger. NetSuite SO is the booking record. Spec intake must stop treating CRM amount as confirmed commercial terms.",
+        singh,
+        "Controls"
+      ),
+      downstream_dependencies: confirmed(
+        "FP&A (forecast uses HubSpot), Audit (cutoff), Procurement (MW sizes the transformer), Collections (AR will invoice NetSuite amount)",
+        singh,
+        "Controls"
+      ),
     }),
   ];
 

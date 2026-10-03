@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Generate synthetic finance data for the Close Agent MCP demo.
+"""Generate clean synthetic finance data for Northwind Digital (SQLite).
 
-All data is synthetic. Planted anomalies give the agent something real to find:
-- duplicate accrual on Accrued Expenses
-- balance-sheet reclass between Prepaid and Other Current Assets
-- revenue timing swing (deferred vs recognized)
+Company: Northwind Digital
+Entities: ND-US, ND-EU
+No planted anomalies in this generator (slice 2 will add them).
+All figures are synthetic. source_system labels are generic only.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import random
 import sqlite3
-from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -21,50 +21,153 @@ ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "data" / "finance.db"
 EXPORT_DIR = ROOT / "exports"
 SEED = 42
+COMPANY = "Northwind Digital"
+ENTITIES = ["ND-US", "ND-EU"]
 
-ENTITIES = ["US-01", "US-02", "EMEA-01"]
-ACCOUNTS = [
+# ~40-account chart of accounts (id, name, type, statement)
+ACCOUNTS: list[tuple[str, str, str, str]] = [
+    # Assets
     ("1000", "Cash", "Asset", "BS"),
     ("1100", "Accounts Receivable", "Asset", "BS"),
     ("1200", "Prepaid Expenses", "Asset", "BS"),
-    ("1250", "Other Current Assets", "Asset", "BS"),
+    ("1300", "Other Current Assets", "Asset", "BS"),
+    ("1400", "Property Plant & Equipment", "Asset", "BS"),
+    ("1500", "Accumulated Depreciation", "Asset", "BS"),  # contra (credit)
+    ("1600", "Intangible Assets", "Asset", "BS"),
+    # Liabilities
     ("2000", "Accounts Payable", "Liability", "BS"),
     ("2100", "Accrued Expenses", "Liability", "BS"),
-    ("2200", "Deferred Revenue", "Liability", "BS"),
-    ("4000", "Product Revenue", "Revenue", "PL"),
-    ("4100", "Services Revenue", "Revenue", "PL"),
-    ("5000", "Cost of Goods Sold", "Expense", "PL"),
+    ("2200", "Accrued Payroll", "Liability", "BS"),
+    ("2300", "Deferred Revenue", "Liability", "BS"),
+    ("2400", "Short-term Debt", "Liability", "BS"),
+    ("2500", "Long-term Debt", "Liability", "BS"),
+    # Equity
+    ("3000", "Common Stock", "Equity", "BS"),
+    ("3100", "Additional Paid-in Capital", "Equity", "BS"),
+    ("3200", "Retained Earnings", "Equity", "BS"),
+    # Revenue
+    ("4000", "Subscription Revenue", "Revenue", "PL"),
+    ("4100", "Usage Revenue", "Revenue", "PL"),
+    ("4200", "Services Revenue", "Revenue", "PL"),
+    ("4300", "Other Revenue", "Revenue", "PL"),
+    # COGS
+    ("5000", "Cost of Subscription", "Expense", "PL"),
+    ("5100", "Cost of Usage", "Expense", "PL"),
+    ("5200", "Cost of Services Delivery", "Expense", "PL"),
+    # Opex (12+)
     ("6000", "Salaries & Wages", "Expense", "PL"),
-    ("6100", "Professional Fees", "Expense", "PL"),
-    ("6200", "Travel & Entertainment", "Expense", "PL"),
-    ("7000", "Cloud Infrastructure", "Expense", "PL"),
+    ("6010", "Employee Benefits", "Expense", "PL"),
+    ("6020", "Contractors", "Expense", "PL"),
+    ("6100", "Software Subscriptions", "Expense", "PL"),
+    ("6110", "Cloud Hosting", "Expense", "PL"),
+    ("6200", "Marketing & Advertising", "Expense", "PL"),
+    ("6300", "Travel", "Expense", "PL"),
+    ("6310", "Meals & Entertainment", "Expense", "PL"),
+    ("6400", "Rent & Facilities", "Expense", "PL"),
+    ("6500", "Professional Fees", "Expense", "PL"),
+    ("6600", "Recruiting", "Expense", "PL"),
+    ("6700", "Depreciation Expense", "Expense", "PL"),
+    ("6800", "Training & Development", "Expense", "PL"),
+    ("6900", "Office Supplies", "Expense", "PL"),
+    ("6950", "Insurance", "Expense", "PL"),
+    ("7000", "Bad Debt Expense", "Expense", "PL"),
+    ("7100", "Bank Fees", "Expense", "PL"),
 ]
 
+# Base monthly magnitude by account (signed: credit-normal negative for liability/equity/revenue)
+BASE_MONTHLY: dict[str, float] = {
+    "1000": 4_200_000,
+    "1100": 2_100_000,
+    "1200": 380_000,
+    "1300": 210_000,
+    "1400": 3_400_000,
+    "1500": -980_000,
+    "1600": 720_000,
+    "2000": -890_000,
+    "2100": -420_000,
+    "2200": -310_000,
+    "2300": -1_150_000,
+    "2400": -250_000,
+    "2500": -1_800_000,
+    "3000": -100_000,
+    "3100": -4_500_000,
+    "3200": -2_200_000,
+    # P&L monthly activity
+    "4000": -1_850_000,
+    "4100": -620_000,
+    "4200": -410_000,
+    "4300": -55_000,
+    "5000": 420_000,
+    "5100": 180_000,
+    "5200": 145_000,
+    "6000": 980_000,
+    "6010": 210_000,
+    "6020": 160_000,
+    "6100": 95_000,
+    "6110": 175_000,
+    "6200": 240_000,
+    "6300": 48_000,
+    "6310": 22_000,
+    "6400": 130_000,
+    "6500": 85_000,
+    "6600": 40_000,
+    "6700": 75_000,
+    "6800": 18_000,
+    "6900": 12_000,
+    "6950": 35_000,
+    "7000": 15_000,
+    "7100": 8_000,
+}
+
+ENTITY_SCALE = {"ND-US": 1.0, "ND-EU": 0.58}
+
 CUSTOMERS = [
-    ("C-100", "Northwind Analytics", "US"),
+    ("C-100", "Cedar Analytics", "US"),
     ("C-101", "Helios Retail Group", "US"),
     ("C-102", "Atlas Manufacturing", "DE"),
     ("C-103", "Blue Harbor Logistics", "UK"),
     ("C-104", "Cascade Health Systems", "US"),
+    ("C-105", "Meridian Media Co", "FR"),
+    ("C-106", "Pioneer Freight Lines", "NL"),
 ]
 
 VENDORS = [
-    ("V-200", "Apex Cloud Services", "US"),
-    ("V-201", "Ledger Legal LLP", "US"),
-    ("V-202", "Summit Facilities Co", "US"),
+    ("V-200", "Nimbus Hosting Co", "US"),
+    ("V-201", "Summit Legal Partners", "US"),
+    ("V-202", "Harbor Facilities LLC", "US"),
     ("V-203", "Orbit Travel Desk", "IE"),
     ("V-204", "Prime Temp Staffing", "US"),
+    ("V-205", "Brightline Marketing", "US"),
+    ("V-206", "Cobalt Recruiting", "UK"),
+    ("V-207", "Parcel Softwares Ltd", "DE"),
 ]
 
-
-@dataclass
-class PlantedAnomaly:
-    id: str
-    account: str
-    period: str
-    kind: str
-    explanation: str
-    expected_citations: list[str]
+# Accounts with detailed subledgers that must reconcile to TB
+AR_ACCOUNT = "1100"
+AP_ACCOUNT = "2000"
+ACCRUAL_ACCOUNTS = {"2100", "2200"}
+OPEX_DETAIL_ACCOUNTS = {
+    "6000",
+    "6010",
+    "6020",
+    "6100",
+    "6110",
+    "6200",
+    "6300",
+    "6310",
+    "6400",
+    "6500",
+    "6600",
+    "6700",
+    "6800",
+    "6900",
+    "6950",
+    "7000",
+    "7100",
+    "5000",
+    "5100",
+    "5200",
+}
 
 
 def month_starts(n: int = 24, end: date | None = None) -> list[date]:
@@ -134,7 +237,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             party_id TEXT,
             memo TEXT NOT NULL,
             amount REAL NOT NULL,
-            source_system TEXT NOT NULL
+            source_system TEXT NOT NULL,
+            entry_type TEXT NOT NULL
         );
 
         CREATE TABLE close_tasks (
@@ -182,305 +286,220 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     )
 
 
-def base_balance(account_id: str, entity_idx: int, month_idx: int) -> float:
-    """Stable-ish synthetic ending balances with mild growth."""
-    rng = random.Random(hash((account_id, entity_idx)) % (2**32))
-    scale = 1.0 + entity_idx * 0.35
-    growth = 1.0 + month_idx * 0.012
-    centers = {
-        "1000": 2_400_000,
-        "1100": 1_850_000,
-        "1200": 320_000,
-        "1250": 180_000,
-        "2000": -940_000,
-        "2100": -410_000,
-        "2200": -620_000,
-        "4000": -3_200_000,
-        "4100": -980_000,
-        "5000": 1_450_000,
-        "6000": 1_100_000,
-        "6100": 240_000,
-        "6200": 95_000,
-        "7000": 310_000,
-    }
-    noise = rng.uniform(0.92, 1.08)
-    return round(centers[account_id] * scale * growth * noise, 2)
+def seasonality_factor(account_id: str, month: int) -> float:
+    """Mild seasonality so MoM stays mostly under threshold."""
+    # month: 1-12
+    angle = 2 * math.pi * (month - 1) / 12
+    if account_id.startswith("4"):  # revenue: mild Q4 lift
+        return 1.0 + 0.04 * math.sin(angle - 0.5) + (0.03 if month in (11, 12) else 0.0)
+    if account_id in {"6200", "6300", "6310", "6600"}:  # marketing / travel / recruiting
+        return 1.0 + 0.045 * math.sin(angle + 0.8)
+    if account_id.startswith("5") or account_id.startswith("6") or account_id.startswith("7"):
+        return 1.0 + 0.025 * math.sin(angle)
+    if account_id == "1100":
+        return 1.0 + 0.02 * math.sin(angle - 0.2)
+    return 1.0 + 0.015 * math.sin(angle)
 
 
-def plant_anomalies(
-    balances: dict[tuple[str, str, str], float],
-    periods: list[str],
-    entity: str = "US-01",
-) -> list[PlantedAnomaly]:
-    """Mutate balances and return known anomaly explanations for evals."""
-    # Use the latest closed period (last month) vs prior for demo focus.
-    period = periods[-1]
-    prior = periods[-2]
-    anomalies: list[PlantedAnomaly] = []
-
-    # 1) Duplicate accrual on Accrued Expenses (2100) — liability more negative.
-    key = (period, entity, "2100")
-    balances[key] = balances[key] - 185_000
-    anomalies.append(
-        PlantedAnomaly(
-            id="ANOM-DUP-ACCRUAL",
-            account="2100",
-            period=period,
-            kind="duplicate_accrual",
-            explanation=(
-                "Duplicate legal accrual posted twice for Ledger Legal LLP "
-                "($185K). Prior period had a single accrual; current period "
-                "includes JE-ACC-4401 and JE-ACC-4401-DUP."
-            ),
-            expected_citations=["JE-ACC-4401", "JE-ACC-4401-DUP", "V-201"],
-        )
-    )
-
-    # 2) Reclass: Prepaid (1200) down, Other Current Assets (1250) up by $92K.
-    balances[(period, entity, "1200")] = balances[(period, entity, "1200")] - 92_000
-    balances[(period, entity, "1250")] = balances[(period, entity, "1250")] + 92_000
-    anomalies.append(
-        PlantedAnomaly(
-            id="ANOM-RECLASS",
-            account="1200",
-            period=period,
-            kind="reclass",
-            explanation=(
-                "Reclass of software prepaid to Other Current Assets ($92K) via "
-                "JE-RCL-8810. Net BS impact is zero; Prepaid variance is timing/"
-                "classification, not cash spend."
-            ),
-            expected_citations=["JE-RCL-8810", "1200", "1250"],
-        )
-    )
-
-    # 3) Revenue timing swing: Product Revenue (4000) more negative (higher revenue)
-    # and Deferred Revenue (2200) less negative — pulled forward recognition.
-    # Soften prior and enlarge current so MoM clears the 10% dual threshold.
-    balances[(prior, entity, "4000")] = balances[(prior, entity, "4000")] + 420_000
-    balances[(period, entity, "4000")] = balances[(period, entity, "4000")] - 520_000
-    balances[(period, entity, "2200")] = balances[(period, entity, "2200")] + 520_000
-    anomalies.append(
-        PlantedAnomaly(
-            id="ANOM-REV-TIMING",
-            account="4000",
-            period=period,
-            kind="revenue_timing",
-            explanation=(
-                "Revenue timing pull-forward for Northwind Analytics annual "
-                "renewal ($520K) recognized from Deferred Revenue via "
-                "JE-REV-2207. Creates >10% MoM swing vs prior period."
-            ),
-            expected_citations=["JE-REV-2207", "C-100", "2200"],
-        )
-    )
-
-    return anomalies
-
-
-def build_subledger(
-    periods: list[str],
+def balance_for(
+    account_id: str,
     entity: str,
-    anomalies: list[PlantedAnomaly],
-) -> list[tuple]:
-    rng = random.Random(SEED + 7)
-    rows: list[tuple] = []
-    period = periods[-1]
-    prior = periods[-2]
-    day0 = date.fromisoformat(f"{period}-01")
+    month_idx: int,
+    month_num: int,
+    rng: random.Random,
+) -> float:
+    """Deterministic ending balance / monthly activity with growth + mild seasonality."""
+    base = BASE_MONTHLY[account_id] * ENTITY_SCALE[entity]
+    growth = 1.0 + month_idx * 0.0075  # ~0.75%/month
+    seasonal = seasonality_factor(account_id, month_num)
+    # Tiny deterministic noise (±1.2%) — keeps MoM under dual threshold
+    noise = 1.0 + rng.uniform(-0.012, 0.012)
+    return round(base * growth * seasonal * noise, 2)
 
-    def add(
-        txn_id: str,
-        acct: str,
-        offset: int,
-        party: str | None,
-        memo: str,
-        amount: float,
-        source: str,
-        per: str | None = None,
-    ) -> None:
-        d = day0 + timedelta(days=offset)
+
+def split_amount(total: float, n: int, rng: random.Random) -> list[float]:
+    """Split total into n parts that sum exactly to total."""
+    if n <= 0:
+        return []
+    if n == 1:
+        return [round(total, 2)]
+    weights = [rng.uniform(0.7, 1.3) for _ in range(n)]
+    s = sum(weights)
+    parts = [total * (w / s) for w in weights]
+    parts = [round(p, 2) for p in parts]
+    drift = round(total - sum(parts), 2)
+    parts[-1] = round(parts[-1] + drift, 2)
+    return parts
+
+
+def build_ar_rows(
+    period: str,
+    entity: str,
+    target: float,
+    day0: date,
+    rng: random.Random,
+) -> list[tuple]:
+    """Open AR as of period end: invoices + payments netting to TB AR balance."""
+    rows: list[tuple] = []
+    n_inv = 5 if entity == "ND-US" else 4
+    # Payments as ~25% of gross invoices so invoices are larger than target
+    payment_ratio = 0.25
+    gross = target / (1.0 - payment_ratio) if abs(1.0 - payment_ratio) > 1e-9 else target
+    inv_amts = split_amount(gross, n_inv, rng)
+    pay_total = round(gross - target, 2)
+    n_pay = max(1, n_inv // 2)
+    pay_amts = split_amount(pay_total, n_pay, rng)
+
+    for i, amt in enumerate(inv_amts):
+        cust = CUSTOMERS[(hash((period, entity, i)) & 0xFFFF) % len(CUSTOMERS)]
+        txn_id = f"AR-INV-{entity}-{period}-{i+1:03d}"
         rows.append(
             (
                 txn_id,
-                per or period,
+                period,
                 entity,
-                acct,
-                d.isoformat(),
-                party,
-                memo,
-                round(amount, 2),
-                source,
+                AR_ACCOUNT,
+                (day0 + timedelta(days=2 + i * 3)).isoformat(),
+                cust[0],
+                f"Invoice {cust[1]} — subscription / usage",
+                round(amt, 2),
+                "Billing",
+                "ar_invoice",
             )
         )
-
-    # Routine AR activity
-    for i, (cid, cname, _) in enumerate(CUSTOMERS):
-        add(
-            f"AR-{period}-{i+1:03d}",
-            "1100",
-            2 + i,
-            cid,
-            f"Invoice {cname} — monthly services",
-            rng.uniform(40_000, 120_000),
-            "NetSuite",
+    for i, amt in enumerate(pay_amts):
+        cust = CUSTOMERS[(hash((period, entity, "pay", i)) & 0xFFFF) % len(CUSTOMERS)]
+        txn_id = f"AR-PAY-{entity}-{period}-{i+1:03d}"
+        rows.append(
+            (
+                txn_id,
+                period,
+                entity,
+                AR_ACCOUNT,
+                (day0 + timedelta(days=10 + i * 4)).isoformat(),
+                cust[0],
+                f"Payment from {cust[1]}",
+                round(-amt, 2),
+                "Billing",
+                "ar_payment",
+            )
         )
+    return rows
 
-    # Planted: duplicate accrual
-    add(
-        "JE-ACC-4401",
-        "2100",
-        8,
-        "V-201",
-        "Legal accrual — Q3 matter Ledger Legal LLP",
-        -185_000,
-        "Manual JE",
-    )
-    add(
-        "JE-ACC-4401-DUP",
-        "2100",
-        9,
-        "V-201",
-        "Legal accrual — Q3 matter Ledger Legal LLP (duplicate)",
-        -185_000,
-        "Manual JE",
-    )
 
-    # Planted: reclass
-    add(
-        "JE-RCL-8810",
-        "1200",
-        11,
-        "V-200",
-        "Reclass software prepaid → Other Current Assets",
-        -92_000,
-        "Manual JE",
-    )
-    add(
-        "JE-RCL-8810-B",
-        "1250",
-        11,
-        "V-200",
-        "Reclass software prepaid → Other Current Assets",
-        92_000,
-        "Manual JE",
-    )
+def build_ap_rows(
+    period: str,
+    entity: str,
+    target: float,
+    day0: date,
+    rng: random.Random,
+) -> list[tuple]:
+    """AP open items (credit-normal negative target) reconciling to TB."""
+    rows: list[tuple] = []
+    n = 4 if entity == "ND-US" else 3
+    # target is negative; split into negative bill amounts
+    amts = split_amount(target, n, rng)
+    for i, amt in enumerate(amts):
+        vend = VENDORS[(hash((period, entity, i)) & 0xFFFF) % len(VENDORS)]
+        rows.append(
+            (
+                f"AP-BILL-{entity}-{period}-{i+1:03d}",
+                period,
+                entity,
+                AP_ACCOUNT,
+                (day0 + timedelta(days=3 + i * 5)).isoformat(),
+                vend[0],
+                f"Vendor bill — {vend[1]}",
+                round(amt, 2),
+                "ERP",
+                "ap_bill",
+            )
+        )
+    return rows
 
-    # Planted: revenue timing
-    add(
-        "JE-REV-2207",
-        "4000",
-        14,
-        "C-100",
-        "Recognize Northwind annual renewal from deferred",
-        -520_000,
-        "Manual JE",
-    )
-    add(
-        "JE-REV-2207-B",
-        "2200",
-        14,
-        "C-100",
-        "Relieve deferred revenue — Northwind renewal",
-        520_000,
-        "Manual JE",
-    )
 
-    # Benign prior-period noise for contrast
-    add(
-        f"JE-PAY-{prior}-01",
-        "6000",
-        -20,
-        "V-204",
-        "Temp staffing — close support",
-        48_500,
-        "Workday",
-        per=prior,
-    )
-    add(
-        f"JE-CLOUD-{period}-01",
-        "7000",
-        5,
-        "V-200",
-        "Apex Cloud — production usage",
-        62_400,
-        "Apex",
-    )
+def build_accrual_rows(
+    account_id: str,
+    period: str,
+    entity: str,
+    target: float,
+    day0: date,
+    rng: random.Random,
+) -> list[tuple]:
+    rows: list[tuple] = []
+    n = 3
+    amts = split_amount(target, n, rng)
+    label = "payroll" if account_id == "2200" else "operating"
+    source = "HRIS" if account_id == "2200" else "ERP"
+    for i, amt in enumerate(amts):
+        vend = VENDORS[(hash((account_id, period, entity, i)) & 0xFFFF) % len(VENDORS)]
+        rows.append(
+            (
+                f"ACCR-{account_id}-{entity}-{period}-{i+1:03d}",
+                period,
+                entity,
+                account_id,
+                (day0 + timedelta(days=20 + i)).isoformat(),
+                vend[0] if account_id != "2200" else None,
+                f"Month-end {label} accrual",
+                round(amt, 2),
+                source,
+                "accrual",
+            )
+        )
+    return rows
 
-    # Keep anomaly list referenced so callers can assert coverage
-    assert anomalies
+
+def build_expense_detail_rows(
+    account_id: str,
+    period: str,
+    entity: str,
+    target: float,
+    day0: date,
+    rng: random.Random,
+) -> list[tuple]:
+    """P&L expense detail summing to monthly TB activity."""
+    rows: list[tuple] = []
+    n = 3 if abs(target) > 50_000 else 2
+    amts = split_amount(target, n, rng)
+    name = next(a[1] for a in ACCOUNTS if a[0] == account_id)
+    for i, amt in enumerate(amts):
+        vend = VENDORS[(hash((account_id, period, entity, i)) & 0xFFFF) % len(VENDORS)]
+        if account_id in {"6000", "6010", "6020", "6600"}:
+            source = "HRIS"
+            party = None if account_id in {"6000", "6010"} else vend[0]
+        elif account_id in {"6300", "6310"}:
+            source = "Expense Tool"
+            party = vend[0]
+        else:
+            source = "ERP"
+            party = vend[0]
+        rows.append(
+            (
+                f"EXP-{account_id}-{entity}-{period}-{i+1:03d}",
+                period,
+                entity,
+                account_id,
+                (day0 + timedelta(days=4 + i * 6)).isoformat(),
+                party,
+                f"{name} — period activity",
+                round(amt, 2),
+                source,
+                "expense_detail",
+            )
+        )
     return rows
 
 
 def build_close_tasks(period: str) -> list[tuple]:
     return [
-        (f"T-{period}-01", period, "US-01", "Post payroll accrual", "Close lead", "done", 1),
-        (f"T-{period}-02", period, "US-01", "Flux accounts >10% / >$50K", "FP&A", "in_progress", 2),
-        (f"T-{period}-03", period, "US-01", "AR subledger tie-out", "AR lead", "in_progress", 2),
-        (f"T-{period}-04", period, "US-01", "Review manual JEs >$100K", "Controller", "open", 3),
-        (f"T-{period}-05", period, "US-01", "Deferred revenue rollforward", "Revenue", "open", 3),
-        (f"T-{period}-06", period, "EMEA-01", "Intercompany confirmations", "EMEA close", "open", 4),
+        (f"T-{period}-01", period, "ND-US", "Post payroll accrual", "Close lead", "done", 1),
+        (f"T-{period}-02", period, "ND-US", "Flux accounts >10% / >$50K", "FP&A", "in_progress", 2),
+        (f"T-{period}-03", period, "ND-US", "AR subledger tie-out", "AR lead", "in_progress", 2),
+        (f"T-{period}-04", period, "ND-US", "Review manual JEs >$100K", "Controller", "open", 3),
+        (f"T-{period}-05", period, "ND-US", "Deferred revenue rollforward", "Revenue", "open", 3),
+        (f"T-{period}-06", period, "ND-EU", "Intercompany confirmations", "EU close", "open", 4),
     ]
-
-
-def build_eval_set(anomalies: list[PlantedAnomaly], periods: list[str]) -> list[dict]:
-    """15–20 variance cases with known explanations for scoring."""
-    period = periods[-1]
-    prior = periods[-2]
-    cases: list[dict] = []
-
-    for a in anomalies:
-        cases.append(
-            {
-                "case_id": a.id,
-                "account_id": a.account,
-                "period_a": prior,
-                "period_b": period,
-                "entity": "US-01",
-                "kind": a.kind,
-                "gold_explanation": a.explanation,
-                "must_cite": a.expected_citations,
-                "threshold_pct": 0.10,
-                "threshold_amt": 50_000,
-            }
-        )
-
-    # Additional benign / distractor cases with known "no material issue" labels
-    benign = [
-        ("6000", "Headcount-driven salary run-rate; no unusual JEs."),
-        ("7000", "Cloud usage within seasonal band; Apex invoice matches subledger."),
-        ("5000", "COGS tracks product revenue mix; no cut-off exceptions."),
-        ("1100", "AR growth from billed renewals; collections aging stable."),
-        ("2000", "AP timing around month-end receipt cutoff."),
-        ("6100", "Professional fees flat MoM after Q2 project close."),
-        ("6200", "T&E under threshold; no policy exceptions flagged."),
-        ("4100", "Services revenue steady; no pull-forwards."),
-        ("1000", "Cash movement matches treasury flash; no recon items."),
-        ("1250", "Increase fully explained by Prepaid reclass JE-RCL-8810."),
-        ("2200", "Decrease from Northwind recognition JE-REV-2207."),
-        ("2100", "Includes duplicate accrual JE-ACC-4401-DUP — needs reversal."),
-        ("1200", "Decrease from reclass out to 1250; not a cash spend."),
-        ("4000", "MoM swing from deferred pull-forward JE-REV-2207."),
-        ("5000", "No anomaly — variance below dual threshold in US-02."),
-        ("6100", "No anomaly — EMEA professional fees within band."),
-    ]
-    for i, (acct, expl) in enumerate(benign, start=1):
-        cases.append(
-            {
-                "case_id": f"EVAL-BENIGN-{i:02d}",
-                "account_id": acct,
-                "period_a": prior,
-                "period_b": period,
-                "entity": "US-01" if i <= 14 else "US-02",
-                "kind": "known_driver" if i <= 14 else "below_threshold",
-                "gold_explanation": expl,
-                "must_cite": [],
-                "threshold_pct": 0.10,
-                "threshold_amt": 50_000,
-            }
-        )
-
-    return cases[:20]
 
 
 def generate(db_path: Path = DB_PATH) -> dict:
@@ -490,27 +509,27 @@ def generate(db_path: Path = DB_PATH) -> dict:
     if db_path.exists():
         db_path.unlink()
 
-    periods = [period_label(d) for d in month_starts(24)]
+    periods_dates = month_starts(24)
+    periods = [period_label(d) for d in periods_dates]
     conn = sqlite3.connect(db_path)
     ensure_schema(conn)
 
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?, ?)",
-        ("disclaimer", "SYNTHETIC DATA — not real company financials"),
+        ("disclaimer", "SYNTHETIC DATA — Northwind Digital demo only"),
     )
-    conn.execute(
-        "INSERT INTO meta(key, value) VALUES (?, ?)",
-        ("seed", str(SEED)),
-    )
+    conn.execute("INSERT INTO meta(key, value) VALUES (?, ?)", ("company", COMPANY))
+    conn.execute("INSERT INTO meta(key, value) VALUES (?, ?)", ("seed", str(SEED)))
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?, ?)",
         ("as_of_period", periods[-1]),
     )
-
-    conn.executemany(
-        "INSERT INTO accounts VALUES (?, ?, ?, ?)",
-        ACCOUNTS,
+    conn.execute(
+        "INSERT INTO meta(key, value) VALUES (?, ?)",
+        ("anomalies", "none — clean baseline (slice 1)"),
     )
+
+    conn.executemany("INSERT INTO accounts VALUES (?, ?, ?, ?)", ACCOUNTS)
     conn.executemany(
         "INSERT INTO parties VALUES (?, ?, ?, ?)",
         [(p[0], p[1], "customer", p[2]) for p in CUSTOMERS]
@@ -518,77 +537,80 @@ def generate(db_path: Path = DB_PATH) -> dict:
     )
 
     balances: dict[tuple[str, str, str], float] = {}
-    for mi, period in enumerate(periods):
-        for ei, entity in enumerate(ENTITIES):
+    for mi, (period, d) in enumerate(zip(periods, periods_dates)):
+        for entity in ENTITIES:
+            rng = random.Random(f"{SEED}:{entity}:{period}")
             for acct, *_ in ACCOUNTS:
-                balances[(period, entity, acct)] = base_balance(acct, ei, mi)
-
-    anomalies = plant_anomalies(balances, periods, entity="US-01")
+                balances[(period, entity, acct)] = balance_for(
+                    acct, entity, mi, d.month, rng
+                )
 
     conn.executemany(
         "INSERT INTO trial_balance(period, entity, account_id, ending_balance) VALUES (?, ?, ?, ?)",
         [(p, e, a, bal) for (p, e, a), bal in balances.items()],
     )
 
-    sub = build_subledger(periods, "US-01", anomalies)
+    sub_rows: list[tuple] = []
+    for period, d in zip(periods, periods_dates):
+        for entity in ENTITIES:
+            rng = random.Random(f"{SEED}:sub:{entity}:{period}")
+            # AR
+            sub_rows.extend(
+                build_ar_rows(period, entity, balances[(period, entity, AR_ACCOUNT)], d, rng)
+            )
+            # AP
+            sub_rows.extend(
+                build_ap_rows(period, entity, balances[(period, entity, AP_ACCOUNT)], d, rng)
+            )
+            # Accruals
+            for acct in sorted(ACCRUAL_ACCOUNTS):
+                sub_rows.extend(
+                    build_accrual_rows(
+                        acct, period, entity, balances[(period, entity, acct)], d, rng
+                    )
+                )
+            # Expense / COGS detail
+            for acct in sorted(OPEX_DETAIL_ACCOUNTS):
+                sub_rows.extend(
+                    build_expense_detail_rows(
+                        acct, period, entity, balances[(period, entity, acct)], d, rng
+                    )
+                )
+
     conn.executemany(
-        "INSERT INTO subledger VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        sub,
+        "INSERT INTO subledger VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        sub_rows,
     )
     conn.executemany(
         "INSERT INTO close_tasks VALUES (?, ?, ?, ?, ?, ?, ?)",
         build_close_tasks(periods[-1]),
     )
-    conn.executemany(
-        "INSERT INTO anomalies VALUES (?, ?, ?, ?, ?, ?)",
-        [
-            (
-                a.id,
-                a.account,
-                a.period,
-                a.kind,
-                a.explanation,
-                json.dumps(a.expected_citations),
-            )
-            for a in anomalies
-        ],
-    )
+    # anomalies table intentionally empty (slice 2)
     conn.commit()
 
-    eval_set = build_eval_set(anomalies, periods)
-    eval_path = ROOT / "evals" / "variance_eval_set.json"
-    eval_path.parent.mkdir(parents=True, exist_ok=True)
-    eval_path.write_text(json.dumps(eval_set, indent=2), encoding="utf-8")
-
-    # Static export for the GitHub Pages demo UI
-    export = export_demo_bundle(conn, periods, anomalies, eval_set)
+    export = export_demo_bundle(conn, periods)
     export_path = EXPORT_DIR / "demo_bundle.json"
     export_path.write_text(json.dumps(export, indent=2), encoding="utf-8")
 
-    # Also copy into frontend for Vite bundling
-    fe_data = ROOT.parent / "frontend" / "data" / "closeAgentDemo.json"
-    fe_data.parent.mkdir(parents=True, exist_ok=True)
-    fe_data.write_text(json.dumps(export, indent=2), encoding="utf-8")
-
-    conn.close()
-    return {
+    summary = {
+        "company": COMPANY,
         "db_path": str(db_path),
-        "periods": periods[-2:],
-        "anomaly_count": len(anomalies),
-        "eval_cases": len(eval_set),
+        "accounts": len(ACCOUNTS),
+        "entities": ENTITIES,
+        "periods": len(periods),
+        "as_of_period": periods[-1],
+        "subledger_rows": len(sub_rows),
+        "anomalies": 0,
         "export_path": str(export_path),
     }
+    conn.close()
+    return summary
 
 
-def export_demo_bundle(
-    conn: sqlite3.Connection,
-    periods: list[str],
-    anomalies: list[PlantedAnomaly],
-    eval_set: list[dict],
-) -> dict:
+def export_demo_bundle(conn: sqlite3.Connection, periods: list[str]) -> dict:
     period = periods[-1]
     prior = periods[-2]
-    entity = "US-01"
+    entity = "ND-US"
 
     def q(sql: str, params: tuple = ()) -> list[dict]:
         cur = conn.execute(sql, params)
@@ -611,13 +633,10 @@ def export_demo_bundle(
     )
     tasks = q("SELECT * FROM close_tasks WHERE period = ? ORDER BY due_day", (period,))
 
-    # Precompute variances for the interactive demo
-    by_key: dict[tuple[str, str], float] = {
-        (r["account_id"], r["period"]): r["ending_balance"] for r in tb
-    }
+    by_key = {(r["account_id"], r["period"]): r["ending_balance"] for r in tb}
     names = {r["account_id"]: r["name"] for r in tb}
     variances = []
-    for acct, *_ in ACCOUNTS:
+    for acct, name, *_ in ACCOUNTS:
         a = by_key.get((acct, prior), 0.0)
         b = by_key.get((acct, period), 0.0)
         delta = b - a
@@ -625,7 +644,7 @@ def export_demo_bundle(
         variances.append(
             {
                 "account_id": acct,
-                "account_name": names.get(acct, acct),
+                "account_name": names.get(acct, name),
                 "period_a": prior,
                 "period_b": period,
                 "balance_a": a,
@@ -637,7 +656,11 @@ def export_demo_bundle(
         )
 
     return {
-        "disclaimer": "All figures are synthetic demo data — not real company financials.",
+        "disclaimer": (
+            "All figures are synthetic demo data for fictional company "
+            "Northwind Digital — not real company financials."
+        ),
+        "company": COMPANY,
         "entity": entity,
         "period": period,
         "prior_period": prior,
@@ -647,35 +670,8 @@ def export_demo_bundle(
         "subledger": sub,
         "close_tasks": tasks,
         "variances": variances,
-        "anomalies": [asdict(a) for a in anomalies],
-        "eval_set": eval_set,
-        "eval_score": {
-            "cases": len(eval_set),
-            "accurate": len(eval_set),
-            "accuracy": 0.0,
-            "pass_rate": 0.0,
-            "notes": (
-                "Placeholder — run python evals/run_evals.py after generate_data.py "
-                "to refresh accuracy on the heuristic agent."
-            ),
-        },
-        "sample_tool_log": [
-            {
-                "tool_name": "get_account_variance",
-                "arguments": {"account": "2100", "period_a": prior, "period_b": period},
-                "result_summary": "variance_amt=-185000+; over_threshold=true",
-            },
-            {
-                "tool_name": "get_subledger_detail",
-                "arguments": {"account": "2100", "period": period},
-                "result_summary": "2 accrual JEs for V-201 including DUP",
-            },
-            {
-                "tool_name": "draft_flux_commentary",
-                "arguments": {"account": "2100", "threshold": 0.10},
-                "result_summary": "low-confidence duplicate accrual draft queued for review",
-            },
-        ],
+        "anomalies": [],
+        "note": "Clean baseline — planted anomalies deferred to slice 2.",
     }
 
 

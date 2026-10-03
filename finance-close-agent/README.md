@@ -1,6 +1,6 @@
 # Finance MCP Server + Close Agent
 
-Synthetic close demo: an MCP server over a miniature finance system, a heuristic close agent that flags variances and drafts flux commentary, a human review queue, and a scored eval set.
+Synthetic close demo for fictional company **Northwind Digital**: MCP tools over a miniature finance system, a close agent that flags variances and drafts flux commentary, a human review queue, and (later) a scored eval set.
 
 **All data is synthetic.** Nothing here is real company financials.
 
@@ -8,14 +8,14 @@ Synthetic close demo: an MCP server over a miniature finance system, a heuristic
 
 | Piece | Path |
 | --- | --- |
-| Synthetic data generator (24 months TB, AR/subledger, planted anomalies) | `generate_data.py` |
+| Synthetic data generator (24 months TB, AR + AP/accrual detail) | `generate_data.py` |
+| Data verification script | `verify_data.py` |
 | SQLite database | `data/finance.db` |
 | MCP tools | `tools.py`, `mcp_server.py` |
 | Close agent pass | `agent/close_agent.py` |
 | Review UI (approve / edit / reject + tool audit log) | `ui/review_app.py` |
-| Eval set (19 variances with gold explanations) | `evals/variance_eval_set.json` |
-| Eval runner | `evals/run_evals.py` |
-| Static export for the portfolio demo | `exports/demo_bundle.json` |
+| Eval harness (hand-written cases TBD) | `evals/` |
+| Static export | `exports/demo_bundle.json` |
 
 ### MCP tools
 
@@ -25,11 +25,13 @@ Synthetic close demo: an MCP server over a miniature finance system, a heuristic
 - `list_open_close_tasks()`
 - `draft_flux_commentary(account, threshold)`
 
-### Planted anomalies (US-01, latest period)
+### Data model (slice 1)
 
-1. **Duplicate accrual** on Accrued Expenses (`JE-ACC-4401` + `JE-ACC-4401-DUP`)
-2. **Reclass** Prepaid → Other Current Assets (`JE-RCL-8810`)
-3. **Revenue timing** pull-forward from Deferred Revenue (`JE-REV-2207`)
+- Company: Northwind Digital
+- Entities: `ND-US`, `ND-EU`
+- ~40 accounts, 24 months trial balance
+- Clean baseline — **no planted anomalies yet** (slice 2)
+- `source_system` labels: `ERP`, `Billing`, `HRIS`, `Expense Tool` only
 
 ## Setup
 
@@ -39,22 +41,25 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python generate_data.py
+python verify_data.py
 ```
 
 ## Run the agent + review UI
 
 ```bash
-python agent/close_agent.py
+python agent/close_agent.py --entity ND-US
 streamlit run ui/review_app.py
 ```
 
+> Note: agent/MCP defaults may still say a legacy entity id until a later slice; pass `ND-US` explicitly.
+
 ## Run evals
+
+Hand-written `evals/cases.yaml` is not in place yet. Do not treat any prior score as valid.
 
 ```bash
 python evals/run_evals.py
 ```
-
-Latest local score is written to `exports/eval_report.json` and surfaced on the portfolio case study page.
 
 ## Claude Desktop (MCP)
 
@@ -72,13 +77,13 @@ Add to your Claude Desktop config:
 }
 ```
 
-Then ask things like:
+Example prompt:
 
-> For US-01, which accounts broke 10% and $50K MoM? Draft flux commentary and cite the JE ids. Queue anything you’re not sure about.
+> For ND-US, which accounts broke 10% and $50K MoM? Draft flux commentary and cite transaction ids. Queue anything you’re not sure about.
 
 ## Guardrails
 
 - Low-confidence drafts are marked for **human review** instead of guessing
 - Every tool call is appended to `tool_call_log`
 - Review queue supports **approve / edit / reject**
-- Eval set scores citation + driver match against known explanations
+- Eval score is published only after hand-written cases exist

@@ -1,9 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
+import Portfolio from "./pages/Portfolio";
+import CloseAgentCaseStudy from "./pages/CloseAgentCaseStudy";
+import DealRecordPage from "./pages/DealRecordPage";
+import "./styles/portfolio.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Portfolio />} />
+        <Route path="/projects/close-agent" element={<CloseAgentCaseStudy />} />
+        <Route path="/projects/deal-record" element={<DealRecordPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </HashRouter>
   </StrictMode>
 );

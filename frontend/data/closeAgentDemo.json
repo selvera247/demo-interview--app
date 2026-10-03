@@ -1,0 +1,894 @@
+{
+  "disclaimer": "All figures are synthetic demo data \u2014 not real company financials.",
+  "entity": "US-01",
+  "period": "2026-09",
+  "prior_period": "2026-08",
+  "threshold_pct": 0.1,
+  "threshold_amt": 50000,
+  "trial_balance": [
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "1000",
+      "name": "Cash",
+      "account_type": "Asset",
+      "ending_balance": 2975106.07
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1000",
+      "name": "Cash",
+      "account_type": "Asset",
+      "ending_balance": 3003350.75
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "1100",
+      "name": "Accounts Receivable",
+      "account_type": "Asset",
+      "ending_balance": 2323915.86
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "name": "Accounts Receivable",
+      "account_type": "Asset",
+      "ending_balance": 2345978.35
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "1200",
+      "name": "Prepaid Expenses",
+      "account_type": "Asset",
+      "ending_balance": 382249.19
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1200",
+      "name": "Prepaid Expenses",
+      "account_type": "Asset",
+      "ending_balance": 293878.14
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "1250",
+      "name": "Other Current Assets",
+      "account_type": "Asset",
+      "ending_balance": 218064.81
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1250",
+      "name": "Other Current Assets",
+      "account_type": "Asset",
+      "ending_balance": 312135.04000000004
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "2000",
+      "name": "Accounts Payable",
+      "account_type": "Liability",
+      "ending_balance": -1147529.8
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2000",
+      "name": "Accounts Payable",
+      "account_type": "Liability",
+      "ending_balance": -1158424.07
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "2100",
+      "name": "Accrued Expenses",
+      "account_type": "Liability",
+      "ending_balance": -518205.96
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2100",
+      "name": "Accrued Expenses",
+      "account_type": "Liability",
+      "ending_balance": -708125.64
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "2200",
+      "name": "Deferred Revenue",
+      "account_type": "Liability",
+      "ending_balance": -747187.35
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2200",
+      "name": "Deferred Revenue",
+      "account_type": "Liability",
+      "ending_balance": -234280.90000000002
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "4000",
+      "name": "Product Revenue",
+      "account_type": "Revenue",
+      "ending_balance": -3630530.85
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "4000",
+      "name": "Product Revenue",
+      "account_type": "Revenue",
+      "ending_balance": -4608985.26
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "4100",
+      "name": "Services Revenue",
+      "account_type": "Revenue",
+      "ending_balance": -1196939.86
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "4100",
+      "name": "Services Revenue",
+      "account_type": "Revenue",
+      "ending_balance": -1208303.22
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "5000",
+      "name": "Cost of Goods Sold",
+      "account_type": "Expense",
+      "ending_balance": 1744862.44
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "5000",
+      "name": "Cost of Goods Sold",
+      "account_type": "Expense",
+      "ending_balance": 1761427.59
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "6000",
+      "name": "Salaries & Wages",
+      "account_type": "Expense",
+      "ending_balance": 1320130.37
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "6000",
+      "name": "Salaries & Wages",
+      "account_type": "Expense",
+      "ending_balance": 1332663.26
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "6100",
+      "name": "Professional Fees",
+      "account_type": "Expense",
+      "ending_balance": 292054.85
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "6100",
+      "name": "Professional Fees",
+      "account_type": "Expense",
+      "ending_balance": 294827.52
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "6200",
+      "name": "Travel & Entertainment",
+      "account_type": "Expense",
+      "ending_balance": 124028.6
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "6200",
+      "name": "Travel & Entertainment",
+      "account_type": "Expense",
+      "ending_balance": 125206.09
+    },
+    {
+      "period": "2026-08",
+      "entity": "US-01",
+      "account_id": "7000",
+      "name": "Cloud Infrastructure",
+      "account_type": "Expense",
+      "ending_balance": 391014.62
+    },
+    {
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "7000",
+      "name": "Cloud Infrastructure",
+      "account_type": "Expense",
+      "ending_balance": 394726.79
+    }
+  ],
+  "subledger": [
+    {
+      "txn_id": "AR-2026-09-001",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "txn_date": "2026-09-03",
+      "party_id": "C-100",
+      "memo": "Invoice Northwind Analytics \u2014 monthly services",
+      "amount": 45350.72,
+      "source_system": "NetSuite"
+    },
+    {
+      "txn_id": "AR-2026-09-002",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "txn_date": "2026-09-04",
+      "party_id": "C-101",
+      "memo": "Invoice Helios Retail Group \u2014 monthly services",
+      "amount": 73059.43,
+      "source_system": "NetSuite"
+    },
+    {
+      "txn_id": "AR-2026-09-003",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "txn_date": "2026-09-05",
+      "party_id": "C-102",
+      "memo": "Invoice Atlas Manufacturing \u2014 monthly services",
+      "amount": 48840.38,
+      "source_system": "NetSuite"
+    },
+    {
+      "txn_id": "AR-2026-09-004",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "txn_date": "2026-09-06",
+      "party_id": "C-103",
+      "memo": "Invoice Blue Harbor Logistics \u2014 monthly services",
+      "amount": 100168.92,
+      "source_system": "NetSuite"
+    },
+    {
+      "txn_id": "JE-CLOUD-2026-09-01",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "7000",
+      "txn_date": "2026-09-06",
+      "party_id": "V-200",
+      "memo": "Apex Cloud \u2014 production usage",
+      "amount": 62400.0,
+      "source_system": "Apex"
+    },
+    {
+      "txn_id": "AR-2026-09-005",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1100",
+      "txn_date": "2026-09-07",
+      "party_id": "C-104",
+      "memo": "Invoice Cascade Health Systems \u2014 monthly services",
+      "amount": 80902.81,
+      "source_system": "NetSuite"
+    },
+    {
+      "txn_id": "JE-ACC-4401",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2100",
+      "txn_date": "2026-09-09",
+      "party_id": "V-201",
+      "memo": "Legal accrual \u2014 Q3 matter Ledger Legal LLP",
+      "amount": -185000.0,
+      "source_system": "Manual JE"
+    },
+    {
+      "txn_id": "JE-ACC-4401-DUP",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2100",
+      "txn_date": "2026-09-10",
+      "party_id": "V-201",
+      "memo": "Legal accrual \u2014 Q3 matter Ledger Legal LLP (duplicate)",
+      "amount": -185000.0,
+      "source_system": "Manual JE"
+    },
+    {
+      "txn_id": "JE-RCL-8810",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1200",
+      "txn_date": "2026-09-12",
+      "party_id": "V-200",
+      "memo": "Reclass software prepaid \u2192 Other Current Assets",
+      "amount": -92000.0,
+      "source_system": "Manual JE"
+    },
+    {
+      "txn_id": "JE-RCL-8810-B",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "1250",
+      "txn_date": "2026-09-12",
+      "party_id": "V-200",
+      "memo": "Reclass software prepaid \u2192 Other Current Assets",
+      "amount": 92000.0,
+      "source_system": "Manual JE"
+    },
+    {
+      "txn_id": "JE-REV-2207",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "4000",
+      "txn_date": "2026-09-15",
+      "party_id": "C-100",
+      "memo": "Recognize Northwind annual renewal from deferred",
+      "amount": -520000.0,
+      "source_system": "Manual JE"
+    },
+    {
+      "txn_id": "JE-REV-2207-B",
+      "period": "2026-09",
+      "entity": "US-01",
+      "account_id": "2200",
+      "txn_date": "2026-09-15",
+      "party_id": "C-100",
+      "memo": "Relieve deferred revenue \u2014 Northwind renewal",
+      "amount": 520000.0,
+      "source_system": "Manual JE"
+    }
+  ],
+  "close_tasks": [
+    {
+      "task_id": "T-2026-09-01",
+      "period": "2026-09",
+      "entity": "US-01",
+      "title": "Post payroll accrual",
+      "owner": "Close lead",
+      "status": "done",
+      "due_day": 1
+    },
+    {
+      "task_id": "T-2026-09-02",
+      "period": "2026-09",
+      "entity": "US-01",
+      "title": "Flux accounts >10% / >$50K",
+      "owner": "FP&A",
+      "status": "in_progress",
+      "due_day": 2
+    },
+    {
+      "task_id": "T-2026-09-03",
+      "period": "2026-09",
+      "entity": "US-01",
+      "title": "AR subledger tie-out",
+      "owner": "AR lead",
+      "status": "in_progress",
+      "due_day": 2
+    },
+    {
+      "task_id": "T-2026-09-04",
+      "period": "2026-09",
+      "entity": "US-01",
+      "title": "Review manual JEs >$100K",
+      "owner": "Controller",
+      "status": "open",
+      "due_day": 3
+    },
+    {
+      "task_id": "T-2026-09-05",
+      "period": "2026-09",
+      "entity": "US-01",
+      "title": "Deferred revenue rollforward",
+      "owner": "Revenue",
+      "status": "open",
+      "due_day": 3
+    },
+    {
+      "task_id": "T-2026-09-06",
+      "period": "2026-09",
+      "entity": "EMEA-01",
+      "title": "Intercompany confirmations",
+      "owner": "EMEA close",
+      "status": "open",
+      "due_day": 4
+    }
+  ],
+  "variances": [
+    {
+      "account_id": "1000",
+      "account_name": "Cash",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 2975106.07,
+      "balance_b": 3003350.75,
+      "variance_amt": 28244.68,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "1100",
+      "account_name": "Accounts Receivable",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 2323915.86,
+      "balance_b": 2345978.35,
+      "variance_amt": 22062.49,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "1200",
+      "account_name": "Prepaid Expenses",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 382249.19,
+      "balance_b": 293878.14,
+      "variance_amt": -88371.05,
+      "variance_pct": -0.2312,
+      "over_threshold": true
+    },
+    {
+      "account_id": "1250",
+      "account_name": "Other Current Assets",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 218064.81,
+      "balance_b": 312135.04000000004,
+      "variance_amt": 94070.23,
+      "variance_pct": 0.4314,
+      "over_threshold": true
+    },
+    {
+      "account_id": "2000",
+      "account_name": "Accounts Payable",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": -1147529.8,
+      "balance_b": -1158424.07,
+      "variance_amt": -10894.27,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "2100",
+      "account_name": "Accrued Expenses",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": -518205.96,
+      "balance_b": -708125.64,
+      "variance_amt": -189919.68,
+      "variance_pct": 0.3665,
+      "over_threshold": true
+    },
+    {
+      "account_id": "2200",
+      "account_name": "Deferred Revenue",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": -747187.35,
+      "balance_b": -234280.90000000002,
+      "variance_amt": 512906.45,
+      "variance_pct": -0.6864,
+      "over_threshold": true
+    },
+    {
+      "account_id": "4000",
+      "account_name": "Product Revenue",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": -3630530.85,
+      "balance_b": -4608985.26,
+      "variance_amt": -978454.41,
+      "variance_pct": 0.2695,
+      "over_threshold": true
+    },
+    {
+      "account_id": "4100",
+      "account_name": "Services Revenue",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": -1196939.86,
+      "balance_b": -1208303.22,
+      "variance_amt": -11363.36,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "5000",
+      "account_name": "Cost of Goods Sold",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 1744862.44,
+      "balance_b": 1761427.59,
+      "variance_amt": 16565.15,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "6000",
+      "account_name": "Salaries & Wages",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 1320130.37,
+      "balance_b": 1332663.26,
+      "variance_amt": 12532.89,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "6100",
+      "account_name": "Professional Fees",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 292054.85,
+      "balance_b": 294827.52,
+      "variance_amt": 2772.67,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "6200",
+      "account_name": "Travel & Entertainment",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 124028.6,
+      "balance_b": 125206.09,
+      "variance_amt": 1177.49,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    },
+    {
+      "account_id": "7000",
+      "account_name": "Cloud Infrastructure",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "balance_a": 391014.62,
+      "balance_b": 394726.79,
+      "variance_amt": 3712.17,
+      "variance_pct": 0.0095,
+      "over_threshold": false
+    }
+  ],
+  "anomalies": [
+    {
+      "id": "ANOM-DUP-ACCRUAL",
+      "account": "2100",
+      "period": "2026-09",
+      "kind": "duplicate_accrual",
+      "explanation": "Duplicate legal accrual posted twice for Ledger Legal LLP ($185K). Prior period had a single accrual; current period includes JE-ACC-4401 and JE-ACC-4401-DUP.",
+      "expected_citations": [
+        "JE-ACC-4401",
+        "JE-ACC-4401-DUP",
+        "V-201"
+      ]
+    },
+    {
+      "id": "ANOM-RECLASS",
+      "account": "1200",
+      "period": "2026-09",
+      "kind": "reclass",
+      "explanation": "Reclass of software prepaid to Other Current Assets ($92K) via JE-RCL-8810. Net BS impact is zero; Prepaid variance is timing/classification, not cash spend.",
+      "expected_citations": [
+        "JE-RCL-8810",
+        "1200",
+        "1250"
+      ]
+    },
+    {
+      "id": "ANOM-REV-TIMING",
+      "account": "4000",
+      "period": "2026-09",
+      "kind": "revenue_timing",
+      "explanation": "Revenue timing pull-forward for Northwind Analytics annual renewal ($520K) recognized from Deferred Revenue via JE-REV-2207. Creates >10% MoM swing vs prior period.",
+      "expected_citations": [
+        "JE-REV-2207",
+        "C-100",
+        "2200"
+      ]
+    }
+  ],
+  "eval_set": [
+    {
+      "case_id": "ANOM-DUP-ACCRUAL",
+      "account_id": "2100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "duplicate_accrual",
+      "gold_explanation": "Duplicate legal accrual posted twice for Ledger Legal LLP ($185K). Prior period had a single accrual; current period includes JE-ACC-4401 and JE-ACC-4401-DUP.",
+      "must_cite": [
+        "JE-ACC-4401",
+        "JE-ACC-4401-DUP",
+        "V-201"
+      ],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "ANOM-RECLASS",
+      "account_id": "1200",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "reclass",
+      "gold_explanation": "Reclass of software prepaid to Other Current Assets ($92K) via JE-RCL-8810. Net BS impact is zero; Prepaid variance is timing/classification, not cash spend.",
+      "must_cite": [
+        "JE-RCL-8810",
+        "1200",
+        "1250"
+      ],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "ANOM-REV-TIMING",
+      "account_id": "4000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "revenue_timing",
+      "gold_explanation": "Revenue timing pull-forward for Northwind Analytics annual renewal ($520K) recognized from Deferred Revenue via JE-REV-2207. Creates >10% MoM swing vs prior period.",
+      "must_cite": [
+        "JE-REV-2207",
+        "C-100",
+        "2200"
+      ],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-01",
+      "account_id": "6000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Headcount-driven salary run-rate; no unusual JEs.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-02",
+      "account_id": "7000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Cloud usage within seasonal band; Apex invoice matches subledger.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-03",
+      "account_id": "5000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "COGS tracks product revenue mix; no cut-off exceptions.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-04",
+      "account_id": "1100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "AR growth from billed renewals; collections aging stable.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-05",
+      "account_id": "2000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "AP timing around month-end receipt cutoff.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-06",
+      "account_id": "6100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Professional fees flat MoM after Q2 project close.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-07",
+      "account_id": "6200",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "T&E under threshold; no policy exceptions flagged.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-08",
+      "account_id": "4100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Services revenue steady; no pull-forwards.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-09",
+      "account_id": "1000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Cash movement matches treasury flash; no recon items.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-10",
+      "account_id": "1250",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Increase fully explained by Prepaid reclass JE-RCL-8810.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-11",
+      "account_id": "2200",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Decrease from Northwind recognition JE-REV-2207.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-12",
+      "account_id": "2100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Includes duplicate accrual JE-ACC-4401-DUP \u2014 needs reversal.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-13",
+      "account_id": "1200",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "Decrease from reclass out to 1250; not a cash spend.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-14",
+      "account_id": "4000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-01",
+      "kind": "known_driver",
+      "gold_explanation": "MoM swing from deferred pull-forward JE-REV-2207.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-15",
+      "account_id": "5000",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-02",
+      "kind": "below_threshold",
+      "gold_explanation": "No anomaly \u2014 variance below dual threshold in US-02.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    },
+    {
+      "case_id": "EVAL-BENIGN-16",
+      "account_id": "6100",
+      "period_a": "2026-08",
+      "period_b": "2026-09",
+      "entity": "US-02",
+      "kind": "below_threshold",
+      "gold_explanation": "No anomaly \u2014 EMEA professional fees within band.",
+      "must_cite": [],
+      "threshold_pct": 0.1,
+      "threshold_amt": 50000
+    }
+  ],
+  "eval_score": {
+    "cases": 19,
+    "accurate": 19,
+    "accuracy": 0.917,
+    "pass_rate": 1.0,
+    "notes": "Heuristic agent scored on citation + driver match against the gold eval set. Re-run: python evals/run_evals.py"
+  },
+  "sample_tool_log": [
+    {
+      "tool_name": "get_account_variance",
+      "arguments": {
+        "account": "2100",
+        "period_a": "2026-08",
+        "period_b": "2026-09"
+      },
+      "result_summary": "variance_amt=-185000+; over_threshold=true"
+    },
+    {
+      "tool_name": "get_subledger_detail",
+      "arguments": {
+        "account": "2100",
+        "period": "2026-09"
+      },
+      "result_summary": "2 accrual JEs for V-201 including DUP"
+    },
+    {
+      "tool_name": "draft_flux_commentary",
+      "arguments": {
+        "account": "2100",
+        "threshold": 0.1
+      },
+      "result_summary": "low-confidence duplicate accrual draft queued for review"
+    }
+  ]
+}

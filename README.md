@@ -1,14 +1,18 @@
-# demo-interview--app
+# Chris Selvera — portfolio demos
 
-Deal Record demo: spec intake, sourcing, and cost tracking on one project ID.
+Personal portfolio and interview demos for AI-native finance transformation work.
 
-## Shareable app
+**Live (GitHub Pages):** https://selvera247.github.io/demo-interview--app/
 
-After GitHub Pages is enabled (Actions → Deploy GitHub Pages):
+## What’s here
 
-https://selvera247.github.io/demo-interview--app/
+1. **Portfolio** — hero, headline metrics, project index  
+2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, review queue, eval score (`finance-close-agent/`)  
+3. **Deal Record** — spec intake, sourcing, and cost tracking on one project ID  
 
-## Local
+All Close Agent figures are **synthetic demo data**.
+
+## Local (portfolio + demos)
 
 ```bash
 npm install
@@ -16,3 +20,30 @@ npm run dev
 ```
 
 Open http://127.0.0.1:5173/
+
+Routes (hash router for GitHub Pages):
+
+- `/#/` — portfolio  
+- `/#/projects/close-agent` — case study + interactive review demo  
+- `/#/projects/deal-record` — Deal Record app  
+
+## Finance Close Agent (Python / MCP)
+
+```bash
+cd finance-close-agent
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python generate_data.py
+python agent/close_agent.py
+python evals/run_evals.py
+streamlit run ui/review_app.py
+```
+
+See [`finance-close-agent/README.md`](finance-close-agent/README.md) for Claude Desktop MCP config.
+
+## Build
+
+```bash
+npm run build
+```

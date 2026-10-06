@@ -1,0 +1,3 @@
+# Eval harness config (not loaded by the close agent / MCP tools).
+
+numeric_tolerance_amt: 500   # dollars; MoM drift vs planted round amounts

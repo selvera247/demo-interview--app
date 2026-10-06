@@ -62,9 +62,35 @@ def test_incomplete_fields_helper_detects_blanks():
             "required_facts": ["ACCR-CLOUD-6110-DUP"],
         }
     ) == []
+    # false-positive-only stubs need no written explanation yet
+    assert (
+        incomplete_fields(
+            {
+                "expected_flagged": False,
+                "expected_explanation": "",
+                "required_facts": [],
+            }
+        )
+        == []
+    )
 
 
 def test_normalize_text_amount_formatting():
     assert normalize_text("$85,000") == normalize_text("85,000")
     assert "85000" in normalize_text("accrual of $85,000 posted")
     assert normalize_text("85,000") in normalize_text("accrual of $85,000 posted")
+
+
+def test_fact_matches_or_alternatives_and_tolerance():
+    from evals.run_evals import fact_matches
+
+    assert fact_matches("timing|early", "Revenue timing JE", 500)
+    assert fact_matches("2026-07|July", "start 2026-07-01", 500)
+    assert fact_matches("70,000", "moved (+70,174)", 500)
+    assert not fact_matches("70,000", "moved (+72,000)", 500)
+    # split invoices summing to target
+    assert fact_matches(
+        "75,000",
+        "line A (37,500). line B (37,500).",
+        500,
+    )

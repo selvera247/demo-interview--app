@@ -121,3 +121,8 @@ Example prompt:
 - Review queue supports **approve / edit / reject** with a **required reviewer note**
 - Queue sorts low confidence first, then dollar size; each card shows citations + policy rule
 - Eval score is published only after hand-written cases exist
+
+### Known limitations
+
+- **Paired anomalies** (A2/A2B, A3/A3B) appear as separate review-queue rows; grouping is optional polish.
+- **Agent does not recommend remediation** (e.g., reversing a duplicate accrual). It identifies the driver and cites evidence, but does not prescribe the correcting JE. Tracked as a product gap, not hidden in the eval answer key.

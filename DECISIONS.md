@@ -44,3 +44,9 @@
 - **Decision:** Restructure A1 so one Cloud Hosting accrual (`ACCR-CLOUD-6110-BASE`) is part of the baseline run rate and the identical twin (`ACCR-CLOUD-6110-DUP`) is the only TB add vs clean baseline — variance exactly **+$85K** (not +$170K). Add anomaly **C1**: ND-EU Software `6100` 2026-08 sticky ~+$90K, of which $60K is a labeled annual license renewal and ~$30K is an unexplained residual from a real vendor (no PO/contract match). C1 expected confidence **med**, queued for review; commentary must cite the $60K txn and state the residual amount. Breach set grows from 8 → **9** keys (C1 has no paired side).
 - **Why:** Controllers need a clean “duplicate = full variance” narrative for A1, plus a med-band partial-explanation case before the review UI slice.
 - **Implications:** `ANOMALIES.md`, `verify_data.EXPECTED_BREACHES`, policy/confidence tests, and generator/subledger overrides updated. Med now routes to human review alongside low.
+
+## 2026-10-06 — Slice 5 Streamlit review UI polish
+
+- **Decision:** Polish `ui/review_app.py` only (plus shared `ui/queue_helpers.py` and text verifier). Queue sorts **low → med → high**, then |variance| descending. Each card shows account, entity, period, variance ($/%), commentary, cited txn IDs, confidence, and policy rule (`threshold` / `unsupported_je`). Approve/edit/reject require a reviewer note in the UI; low approve remains API-blocked without a note. Status history is session-scoped; tool-call log tab maps each call to the close-pass item it served. No MCP / agent / eval changes.
+- **Why:** Controllers need a review surface that surfaces risk order and evidence without leaving the demo.
+- **Implications:** README demo checklist documents 9 pending items and what high/med/low look like. `ui/verify_queue_text.py` prints the queue for environments that cannot screenshot Streamlit.

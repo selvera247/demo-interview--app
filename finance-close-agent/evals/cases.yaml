@@ -286,8 +286,6 @@ cases:
     notes: ""
 
   # --- Harder adversarial stubs (threshold edge / seasonal) ---
-  # N12 note: no true MoM with |pct|>10% AND |amt|<$50k exists in this DB
-  # outside planted breaches (which also exceed $50k). Closest stand-in used.
 
   - id: N11
     account: "4000"
@@ -305,10 +303,10 @@ cases:
       Expect no flag (AND threshold).
 
   - id: N12
-    account: "6020"
+    account: "6950"
     entity: ND-EU
-    period: "2026-08"
-    variance: -962.41
+    period: "2026-05"
+    variance: 4547.95
     expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
@@ -316,8 +314,8 @@ cases:
     must_cite: []
     must_not_say: []
     notes: >
-      Closest available to high-pct/low-dollar: ~8% on ~$1k after sticky A2
-      left a small Contractors base. True >10%/<$50k does not exist unflagged.
+      Planted S1: Misc opex MoM ~+19% / ~+$4.5k — clears percent threshold but
+      not dollar threshold; expected_flagged false under AND policy.
 
   - id: N13
     account: "4000"

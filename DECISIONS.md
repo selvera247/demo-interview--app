@@ -79,4 +79,16 @@
 
 - **Decision:** Allow `required_facts` alternatives separated by `|`; match numeric facts within `$500` (`evals/config.yaml`). Drop A1 `reverse` from required_facts and document “no remediation recommendation” as a known limitation in the README. Set N01–N10 `expected_flagged: false` (false-positive-only scoring). Add N11–N14 edge stubs from DB scan; note that a true unflagged `>10% AND <$50k` MoM does not exist in this synthetic set (N12 is the closest stand-in).
 - **Why:** Score finance-correct answers without false fails from date format / baseline drift / synonyms, while keeping harder threshold-edge negatives for the answer-key author.
-- **Implications:** Re-score after this change; if planted cases go to 9/9, treat that as measurement calibration — not a claim the agent got smarter. Agent/MCP/UI still untouched.
+- **Implications:** Re-score after this change; if planted cases go to 9/9, treat that as measurement calibration — not a claim the agent got smarter. Agent/MCP/evals still untouched.
+
+## 2026-10-06 — Known loosening: pairwise amount-sum matching in evals
+
+- **Decision:** When matching numeric `required_facts`, the harness accepts either (1) any single amount in the commentary within `$500` of the target, or (2) **any pair of amounts that sum** to the target within `$500`. Logged as a **known measurement loosening** (needed for B1’s two $37.5k invoices ↔ $75k fact).
+- **Why:** Controllers read split invoices as one spend story; requiring the literal total string false-fails correct commentary.
+- **Implications:** Pair-sum could theoretically false-pass if two unrelated numbers happen to add up; tolerance stays tight ($500). Do not treat this as agent improvement.
+
+## 2026-10-06 — Hold-out seed + hard variants (eval credibility)
+
+- **Decision:** Add `generate_data.py --profile holdout --seed 43` writing `data/finance_holdout.db` with the **same anomaly types** remapped to different accounts/entities/periods and txn-id prefixes that avoid demo-specific agent hooks where possible. Add demo hard variants H1–H4 (near-dup, silent reclass, vague JE, 90/10 partial) and S1 (small account >10% / <$50k, not flagged). Ship `evals/holdout_cases.yaml` and `evals/hard_cases.yaml` as **stubs**. Replace N12 with S1. Agent/MCP/UI unchanged.
+- **Why:** The calibrated 9/9 on the original set is not enough for credibility; hold-out and hard variants show whether detection generalizes.
+- **Implications:** Report original / hold-out / hard scores separately. Hold-out answer key still author-owned.

@@ -11,7 +11,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXPORT_DIR = ROOT / "exports"
 NAME_RE = re.compile(
-    r"^(?P<provider>[^_]+)_(?P<model>.+)_(?P<suite>planted|holdout|hard|sealed|custom)\.json$"
+    r"^(?P<provider>heuristic|openai|anthropic|xai|deepseek|ollama)"
+    r"_(?P<model>.+)"
+    r"_(?P<suite>planted|holdout|hard|sealed|custom)\.json$"
 )
 
 

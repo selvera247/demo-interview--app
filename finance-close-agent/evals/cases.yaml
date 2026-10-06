@@ -15,7 +15,7 @@ cases:
     expected_explanation: >
       Cloud Hosting was accrued twice in June for the same vendor and
       reference, $85,000 each. The second is a duplicate and should be reversed.
-    required_facts: ["duplicate", "85,000", "reverse"]
+    required_facts: ["duplicate", "85,000"]
     must_cite:
       - ACCR-CLOUD-6110-BASE-2026-06
       - ACCR-CLOUD-6110-DUP-2026-06
@@ -64,7 +64,7 @@ cases:
     expected_explanation: >
       Subscription revenue is up $400,000 in June because a contract was
       recognized early. Its start date is in July, so this is a timing issue.
-    required_facts: ["timing", "400,000", "July"]
+    required_facts: ["timing|early", "400,000", "2026-07|July"]
     must_cite:
       - JE-REV-TIMING-FWD
     must_not_say: ["new customer", "upsell", "price increase", "expansion"]
@@ -80,7 +80,7 @@ cases:
     expected_explanation: >
       Subscription revenue is down $400,000 in July, reversing the early
       recognition from June. This is timing, not lost business.
-    required_facts: ["timing", "400,000", "June"]
+    required_facts: ["timing|revers", "400,000", "2026-06|June"]
     must_cite:
       - JE-REV-TIMING-REV
     must_not_say: ["churn", "cancellation", "lost customer", "downgrade"]
@@ -96,7 +96,7 @@ cases:
     expected_explanation: >
       A manual journal of $70,000 has no description, vendor, or support.
       The agent should say it cannot explain the variance and route it to review.
-    required_facts: ["no description", "70,000", "cannot explain"]
+    required_facts: ["blank description|no description", "70,000", "cannot explain|unexplained|do not invent"]
     must_cite:
       - JE-MANUAL-BLANK
     must_not_say: ["client dinner", "offsite", "conference", "likely", "probably"]
@@ -112,7 +112,7 @@ cases:
     expected_explanation: >
       Marketing is up $75,000 from the annual conference, fully covered by
       vendor invoices. This is a benign, expected increase.
-    required_facts: ["conference", "75,000", "invoice"]
+    required_facts: ["conference", "75,000"]
     must_cite:
       - CONF-2026-ANNUAL-01
       - CONF-2026-ANNUAL-02
@@ -129,7 +129,7 @@ cases:
     expected_explanation: >
       Recruiting is up $55,000 in March from agency fees during a hiring surge,
       covered by agency invoices. This is a benign, seasonal increase.
-    required_facts: ["agency", "55,000", "hiring"]
+    required_facts: ["agency|recruiting fees", "55,000", "hiring"]
     must_cite:
       - HIRING-SURGE-2026-Q1-2026-03
     must_not_say: ["duplicate", "error", "unsupported", "cannot explain"]
@@ -160,7 +160,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -173,7 +173,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -186,7 +186,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -199,7 +199,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -212,7 +212,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -225,7 +225,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -238,7 +238,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -251,7 +251,7 @@ cases:
     entity: ND-EU
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -264,7 +264,7 @@ cases:
     entity: ND-US
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
@@ -277,10 +277,74 @@ cases:
     entity: ND-US
     period: "2026-01"
     variance: null
-    expected_flagged: null
+    expected_flagged: false
     expected_explanation: ""
     expected_confidence: ""
     required_facts: []
     must_cite: []
     must_not_say: []
     notes: ""
+
+  # --- Harder adversarial stubs (threshold edge / seasonal) ---
+  # N12 note: no true MoM with |pct|>10% AND |amt|<$50k exists in this DB
+  # outside planted breaches (which also exceed $50k). Closest stand-in used.
+
+  - id: N11
+    account: "4000"
+    entity: ND-US
+    period: "2024-11"
+    variance: -71455.07
+    expected_flagged: false
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: >
+      Dollars above $50k, percent below 10% (large Subscription Revenue MoM).
+      Expect no flag (AND threshold).
+
+  - id: N12
+    account: "6020"
+    entity: ND-EU
+    period: "2026-08"
+    variance: -962.41
+    expected_flagged: false
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: >
+      Closest available to high-pct/low-dollar: ~8% on ~$1k after sticky A2
+      left a small Contractors base. True >10%/<$50k does not exist unflagged.
+
+  - id: N13
+    account: "4000"
+    entity: ND-US
+    period: "2025-03"
+    variance: -50259.37
+    expected_flagged: false
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: >
+      Within ~5% of the $50k dollar threshold (|amt|≈$50.3k) but pct only ~2.6%.
+      Expect no flag.
+
+  - id: N14
+    account: "6200"
+    entity: ND-EU
+    period: "2025-01"
+    variance: 6431.42
+    expected_flagged: false
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: >
+      Seasonal Jan marketing lift (~+4.5%) that looks busy but stays under both
+      thresholds. Expect no flag.

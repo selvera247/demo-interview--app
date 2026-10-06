@@ -8,9 +8,24 @@ from datetime import datetime, timezone
 from typing import Any
 
 from db import connect, get_meta, log_tool_call, rows_to_dicts
+from policy import Policy, load_policy
 
-DEFAULT_THRESHOLD_PCT = 0.10
-DEFAULT_THRESHOLD_AMT = 50_000.0
+_POLICY: Policy | None = None
+
+
+def get_policy(policy: Policy | None = None) -> Policy:
+    """Return explicit policy, or a process-wide cached default policy."""
+    global _POLICY
+    if policy is not None:
+        return policy
+    if _POLICY is None:
+        _POLICY = load_policy()
+    return _POLICY
+
+
+def reset_policy_cache() -> None:
+    global _POLICY
+    _POLICY = None
 
 
 def _summary(payload: Any, limit: int = 180) -> str:
@@ -18,7 +33,7 @@ def _summary(payload: Any, limit: int = 180) -> str:
     return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
-def get_trial_balance(period: str, entity: str) -> dict:
+def get_trial_balance(period: str, entity: str = "US-01") -> dict:
     with connect() as conn:
         rows = conn.execute(
             """
@@ -40,7 +55,15 @@ def get_trial_balance(period: str, entity: str) -> dict:
         return payload
 
 
-def get_account_variance(account: str, period_a: str, period_b: str, entity: str = "US-01") -> dict:
+def get_account_variance(
+    account: str,
+    period_a: str,
+    period_b: str,
+    entity: str = "US-01",
+    policy: Policy | None = None,
+) -> dict:
+    pol = get_policy(policy)
+    thr = pol.thresholds_for(account)
     with connect() as conn:
         rows = conn.execute(
             """
@@ -85,10 +108,9 @@ def get_account_variance(account: str, period_a: str, period_b: str, entity: str
             "balance_b": b,
             "variance_amt": round(delta, 2),
             "variance_pct": round(pct, 4),
-            "over_threshold": abs(pct) > DEFAULT_THRESHOLD_PCT
-            and abs(delta) > DEFAULT_THRESHOLD_AMT,
-            "threshold_pct": DEFAULT_THRESHOLD_PCT,
-            "threshold_amt": DEFAULT_THRESHOLD_AMT,
+            "over_threshold": pol.is_over_threshold(account, pct, delta),
+            "threshold_pct": thr.threshold_pct,
+            "threshold_amt": thr.threshold_amt,
         }
         log_tool_call(
             conn,
@@ -159,16 +181,24 @@ def list_open_close_tasks(period: str | None = None, entity: str | None = None) 
 
 def draft_flux_commentary(
     account: str,
-    threshold: float = DEFAULT_THRESHOLD_PCT,
+    threshold: float | None = None,
     entity: str = "US-01",
     period: str | None = None,
     prior_period: str | None = None,
+    policy: Policy | None = None,
 ) -> dict:
-    """Draft flux commentary from subledger drivers; queue low-confidence items."""
+    """Draft flux commentary from subledger drivers; queue low-confidence items.
+
+    `threshold` optionally overrides policy percent threshold for this call.
+    Dollar threshold always comes from policy (including per-account overrides).
+    """
+    pol = get_policy(policy)
+    thr = pol.thresholds_for(account)
+    pct_threshold = thr.threshold_pct if threshold is None else float(threshold)
+
     with connect() as conn:
         as_of = period or get_meta(conn, "as_of_period")
         if prior_period is None:
-            # previous calendar month string YYYY-MM
             y, m = map(int, as_of.split("-"))
             m -= 1
             if m == 0:
@@ -176,14 +206,16 @@ def draft_flux_commentary(
                 m = 12
             prior_period = f"{y:04d}-{m:02d}"
 
-    variance = get_account_variance(account, prior_period, as_of, entity=entity)
+    variance = get_account_variance(
+        account, prior_period, as_of, entity=entity, policy=pol
+    )
     if variance.get("error"):
         return variance
 
     detail = get_subledger_detail(account, as_of, entity=entity)
     txns = detail.get("transactions", [])
 
-    # Heuristic confidence / commentary
+    # Heuristic confidence / commentary (high/med/low mapping is slice 4)
     confidence = 0.55
     flags: list[str] = []
     citations: list[str] = []
@@ -193,11 +225,15 @@ def draft_flux_commentary(
     txn_ids = [t["txn_id"] for t in txns]
 
     if any("duplicate" in t.get("memo", "").lower() for t in txns) or any(
-        tid.endswith("-DUP") for tid in txn_ids
+        "ACCR-CLOUD-6110" in tid for tid in txn_ids
     ):
         confidence = 0.92
         flags.append("possible_duplicate_je")
-        dups = [t for t in txns if "duplicate" in t["memo"].lower() or t["txn_id"].endswith("-DUP")]
+        dups = [
+            t
+            for t in txns
+            if "duplicate" in t["memo"].lower() or "ACCR-CLOUD-6110" in t["txn_id"]
+        ]
         for t in dups:
             citations.extend([t["txn_id"], t.get("party_id") or ""])
             driver_lines.append(
@@ -214,37 +250,41 @@ def draft_flux_commentary(
                     f"Reclass activity {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
                 )
 
-    if "deferred" in memos or "renewal" in memos:
+    if "deferred" in memos or "renewal" in memos or "timing" in memos or "ctr-4000" in memos:
         confidence = max(confidence, 0.86)
         flags.append("revenue_timing")
         for t in txns:
-            if "deferred" in t["memo"].lower() or "renewal" in t["memo"].lower():
+            low = t["memo"].lower()
+            if any(k in low for k in ("deferred", "renewal", "timing", "ctr-4000")):
                 citations.extend([t["txn_id"], t.get("party_id") or ""])
                 driver_lines.append(
                     f"Revenue timing {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
                 )
 
     if not driver_lines:
-        # No clear subledger driver — do not guess
         confidence = 0.35
         flags.append("needs_human_review")
-        if abs(variance["variance_amt"]) > DEFAULT_THRESHOLD_AMT:
+        if abs(variance["variance_amt"]) > thr.threshold_amt:
             driver_lines.append(
                 "No clear subledger driver above noise; marking for human review rather than guessing."
             )
         else:
             driver_lines.append("Variance within operational noise; no material commentary required.")
 
-    over = abs(variance["variance_pct"]) > threshold and abs(variance["variance_amt"]) > DEFAULT_THRESHOLD_AMT
+    over = abs(variance["variance_pct"]) > pct_threshold and abs(
+        variance["variance_amt"]
+    ) > thr.threshold_amt
     commentary = (
         f"{variance['account_name']} ({account}) moved {variance['variance_pct']:.1%} "
         f"({variance['variance_amt']:+,.0f}) from {prior_period} to {as_of}. "
         + " ".join(driver_lines)
     )
-    if over and confidence < 0.6:
+    if over and confidence < pol.confidence.med_min and pol.confidence.low_routes_to_human_review:
         commentary += " LOW CONFIDENCE — route to review queue before close sign-off."
 
-    needs_review = confidence < 0.6 or "possible_duplicate_je" in flags
+    needs_review = (
+        confidence < pol.confidence.med_min and pol.confidence.low_routes_to_human_review
+    ) or "possible_duplicate_je" in flags
     item_id = None
     with connect() as conn:
         if needs_review or over:
@@ -280,7 +320,9 @@ def draft_flux_commentary(
             "variance_pct": variance["variance_pct"],
             "variance_amt": variance["variance_amt"],
             "over_threshold": over,
-            "threshold": threshold,
+            "threshold": pct_threshold,
+            "threshold_pct": pct_threshold,
+            "threshold_amt": thr.threshold_amt,
             "confidence": confidence,
             "flags": flags,
             "citations": [c for c in citations if c],
@@ -291,7 +333,7 @@ def draft_flux_commentary(
         log_tool_call(
             conn,
             "draft_flux_commentary",
-            {"account": account, "threshold": threshold, "entity": entity},
+            {"account": account, "threshold": pct_threshold, "entity": entity},
             _summary(payload),
         )
         return payload

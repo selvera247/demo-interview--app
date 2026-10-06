@@ -1192,12 +1192,25 @@ def export_demo_bundle(
 
     by_key = {(r["account_id"], r["period"]): r["ending_balance"] for r in tb}
     names = {r["account_id"]: r["name"] for r in tb}
+    try:
+        from policy import load_policy
+
+        pol = load_policy()
+        thr_pct = pol.variance.threshold_pct
+        thr_amt = pol.variance.threshold_amt
+    except Exception:
+        thr_pct = None
+        thr_amt = None
     variances = []
     for acct, name, *_ in ACCOUNTS:
         a = by_key.get((acct, prior), 0.0)
         b = by_key.get((acct, period), 0.0)
         delta = b - a
         pct = (delta / a) if abs(a) > 1 else (1.0 if abs(delta) > 0 else 0.0)
+        if thr_pct is None or thr_amt is None:
+            over = False
+        else:
+            over = abs(pct) > thr_pct and abs(delta) > thr_amt
         variances.append(
             {
                 "account_id": acct,
@@ -1208,7 +1221,7 @@ def export_demo_bundle(
                 "balance_b": b,
                 "variance_amt": round(delta, 2),
                 "variance_pct": round(pct, 4),
-                "over_threshold": abs(pct) > 0.10 and abs(delta) > 50_000,
+                "over_threshold": over,
             }
         )
 
@@ -1221,8 +1234,8 @@ def export_demo_bundle(
         "entity": entity,
         "period": period,
         "prior_period": prior,
-        "threshold_pct": 0.10,
-        "threshold_amt": 50_000,
+        "threshold_pct": thr_pct,
+        "threshold_amt": thr_amt,
         "trial_balance": tb,
         "subledger": sub,
         "close_tasks": tasks,

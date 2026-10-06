@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Heuristic Close Agent — flags threshold breaches, drafts flux, queues review.
-
-This is the offline stand-in for an LLM agent using the same MCP tools.
-"""
+"""Heuristic Close Agent — flags threshold breaches using config/policy.yaml."""
 
 from __future__ import annotations
 
@@ -16,56 +13,68 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from db import connect, get_meta  # noqa: E402
-from tools import (  # noqa: E402
-    draft_flux_commentary,
-    get_account_variance,
-    list_open_close_tasks,
-)
+from policy import flag_variances, load_policy  # noqa: E402
+from tools import draft_flux_commentary, list_open_close_tasks, reset_policy_cache  # noqa: E402
 
 
 def run_close_pass(
-    entity: str = "US-01",
-    threshold_pct: float = 0.10,
-    threshold_amt: float = 50_000.0,
+    entity: str | None = None,
+    policy_path: str | Path | None = None,
+    draft: bool = False,
 ) -> dict:
+    """Flag MoM breaches per policy.
+
+    When ``entity`` is None, scans all entities and all consecutive periods.
+    """
+    reset_policy_cache()
+    policy = load_policy(policy_path)
     with connect() as conn:
-        period = get_meta(conn, "as_of_period")
-        y, m = map(int, period.split("-"))
-        m -= 1
-        if m == 0:
-            y -= 1
-            m = 12
-        prior = f"{y:04d}-{m:02d}"
-        accounts = [
-            r["account_id"]
-            for r in conn.execute("SELECT account_id FROM accounts ORDER BY account_id")
-        ]
+        as_of = get_meta(conn, "as_of_period")
+        flagged = flag_variances(policy, conn)
 
-    tasks = list_open_close_tasks(period=period, entity=entity)
-    flagged = []
+    if entity:
+        flagged = [f for f in flagged if f["entity"] == entity]
+
+    flagged.sort(key=lambda r: (r["entity"], r["period_b"], r["account_id"]))
+
     drafts = []
-
-    for account in accounts:
-        variance = get_account_variance(account, prior, period, entity=entity)
-        if variance.get("error"):
-            continue
-        if abs(variance["variance_pct"]) > threshold_pct and abs(
-            variance["variance_amt"]
-        ) > threshold_amt:
-            flagged.append(variance)
-            draft = draft_flux_commentary(
-                account, threshold=threshold_pct, entity=entity
+    if draft:
+        for row in flagged:
+            drafts.append(
+                draft_flux_commentary(
+                    row["account_id"],
+                    threshold=None,
+                    entity=row["entity"],
+                    period=row["period_b"],
+                    prior_period=row["period_a"],
+                    policy=policy,
+                )
             )
-            drafts.append(draft)
 
+    tasks = list_open_close_tasks(period=as_of, entity=entity)
     return {
-        "disclaimer": "SYNTHETIC DATA — not real company financials",
-        "entity": entity,
-        "period": period,
-        "prior_period": prior,
+        "disclaimer": "SYNTHETIC DATA — Northwind Digital demo only",
+        "policy_path": str(policy.source_path),
+        "threshold_pct": policy.variance.threshold_pct,
+        "threshold_amt": policy.variance.threshold_amt,
+        "entity_filter": entity,
+        "as_of_period": as_of,
         "open_tasks": tasks.get("open_count"),
         "flagged_count": len(flagged),
-        "flagged": flagged,
+        "flagged": [
+            {
+                "entity": f["entity"],
+                "account_id": f["account_id"],
+                "account_name": f["account_name"],
+                "period_a": f["period_a"],
+                "period_b": f["period_b"],
+                "variance_pct": f["variance_pct"],
+                "variance_amt": f["variance_amt"],
+                "threshold_pct": f["threshold_pct"],
+                "threshold_amt": f["threshold_amt"],
+            }
+            for f in flagged
+        ],
         "drafts": drafts,
         "review_queued": sum(
             1 for d in drafts if d.get("status") == "queued_for_review"
@@ -75,11 +84,23 @@ def run_close_pass(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--entity", default="US-01")
-    parser.add_argument("--threshold-pct", type=float, default=0.10)
-    parser.add_argument("--threshold-amt", type=float, default=50_000.0)
+    parser.add_argument(
+        "--entity",
+        default=None,
+        help="Optional entity filter (default: all entities)",
+    )
+    parser.add_argument(
+        "--policy",
+        default=None,
+        help="Path to policy YAML (default: config/policy.yaml)",
+    )
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        help="Also draft flux commentary for flagged accounts",
+    )
     args = parser.parse_args()
-    result = run_close_pass(args.entity, args.threshold_pct, args.threshold_amt)
+    result = run_close_pass(entity=args.entity, policy_path=args.policy, draft=args.draft)
     print(json.dumps(result, indent=2))
 
 

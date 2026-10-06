@@ -94,10 +94,13 @@ def main() -> None:
     @mcp.tool()
     def draft_flux_commentary(
         account: str,
-        threshold: float = 0.10,
+        threshold: float | None = None,
         entity: str = "US-01",
     ) -> dict:
-        """Draft flux commentary from subledger drivers; queue low-confidence items."""
+        """Draft flux commentary from subledger drivers; queue low-confidence items.
+
+        threshold: optional percent override; when omitted, uses config/policy.yaml.
+        """
         return t.draft_flux_commentary(account, threshold=threshold, entity=entity)
 
     mcp.run(transport="stdio")

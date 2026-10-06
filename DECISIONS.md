@@ -92,3 +92,15 @@
 - **Decision:** Add `generate_data.py --profile holdout --seed 43` writing `data/finance_holdout.db` with the **same anomaly types** remapped to different accounts/entities/periods and txn-id prefixes that avoid demo-specific agent hooks where possible. Add demo hard variants H1–H4 (near-dup, silent reclass, vague JE, 90/10 partial) and S1 (small account >10% / <$50k, not flagged). Ship `evals/holdout_cases.yaml` and `evals/hard_cases.yaml` as **stubs**. Replace N12 with S1. Agent/MCP/UI unchanged.
 - **Why:** The calibrated 9/9 on the original set is not enough for credibility; hold-out and hard variants show whether detection generalizes.
 - **Implications:** Report original / hold-out / hard scores separately. Hold-out answer key still author-owned.
+
+## 2026-10-06 — Generic retrieval (no planted-ID hooks)
+
+- **Decision:** Move flux evidence gathering into `retrieval.retrieve_flux_evidence`: all current-period subledger rows for account/entity/period, all prior-period rows for the same account/entity, and counterpart accounts discovered by opposite-signed amounts (within $1) or 4-digit account refs in memos. Rewrite `assess_flux` to score structural signals only (unsupported JE, identical/near-identical same-party amounts, magnitude coverage, counterpart pairs). Add `tests/test_no_seed_ids.py` that greps agent/tools/retrieval for seed-42 identifiers derived from the DB.
+- **Why:** Hold-out failures that said “no citable” while rows existed were caused by planted-ID / vendor / memo hooks in the old assess path — not missing data.
+- **Implications:** Detection quality on remapped seeds depends on structure, not demo strings. MCP tool names/signatures unchanged.
+
+## 2026-10-06 — Multi-provider LLM drafting layer
+
+- **Decision:** Add `llm/` with `generate(system, user, json_schema) -> dict`. Adapters: OpenAI-compatible (configurable `base_url` for OpenAI / xAI / DeepSeek / Ollama), Anthropic native, and **heuristic** (wraps structural `assess_flux` as the no-LLM baseline). Config in `config/llm.yaml` (provider, model, base_url, api_key_env, temperature default 0, timeout); keys only via env (`.env.example`, gitignore `.env`). Provider selectable via config, `LLM_PROVIDER`, or `--provider`. Drafting contract JSON: `{commentary, cited_ids, explained_amount, residual_amount}`. Retrieval, confidence, unsupported_je, and low→review stay in code. Hallucinated cites → low + logged; invalid JSON → one retry then heuristic fallback (logged in `draft_meta`). Deps: `openai`, `anthropic`, `python-dotenv` only.
+- **Why:** Controllers need model-swappable commentary without letting the LLM own policy gates; heuristic remains the honest baseline.
+- **Implications:** Real API calls are opt-in via env keys; tests mock providers only. No README score publish.

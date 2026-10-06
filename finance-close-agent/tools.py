@@ -28,6 +28,19 @@ def reset_policy_cache() -> None:
     _POLICY = None
 
 
+_LLM_PROVIDER_NAME: str | None = None
+
+
+def set_llm_provider(name: str | None) -> None:
+    """Select LLM provider for draft_flux_commentary (None = config default)."""
+    global _LLM_PROVIDER_NAME
+    _LLM_PROVIDER_NAME = name
+
+
+def get_llm_provider_name() -> str | None:
+    return _LLM_PROVIDER_NAME
+
+
 def _summary(payload: Any, limit: int = 180) -> str:
     text = json.dumps(payload, default=str)
     return text if len(text) <= limit else text[: limit - 3] + "..."
@@ -411,21 +424,120 @@ def draft_flux_commentary(
         return variance
 
     from retrieval import retrieve_flux_evidence
+    from llm import LLMError, get_provider
+    from llm.drafting import SYSTEM_PROMPT, build_user_payload, DRAFT_JSON_SCHEMA
+    from llm.heuristic import HeuristicProvider
+    import logging
+    import time
+
+    log = logging.getLogger("finance_close.draft")
 
     evidence = retrieve_flux_evidence(account, entity, as_of, prior_period)
     txns = evidence.get("current") or []
-    assessed = assess_flux(
-        account,
-        entity,
-        as_of,
-        prior_period,
-        txns,
-        variance,
-        pol,
-        pct_threshold,
-        evidence=evidence,
+    evidence_ids = set(evidence.get("evidence_txn_ids") or [])
+
+    user_payload = build_user_payload(
+        account, entity, as_of, prior_period, variance, evidence, pct_threshold
     )
-    assessed["evidence_txn_ids"] = list(evidence.get("evidence_txn_ids") or [])
+    provider_name = get_llm_provider_name()
+    draft_meta: dict[str, Any] = {
+        "provider": provider_name or "config_default",
+        "fallback": False,
+        "citation_errors": [],
+        "latency_ms": None,
+        "usage": None,
+    }
+
+    def _heuristic_assess() -> dict[str, Any]:
+        return assess_flux(
+            account,
+            entity,
+            as_of,
+            prior_period,
+            txns,
+            variance,
+            pol,
+            pct_threshold,
+            evidence=evidence,
+        )
+
+    def _apply_llm_draft(raw: dict[str, Any], base: dict[str, Any]) -> dict[str, Any]:
+        cited = [str(x) for x in (raw.get("cited_ids") or [])]
+        bad = [c for c in cited if c not in evidence_ids]
+        draft_meta["citation_errors"] = bad
+        if bad:
+            log.warning("hallucinated citations %s → downgrade low", bad)
+            base["confidence"] = "low"
+            base["flags"] = list(base.get("flags") or []) + ["hallucinated_citation"]
+            base["status"] = (
+                "queued_for_review"
+                if pol.confidence.low_routes_to_human_review
+                else base.get("status")
+            )
+            if base["status"] == "approved":
+                raise RuntimeError("agent must never auto-approve")
+        commentary = str(raw.get("commentary") or "").strip()
+        if not commentary:
+            commentary = base.get("commentary") or ""
+        # Ensure citations appear in commentary when valid
+        valid_cites = [c for c in cited if c in evidence_ids] or list(
+            base.get("citations") or []
+        )
+        if valid_cites and "Citations:" not in commentary:
+            commentary = commentary.rstrip(".") + ". Citations: " + ", ".join(valid_cites) + "."
+        if (
+            base.get("confidence") == "low"
+            and pol.confidence.low_routes_to_human_review
+            and "LOW CONFIDENCE" not in commentary
+        ):
+            commentary += " LOW CONFIDENCE — queued for human review (no auto-approve)."
+        base["commentary"] = commentary
+        base["citations"] = valid_cites
+        base["explained_amount"] = raw.get("explained_amount")
+        base["residual_amount"] = raw.get("residual_amount")
+        return base
+
+    t0 = time.perf_counter()
+    try:
+        provider = get_provider(provider_name)
+        draft_meta["provider"] = getattr(provider, "name", provider_name) or "unknown"
+        raw = None
+        last_err = None
+        for attempt in range(2):
+            try:
+                raw = provider.generate(SYSTEM_PROMPT, user_payload, DRAFT_JSON_SCHEMA)
+                break
+            except LLMError as exc:
+                last_err = exc
+                log.warning("LLM JSON/provider error attempt %s: %s", attempt + 1, exc)
+        if raw is None:
+            log.warning("LLM failed after retry (%s); falling back to heuristic", last_err)
+            draft_meta["fallback"] = True
+            assessed = _heuristic_assess()
+        elif draft_meta["provider"] == "heuristic" or isinstance(
+            provider, HeuristicProvider
+        ):
+            # Heuristic returns _heuristic_assessed for full policy fields
+            assessed = raw.get("_heuristic_assessed") or _heuristic_assess()
+            assessed = _apply_llm_draft(raw, assessed)
+        else:
+            assessed = _heuristic_assess()
+            # Keep policy confidence/unsupported from structural pass, overlay LLM prose
+            assessed = _apply_llm_draft(raw, assessed)
+            # If LLM provided citations and none hallucinated, prefer structural confidence
+            # unless unsupported / no citations after filter
+            if assessed.get("unsupported_je") or not assessed.get("citations"):
+                assessed["confidence"] = "low"
+                assessed["status"] = "queued_for_review"
+            draft_meta["usage"] = raw.get("_usage")
+    except Exception as exc:  # noqa: BLE001 — never fail close pass on provider
+        log.warning("provider init/call failed (%s); heuristic fallback", exc)
+        draft_meta["fallback"] = True
+        draft_meta["provider"] = "heuristic"
+        assessed = _heuristic_assess()
+    draft_meta["latency_ms"] = round((time.perf_counter() - t0) * 1000, 1)
+    assessed["evidence_txn_ids"] = list(evidence_ids)
+    assessed["draft_meta"] = draft_meta
 
     item_id = None
     should_queue = (
@@ -476,6 +588,10 @@ def draft_flux_commentary(
             "flags": assessed["flags"],
             "citations": assessed["citations"],
             "commentary": assessed["commentary"],
+            "explained_amount": assessed.get("explained_amount"),
+            "residual_amount": assessed.get("residual_amount"),
+            "evidence_txn_ids": assessed.get("evidence_txn_ids"),
+            "draft_meta": assessed.get("draft_meta"),
             "review_item_id": item_id,
             "status": assessed["status"],
         }

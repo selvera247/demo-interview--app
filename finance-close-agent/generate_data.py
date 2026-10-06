@@ -20,8 +20,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "data" / "finance.db"
+HOLDOUT_DB_PATH = ROOT / "data" / "finance_holdout.db"
+SEALED_DB_PATH = ROOT / "data" / "finance_sealed.db"
 EXPORT_DIR = ROOT / "exports"
-SEED = 42
+DEFAULT_SEED = 42
+HOLDOUT_SEED = 43
+SEALED_SEED = 44
+SEED = DEFAULT_SEED  # mutated by generate() for deterministic sub-seeds
 COMPANY = "Northwind Digital"
 ENTITIES = ["ND-US", "ND-EU"]
 
@@ -1091,7 +1096,15 @@ def build_close_tasks(period: str) -> list[tuple]:
     ]
 
 
-def generate(db_path: Path = DB_PATH) -> dict:
+def generate(
+    db_path: Path = DB_PATH,
+    seed: int = DEFAULT_SEED,
+    profile: str = "demo",
+) -> dict:
+    global SEED
+    if profile not in {"demo", "holdout", "sealed"}:
+        raise ValueError(f"unknown profile {profile!r}; use demo|holdout|sealed")
+    SEED = seed
     random.seed(SEED)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
@@ -1109,13 +1122,10 @@ def generate(db_path: Path = DB_PATH) -> dict:
     )
     conn.execute("INSERT INTO meta(key, value) VALUES (?, ?)", ("company", COMPANY))
     conn.execute("INSERT INTO meta(key, value) VALUES (?, ?)", ("seed", str(SEED)))
+    conn.execute("INSERT INTO meta(key, value) VALUES (?, ?)", ("profile", profile))
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?, ?)",
         ("as_of_period", periods[-1]),
-    )
-    conn.execute(
-        "INSERT INTO meta(key, value) VALUES (?, ?)",
-        ("anomalies", "A1,A2,A2B,A3,A3B,A4,B1,B2,C1"),
     )
 
     conn.executemany("INSERT INTO accounts VALUES (?, ?, ?, ?)", ACCOUNTS)
@@ -1134,7 +1144,27 @@ def generate(db_path: Path = DB_PATH) -> dict:
                     acct, entity, mi, d.month, rng
                 )
 
-    anomaly_records = plant_anomalies(balances, periods)
+    from anomaly_extra import (
+        override_hard_and_edge,
+        override_holdout,
+        override_sealed,
+        plant_hard_and_edge,
+        plant_holdout,
+        plant_sealed,
+    )
+
+    if profile == "holdout":
+        anomaly_records = plant_holdout(balances, periods)
+    elif profile == "sealed":
+        anomaly_records = plant_sealed(balances, periods)
+    else:
+        anomaly_records = plant_anomalies(balances, periods)
+        anomaly_records.extend(plant_hard_and_edge(balances, periods))
+
+    conn.execute(
+        "INSERT INTO meta(key, value) VALUES (?, ?)",
+        ("anomalies", ",".join(a.anomaly_id for a in anomaly_records)),
+    )
 
     conn.executemany(
         "INSERT INTO trial_balance(period, entity, account_id, ending_balance) VALUES (?, ?, ?, ?)",
@@ -1170,7 +1200,13 @@ def generate(db_path: Path = DB_PATH) -> dict:
                     )
                 )
 
-    sub_rows = override_subledger_for_anomalies(sub_rows, balances, periods)
+    if profile == "holdout":
+        sub_rows = override_holdout(sub_rows, balances, periods, SEED)
+    elif profile == "sealed":
+        sub_rows = override_sealed(sub_rows, balances, periods, SEED)
+    else:
+        sub_rows = override_subledger_for_anomalies(sub_rows, balances, periods)
+        sub_rows = override_hard_and_edge(sub_rows, balances, periods, SEED)
 
     # Ensure txn_ids unique after overrides
     seen: set[str] = set()
@@ -1215,12 +1251,20 @@ def generate(db_path: Path = DB_PATH) -> dict:
     conn.commit()
 
     export = export_demo_bundle(conn, periods, anomaly_records)
-    export_path = EXPORT_DIR / "demo_bundle.json"
+    if profile == "holdout":
+        export_name = "demo_bundle_holdout.json"
+    elif profile == "sealed":
+        export_name = "demo_bundle_sealed.json"
+    else:
+        export_name = "demo_bundle.json"
+    export_path = EXPORT_DIR / export_name
     export_path.write_text(json.dumps(export, indent=2), encoding="utf-8")
 
     summary = {
         "company": COMPANY,
         "db_path": str(db_path),
+        "seed": SEED,
+        "profile": profile,
         "accounts": len(ACCOUNTS),
         "entities": ENTITIES,
         "periods": len(periods),
@@ -1332,9 +1376,37 @@ def export_demo_bundle(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--db", type=Path, default=DB_PATH)
+    parser.add_argument("--db", type=Path, default=None, help="Output SQLite path")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="RNG seed (default 42 demo / 43 holdout / 44 sealed)",
+    )
+    parser.add_argument(
+        "--profile",
+        choices=("demo", "holdout", "sealed"),
+        default="demo",
+        help="demo=A1–C1+hard/S1; holdout=remapped (43); sealed=remapped (44)",
+    )
     args = parser.parse_args()
-    result = generate(args.db)
+    profile = args.profile
+    if args.seed is not None:
+        seed = args.seed
+    elif profile == "holdout":
+        seed = HOLDOUT_SEED
+    elif profile == "sealed":
+        seed = SEALED_SEED
+    else:
+        seed = DEFAULT_SEED
+    if profile == "holdout":
+        default_db = HOLDOUT_DB_PATH
+    elif profile == "sealed":
+        default_db = SEALED_DB_PATH
+    else:
+        default_db = DB_PATH
+    db_path = args.db or default_db
+    result = generate(db_path=db_path, seed=seed, profile=profile)
     print(json.dumps(result, indent=2))
 
 

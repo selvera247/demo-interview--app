@@ -14,20 +14,29 @@ if str(ROOT) not in sys.path:
 
 from db import connect, get_meta  # noqa: E402
 from policy import flag_variances, load_policy  # noqa: E402
-from tools import draft_flux_commentary, list_open_close_tasks, reset_policy_cache  # noqa: E402
+from tools import (  # noqa: E402
+    draft_flux_commentary,
+    list_open_close_tasks,
+    reset_policy_cache,
+    set_llm_provider,
+)
 
 
 def run_close_pass(
     entity: str | None = None,
     policy_path: str | Path | None = None,
     draft: bool = True,
+    provider: str | None = None,
 ) -> dict:
     """Flag MoM breaches / unsupported JEs per policy and attach confidence labels.
 
     When ``entity`` is None, scans all entities and all consecutive periods.
     Drafts are produced by default so each flagged item includes confidence.
+    ``provider`` selects the LLM drafting adapter (config/llm.yaml); None uses
+    config default / LLM_PROVIDER env.
     """
     reset_policy_cache()
+    set_llm_provider(provider)
     policy = load_policy(policy_path)
     with connect() as conn:
         as_of = get_meta(conn, "as_of_period")
@@ -106,11 +115,17 @@ def main() -> None:
         action="store_true",
         help="Skip flux drafts (flag list only, no confidence labels)",
     )
+    parser.add_argument(
+        "--provider",
+        default=None,
+        help="LLM provider from config/llm.yaml (or LLM_PROVIDER env)",
+    )
     args = parser.parse_args()
     result = run_close_pass(
         entity=args.entity,
         policy_path=args.policy,
         draft=not args.no_draft,
+        provider=args.provider,
     )
     print(json.dumps(result, indent=2))
 

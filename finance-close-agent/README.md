@@ -83,16 +83,21 @@ streamlit run ui/review_app.py
 
 ## Run evals
 
-`evals/cases.yaml` has stubs (must_cite pre-filled). Fill `expected_explanation`,
-`required_facts`, `must_not_say`, and `expected_confidence` before treating any
-score as valid. Incomplete answer keys exit non-zero and pytest fails until filled.
+`evals/cases.yaml` has planted answer keys + FP stubs. Also:
+- `evals/holdout_cases.yaml` — seed-43 remapped types (`data/finance_holdout.db`)
+- `evals/hard_cases.yaml` — H1–H4 hard variants on the demo DB
 
 ```bash
+python3 generate_data.py
+python3 generate_data.py --profile holdout
 python3 evals/run_evals.py
+python3 evals/run_evals.py --cases evals/hard_cases.yaml --report exports/eval_report_hard.json
+python3 evals/run_evals.py --cases evals/holdout_cases.yaml --db data/finance_holdout.db \
+  --report exports/eval_report_holdout.json
 python3 -m pytest tests/test_evals.py -q
 ```
 
-Do not publish a score in this README until the answer key is complete.
+Do not publish a score in this README until hold-out / hard answer keys are complete and reviewed.
 
 ## Claude Desktop (MCP)
 

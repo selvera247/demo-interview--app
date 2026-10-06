@@ -1,0 +1,137 @@
+# Hold-out eval stubs (seed 43 / finance_holdout.db).
+# Same anomaly TYPES as A1–C1 in different accounts, entities, and periods.
+# Answer key blank for the author. Agent must run unchanged.
+#
+# Generate: python3 generate_data.py --profile holdout
+# Score:    python3 evals/run_evals.py --cases evals/holdout_cases.yaml \
+#              --db data/finance_holdout.db --report exports/eval_report_holdout.json
+
+cases:
+  - id: A1
+    account: "6800"
+    entity: ND-EU
+    period: "2026-05"
+    variance: 84884.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - ACCR-FACIL-6800-BASE-2026-05
+      - ACCR-FACIL-6800-DUP-2026-05
+    must_not_say: []
+    notes: "Holdout duplicate accrual (Training 6800), seed 43"
+
+  - id: A2
+    account: "6000"
+    entity: ND-US
+    period: "2026-06"
+    variance: -123953.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-HOLD-6000-2026-06
+    must_not_say: []
+    notes: "Holdout reclass Salaries → Other Opex"
+
+  - id: A2B
+    account: "6900"
+    entity: ND-US
+    period: "2026-06"
+    variance: 119962.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-HOLD-6900-2026-06
+    must_not_say: []
+    notes: ""
+
+  - id: A3
+    account: "4100"
+    entity: ND-EU
+    period: "2026-07"
+    variance: -395937.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-HOLD-REV-FWD
+    must_not_say: []
+    notes: "Holdout usage-revenue timing (IDs avoid JE-REV-TIMING* agent hooks)"
+
+  - id: A3B
+    account: "4100"
+    entity: ND-EU
+    period: "2026-08"
+    variance: 407193.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-HOLD-REV-REV
+    must_not_say: []
+    notes: ""
+
+  - id: A4
+    account: "6300"
+    entity: ND-US
+    period: "2026-09"
+    variance: 70268.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MANUAL-EMPTY
+    must_not_say: []
+    notes: "Holdout blank manual JE on Travel"
+
+  - id: B1
+    account: "6200"
+    entity: ND-EU
+    period: "2026-09"
+    variance: null
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - SUMMIT-2026-01
+      - SUMMIT-2026-02
+    must_not_say: []
+    notes: "Holdout summit spend (memo avoids 'conference' keyword)"
+
+  - id: B2
+    account: "6600"
+    entity: ND-EU
+    period: "2026-02"
+    variance: 55747.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - STAFF-RAMP-2026-Q1-2026-02
+    must_not_say: []
+    notes: "Holdout staffing-ramp fees (avoids HIRING-SURGE tokens)"
+
+  - id: C1
+    account: "6100"
+    entity: ND-US
+    period: "2026-07"
+    variance: 90335.0
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - APP-LICENSE-2026-US-2026-07
+      - APP-RESIDUAL-UNMATCHED-2026-07
+    must_not_say: []
+    notes: "Holdout partial software (APP-* prefixes, not SW-*)"

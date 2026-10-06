@@ -38,3 +38,21 @@
   - **low** (`score < med_min`, or hard-capped): unexplained variance, **unsupported JE**, or **zero citations** (no txn IDs to cite ⇒ confidence capped at low).
 - **Why:** Controllers need an explicit human gate for unsupported entries (A4) even when thresholds are raised, and explainable anomalies must show receipt-level citations.
 - **Implications:** `assess_flux` + `draft_flux_commentary` return string labels; review queue stores TEXT confidence; Streamlit shows high/med/low; evals untouched aside from dropping a hardcoded default threshold fallback.
+
+## 2026-10-06 — Fix-up: A1 = +$85K variance; add C1 (med)
+
+- **Decision:** Restructure A1 so one Cloud Hosting accrual (`ACCR-CLOUD-6110-BASE`) is part of the baseline run rate and the identical twin (`ACCR-CLOUD-6110-DUP`) is the only TB add vs clean baseline — variance exactly **+$85K** (not +$170K). Add anomaly **C1**: ND-EU Software `6100` 2026-08 sticky ~+$90K, of which $60K is a labeled annual license renewal and ~$30K is an unexplained residual from a real vendor (no PO/contract match). C1 expected confidence **med**, queued for review; commentary must cite the $60K txn and state the residual amount. Breach set grows from 8 → **9** keys (C1 has no paired side).
+- **Why:** Controllers need a clean “duplicate = full variance” narrative for A1, plus a med-band partial-explanation case before the review UI slice.
+- **Implications:** `ANOMALIES.md`, `verify_data.EXPECTED_BREACHES`, policy/confidence tests, and generator/subledger overrides updated. Med now routes to human review alongside low.
+
+## 2026-10-06 — Slice 5 Streamlit review UI polish
+
+- **Decision:** Polish `ui/review_app.py` only (plus shared `ui/queue_helpers.py` and text verifier). Queue sorts **low → med → high**, then |variance| descending. Each card shows account, entity, period, variance ($/%), commentary, cited txn IDs, confidence, and policy rule (`threshold` / `unsupported_je`). Approve/edit/reject require a reviewer note in the UI; low approve remains API-blocked without a note. Status history is session-scoped; tool-call log tab maps each call to the close-pass item it served. No MCP / agent / eval changes.
+- **Why:** Controllers need a review surface that surfaces risk order and evidence without leaving the demo.
+- **Implications:** README demo checklist documents 9 pending items and what high/med/low look like. `ui/verify_queue_text.py` prints the queue for environments that cannot screenshot Streamlit.
+
+## 2026-10-06 — Known limitation: paired anomalies are separate queue rows
+
+- **Decision:** Leave A2/A2B and A3/A3B as **four separate** review-queue entries for now (not a merge blocker). Optionally add a small “group paired entries” polish before packaging so each offset side sits next to its original.
+- **Why:** The offset side only makes sense beside the original; four independent cards are less realistic for a controller review, but confidence sort and evidence still work for the demo.
+- **Implications:** Documented limitation only — no code change this turn. If we add grouping later, keep MCP/agent/evals untouched and sort groups by the worse confidence / larger |$| of the pair.

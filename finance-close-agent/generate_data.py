@@ -3,7 +3,7 @@
 
 Company: Northwind Digital
 Entities: ND-US, ND-EU
-Planted anomalies A1–A4 and benign breaches B1–B2 (see data/ANOMALIES.md).
+Planted anomalies A1–A4, B1–B2, and C1 (see data/ANOMALIES.md).
 All figures are synthetic. source_system labels are generic only.
 """
 
@@ -172,12 +172,15 @@ OPEX_DETAIL_ACCOUNTS = {
 REVENUE_DETAIL_ACCOUNTS = {"4000", "4100", "4200", "4300"}
 
 # Anomaly amounts (deterministic)
-A1_DUP_AMOUNT = 85_000.0  # each of two identical accrual rows
+A1_DUP_AMOUNT = 85_000.0  # duplicate accrual size (= full TB variance vs baseline)
 A2_RECLASS_AMOUNT = 120_000.0
 A3_REV_AMOUNT = 400_000.0
 A4_UNEXPLAINED_AMOUNT = 70_000.0
 B1_CONFERENCE_AMOUNT = 75_000.0
 B2_RECRUITING_AMOUNT = 55_000.0
+C1_SOFTWARE_TOTAL = 90_000.0
+C1_SOFTWARE_EXPLAINED = 60_000.0
+C1_SOFTWARE_RESIDUAL = 30_000.0
 
 
 @dataclass(frozen=True)
@@ -560,6 +563,7 @@ def anomaly_periods(periods: list[str]) -> dict[str, str]:
         "a4": periods[-1],
         "b1": periods[-1],
         "b2_start": periods[-7],  # 2026-03 hiring-heavy month
+        "c1": periods[-2],  # 2026-08 — Software partial explanation
     }
 
 
@@ -571,11 +575,12 @@ def plant_anomalies(
     p = anomaly_periods(periods)
     records: list[AnomalyRecord] = []
 
-    # A1 — duplicate Cloud Hosting accrual (sticky from a1 period onward)
-    # Two identical $85k rows → +$170k to expense; amount field stores $85k per line.
+    # A1 — duplicate Cloud Hosting accrual (sticky from a1 period onward).
+    # Baseline already includes one $85k run-rate accrual in the subledger; TB only
+    # increases by the duplicate (+$85k vs clean baseline).
     for period in periods[periods.index(p["a1"]) :]:
         key = (period, "ND-US", "6110")
-        balances[key] = round(balances[key] + 2 * A1_DUP_AMOUNT, 2)
+        balances[key] = round(balances[key] + A1_DUP_AMOUNT, 2)
     records.append(
         AnomalyRecord(
             anomaly_id="A1",
@@ -585,14 +590,16 @@ def plant_anomalies(
             amount=A1_DUP_AMOUNT,
             kind="duplicate_accrual",
             explanation=(
-                "Duplicate Cloud Hosting accrual: two identical $85,000 accrual rows "
-                "(same vendor Nimbus Hosting Co, same reference ACCR-CLOUD-6110) "
-                "posted in ND-US for the period. Reverse one duplicate."
+                "Duplicate Cloud Hosting accrual: baseline run-rate accrual "
+                "ACCR-CLOUD-6110-BASE ($85,000) plus identical duplicate "
+                "ACCR-CLOUD-6110-DUP ($85,000) for the same vendor/reference. "
+                "The duplicate accounts for the full +$85,000 variance vs baseline; "
+                "reverse ACCR-CLOUD-6110-DUP."
             ),
             expected_confidence="high",
             expected_citations=(
-                "ACCR-CLOUD-6110-A",
-                "ACCR-CLOUD-6110-B",
+                "ACCR-CLOUD-6110-BASE",
+                "ACCR-CLOUD-6110-DUP",
                 "V-200",
             ),
         )
@@ -750,6 +757,29 @@ def plant_anomalies(
         )
     )
 
+    # C1 — partially explained Software (6100) spend in ND-EU (sticky from Aug)
+    for period in periods[periods.index(p["c1"]) :]:
+        balances[(period, "ND-EU", "6100")] = round(
+            balances[(period, "ND-EU", "6100")] + C1_SOFTWARE_TOTAL, 2
+        )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="C1",
+            account_id="6100",
+            entity="ND-EU",
+            period=p["c1"],
+            amount=C1_SOFTWARE_TOTAL,
+            kind="partial_software",
+            explanation=(
+                "Software Subscriptions ND-EU +~$90,000: $60,000 explained by annual "
+                "license renewal SW-LICENSE-2026-EU; ~$30,000 residual invoice from a "
+                "real vendor lacks PO/contract match — partial explanation (med)."
+            ),
+            expected_confidence="med",
+            expected_citations=("SW-LICENSE-2026-EU", "SW-RESIDUAL-UNMATCHED"),
+        )
+    )
+
     return records
 
 
@@ -773,14 +803,17 @@ def override_subledger_for_anomalies(
             if not (r[3] == account and r[2] == entity and r[1] == period)
         ]
 
-    # --- A1: from a1 period onward, two identical accruals + remainder ---
+    # --- A1: baseline run-rate accrual + identical duplicate; TB only +$85k ---
     for period in periods[periods.index(p["a1"]) :]:
         drop("6110", "ND-US", period)
         tb = balances[(period, "ND-US", "6110")]
+        # BASE is part of run rate; DUP is the +$85k variance vs clean baseline
         remainder = round(tb - 2 * A1_DUP_AMOUNT, 2)
         day0 = _day0(period)
-        for suffix, txn_id in (("A", "ACCR-CLOUD-6110-A"), ("B", "ACCR-CLOUD-6110-B")):
-            # Identical rows: same vendor, amount, reference in memo
+        for suffix, txn_id in (
+            ("BASE", "ACCR-CLOUD-6110-BASE"),
+            ("DUP", "ACCR-CLOUD-6110-DUP"),
+        ):
             sub_rows.append(
                 (
                     f"{txn_id}-{period}",
@@ -1004,6 +1037,46 @@ def override_subledger_for_anomalies(
                 build_expense_detail_rows("6600", period, "ND-US", rem, day0, rng)
             )
 
+    # --- C1 Software partial explanation (ND-EU, sticky from Aug) ---
+    for period in periods[periods.index(p["c1"]) :]:
+        drop("6100", "ND-EU", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-EU", "6100")]
+        rem = round(tb - C1_SOFTWARE_TOTAL, 2)
+        sub_rows.append(
+            (
+                f"SW-LICENSE-2026-EU-{period}",
+                period,
+                "ND-EU",
+                "6100",
+                (day0 + timedelta(days=8)).isoformat(),
+                "V-207",
+                "Annual software license renewal — Parcel Softwares Ltd (SW-LICENSE-2026-EU)",
+                C1_SOFTWARE_EXPLAINED,
+                "ERP",
+                "expense_detail",
+            )
+        )
+        sub_rows.append(
+            (
+                f"SW-RESIDUAL-UNMATCHED-{period}",
+                period,
+                "ND-EU",
+                "6100",
+                (day0 + timedelta(days=15)).isoformat(),
+                "V-207",
+                "Vendor invoice — no PO / no matching contract reference",
+                C1_SOFTWARE_RESIDUAL,
+                "ERP",
+                "expense_detail",
+            )
+        )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{SEED}:c1:{period}")
+            sub_rows.extend(
+                build_expense_detail_rows("6100", period, "ND-EU", rem, day0, rng)
+            )
+
     return sub_rows
 
 
@@ -1042,7 +1115,7 @@ def generate(db_path: Path = DB_PATH) -> dict:
     )
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?, ?)",
-        ("anomalies", "A1,A2,A2B,A3,A3B,A4,B1,B2"),
+        ("anomalies", "A1,A2,A2B,A3,A3B,A4,B1,B2,C1"),
     )
 
     conn.executemany("INSERT INTO accounts VALUES (?, ?, ?, ?)", ACCOUNTS)
@@ -1253,7 +1326,7 @@ def export_demo_bundle(
             }
             for a in anomaly_records
         ],
-        "note": "Planted anomalies A1–A4 and benign breaches B1–B2 — see data/ANOMALIES.md.",
+        "note": "Planted anomalies A1–A4, B1–B2, C1 — see data/ANOMALIES.md.",
     }
 
 

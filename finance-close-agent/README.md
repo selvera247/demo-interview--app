@@ -31,7 +31,7 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 - Company: Northwind Digital
 - Entities: `ND-US`, `ND-EU`
 - ~40 accounts, 24 months trial balance
-- Planted anomalies A1–A4 and benign breaches B1–B2 — see `data/ANOMALIES.md`
+- Planted anomalies A1–A4, B1–B2, and C1 (med partial Software) — see `data/ANOMALIES.md`
 - `source_system` labels: `ERP`, `Billing`, `HRIS`, `Expense Tool` only
 
 ## Setup
@@ -47,12 +47,39 @@ python verify_data.py
 
 ## Run the agent + review UI
 
+### Demo checklist (slice 5)
+
+1. **Regenerate / verify data** (if needed):
+   ```bash
+   python3 generate_data.py
+   python3 verify_data.py   # expects 9 breaches including C1
+   ```
+2. **Run close pass** (all entities, default policy):
+   ```bash
+   python3 agent/close_agent.py
+   ```
+   Expect **9** flagged accounts; **2** routed as `queued_for_review` (C1 med + A4 low). All 9 land as **pending** in the review queue.
+3. **Open Streamlit**:
+   ```bash
+   streamlit run ui/review_app.py
+   ```
+   Click **Run close pass (all entities)** if the queue is empty.
+4. **Expected pending items: 9**, sorted **low → med → high**, then largest |$| variance.
+5. **What each confidence should look like:**
+   - **low** — A4 T&E (`6310` ND-US 2026-09): unsupported blank JE, policy rule `threshold+unsupported_je`, no reliable citations; approve without a reviewer note is **blocked**.
+   - **med** — C1 Software (`6100` ND-EU 2026-08): cites `SW-LICENSE-2026-EU` ($60k) and states ~$30k unexplained residual; queued for review.
+   - **high** — A1/A2/A3/B1/B2 (and pairs): full subledger citations, policy rule `threshold`, draft-ready commentary.
+6. **Text-only queue check** (no screenshot):
+   ```bash
+   python3 ui/verify_queue_text.py
+   ```
+
 ```bash
-python agent/close_agent.py --entity ND-US
+python3 agent/close_agent.py
 streamlit run ui/review_app.py
 ```
 
-> Note: agent/MCP defaults may still say a legacy entity id until a later slice; pass `ND-US` explicitly.
+> Pass `ND-US` / `ND-EU` explicitly when calling tools with a single entity.
 
 ## Run evals
 
@@ -84,7 +111,8 @@ Example prompt:
 
 ## Guardrails
 
-- Low-confidence drafts are marked for **human review** instead of guessing
-- Every tool call is appended to `tool_call_log`
-- Review queue supports **approve / edit / reject**
+- Low- and med-confidence drafts are marked for **human review** instead of guessing
+- Every tool call is appended to `tool_call_log` (UI log tab shows timestamp, tool, inputs, served item)
+- Review queue supports **approve / edit / reject** with a **required reviewer note**
+- Queue sorts low confidence first, then dollar size; each card shows citations + policy rule
 - Eval score is published only after hand-written cases exist

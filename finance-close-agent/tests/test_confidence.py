@@ -138,3 +138,51 @@ def test_explainable_commentary_cites_transaction_ids(db_ready):
         assert any(
             cid in draft["commentary"] for cid in draft["citations"]
         ), f"commentary must cite txn for {account}"
+
+
+def test_c1_med_queued_cites_license_and_residual(db_ready):
+    """C1: partial Software explanation → med, queued, cites $60k + residual."""
+    policy = load_policy(DEFAULT_POLICY)
+    reset_policy_cache()
+    draft = draft_flux_commentary(
+        "6100",
+        entity="ND-EU",
+        period="2026-08",
+        prior_period="2026-07",
+        policy=policy,
+    )
+    assert draft["confidence"] == "med"
+    assert draft["status"] == "queued_for_review"
+    assert draft.get("review_item_id")
+    commentary = draft["commentary"]
+    assert any("SW-LICENSE-2026-EU" in c for c in draft["citations"])
+    assert "SW-LICENSE-2026-EU" in commentary
+    assert "60,000" in commentary
+    assert "unexplained residual" in commentary.lower()
+    assert "30,000" in commentary
+
+    pending = list_review_queue("pending")["items"]
+    assert any(
+        i["item_id"] == draft["review_item_id"] and i["status"] == "pending"
+        for i in pending
+    )
+
+
+def test_a1_duplicate_accounts_for_full_variance(db_ready):
+    """A1: BASE run-rate + DUP; commentary states duplicate = full +$85k variance."""
+    policy = load_policy(DEFAULT_POLICY)
+    reset_policy_cache()
+    draft = draft_flux_commentary(
+        "6110",
+        entity="ND-US",
+        period="2026-06",
+        prior_period="2026-05",
+        policy=policy,
+    )
+    assert draft["confidence"] == "high"
+    # Planted duplicate is +$85k vs baseline; MoM also includes mild natural drift
+    assert draft["variance_amt"] > 50_000
+    cites = " ".join(draft["citations"])
+    assert "ACCR-CLOUD-6110-BASE" in cites
+    assert "ACCR-CLOUD-6110-DUP" in cites
+    assert "full +$85,000 variance" in draft["commentary"]

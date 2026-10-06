@@ -8,14 +8,14 @@ Per case checks (when the answer key is filled):
   (d) commentary contains every required_fact
   (e) if expected_flagged is set: over_threshold / unsupported matches
 
-Number facts are compared after stripping ``$`` and thousands separators so
-``85,000`` matches both ``$85,000`` and ``85000``.
+required_facts may use ``|`` alternatives (any one match passes).
+Numeric facts match within ``numeric_tolerance_amt`` (evals/config.yaml),
+including against the sum of amounts mentioned in the commentary.
 
-Incomplete cases (blank expected_explanation / required_facts) are skipped for
-scoring but still cause a non-zero exit. Complete cases are scored honestly —
-do not edit the answer key to force a pass.
+False-positive-only stubs (expected_flagged: false, blank explanation/facts)
+are scored on the flagged check alone.
 
-Does not write a score into the README.
+Does not write a score into the README. Do not edit answer keys to force passes.
 """
 
 from __future__ import annotations
@@ -35,7 +35,13 @@ if str(ROOT) not in sys.path:
 from tools import draft_flux_commentary, reset_policy_cache  # noqa: E402
 
 CASES_PATH = Path(__file__).resolve().parent / "cases.yaml"
+CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
 REPORT_PATH = ROOT / "exports" / "eval_report.json"
+
+DEFAULT_NUMERIC_TOLERANCE = 500.0
+AMOUNT_RE = re.compile(
+    r"(?<![\w-])([+-]?\$?\d{1,3}(?:,\d{3})+(?:\.\d+)?|[+-]?\$?\d+(?:\.\d+)?)(?![\w-])"
+)
 
 
 def prior_period(period: str) -> str:
@@ -45,6 +51,14 @@ def prior_period(period: str) -> str:
         y -= 1
         m = 12
     return f"{y:04d}-{m:02d}"
+
+
+def load_eval_config(path: Path = CONFIG_PATH) -> dict:
+    if not path.exists():
+        return {"numeric_tolerance_amt": DEFAULT_NUMERIC_TOLERANCE}
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    tol = raw.get("numeric_tolerance_amt", DEFAULT_NUMERIC_TOLERANCE)
+    return {"numeric_tolerance_amt": float(tol)}
 
 
 def load_cases(path: Path) -> list[dict]:
@@ -67,8 +81,17 @@ def _blank(value) -> bool:
     return False
 
 
+def is_false_positive_only(case: dict) -> bool:
+    """expected_flagged explicitly false with no written answer key yet."""
+    return case.get("expected_flagged") is False and _blank(
+        case.get("expected_explanation")
+    )
+
+
 def incomplete_fields(case: dict) -> list[str]:
-    """Answer-key fields that must be filled before scoring."""
+    """Answer-key fields that must be filled before full scoring."""
+    if is_false_positive_only(case):
+        return []
     missing: list[str] = []
     if _blank(case.get("expected_explanation")):
         missing.append("expected_explanation")
@@ -95,6 +118,27 @@ def normalize_text(text: str) -> str:
     return t
 
 
+def parse_amount(token: str) -> float | None:
+    s = str(token).strip().replace("$", "").replace(",", "")
+    if not re.fullmatch(r"[+-]?\d+(?:\.\d+)?", s):
+        return None
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+def extract_amounts(text: str) -> list[float]:
+    found: list[float] = []
+    for m in AMOUNT_RE.finditer(text or ""):
+        raw = m.group(1).replace("$", "").replace(",", "")
+        try:
+            found.append(float(raw))
+        except ValueError:
+            continue
+    return found
+
+
 def _contains_cite(needle: str, citations: list[str], commentary: str) -> bool:
     needle = str(needle)
     if any(needle == c or needle in c or c in needle for c in citations):
@@ -102,11 +146,35 @@ def _contains_cite(needle: str, citations: list[str], commentary: str) -> bool:
     return needle.lower() in commentary.lower()
 
 
-def _contains_fact(fact: str, commentary: str) -> bool:
-    return normalize_text(str(fact)) in normalize_text(commentary)
+def fact_matches(fact: str, commentary: str, tolerance: float) -> bool:
+    """Pass if any ``|`` alternative matches as text or (for numbers) within tolerance."""
+    alts = [a.strip() for a in str(fact).split("|") if a.strip()]
+    norm_commentary = normalize_text(commentary)
+    amounts = extract_amounts(commentary)
+
+    def near(value: float, target: float) -> bool:
+        return abs(abs(value) - abs(target)) <= tolerance
+
+    for alt in alts:
+        target = parse_amount(normalize_text(alt).replace(" ", ""))
+        if target is not None:
+            for num in amounts:
+                if near(num, target):
+                    return True
+            # Split invoices: any pair of amounts may sum to the planted total
+            for i, a in enumerate(amounts):
+                for b in amounts[i + 1 :]:
+                    if near(abs(a) + abs(b), target):
+                        return True
+            if normalize_text(alt) in norm_commentary:
+                return True
+            continue
+        if normalize_text(alt) in norm_commentary:
+            return True
+    return False
 
 
-def score_case(case: dict) -> dict:
+def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict:
     """Run agent draft and score against the answer key."""
     account = str(case["account"])
     entity = case["entity"]
@@ -130,10 +198,10 @@ def score_case(case: dict) -> dict:
     reasons: list[str] = []
     checks: dict[str, bool] = {}
 
-    # (e) expected_flagged — when set (true/false), require match
+    # (e) expected_flagged
     expected_flagged = case.get("expected_flagged")
     if expected_flagged is None:
-        checks["flagged"] = True  # not asserted yet
+        checks["flagged"] = True
     else:
         want = bool(expected_flagged)
         flag_ok = got_flagged == want
@@ -143,6 +211,26 @@ def score_case(case: dict) -> dict:
                 f"flagged: got {got_flagged}, expected {want} "
                 f"(over_threshold={over_threshold}, unsupported_je={unsupported})"
             )
+
+    # False-positive-only stubs: flagged check is the whole score
+    if is_false_positive_only(case):
+        passed = checks.get("flagged", False)
+        return {
+            "id": case.get("id"),
+            "account": account,
+            "entity": entity,
+            "period": period,
+            "passed": passed,
+            "checks": {"flagged": checks.get("flagged", False)},
+            "reasons": reasons,
+            "got_confidence": confidence,
+            "expected_confidence": None,
+            "got_flagged": got_flagged,
+            "expected_flagged": expected_flagged,
+            "citations": citations,
+            "commentary": commentary,
+            "mode": "false_positive_only",
+        }
 
     # (a) confidence
     expected_conf = (case.get("expected_confidence") or "").strip()
@@ -179,9 +267,11 @@ def score_case(case: dict) -> dict:
     if hit_forbidden:
         reasons.append(f"must_not_say hit: {hit_forbidden}")
 
-    # (d) required_facts (case-insensitive; amount formatting normalized)
+    # (d) required_facts — OR-alternatives + numeric tolerance
     required = list(case.get("required_facts") or [])
-    missing_facts = [f for f in required if f and not _contains_fact(f, commentary)]
+    missing_facts = [
+        f for f in required if f and not fact_matches(f, commentary, tolerance)
+    ]
     facts_ok = bool(required) and not missing_facts
     checks["required_facts"] = facts_ok
     if not required:
@@ -204,20 +294,21 @@ def score_case(case: dict) -> dict:
         "expected_flagged": expected_flagged,
         "citations": citations,
         "commentary": commentary,
+        "mode": "full",
     }
 
 
 def run(cases_path: Path = CASES_PATH) -> dict:
     cases = load_cases(cases_path)
+    cfg = load_eval_config()
+    tolerance = cfg["numeric_tolerance_amt"]
     incomplete = find_incomplete(cases)
     complete = [c for c in cases if not incomplete_fields(c)]
 
-    results = [score_case(c) for c in complete]
+    results = [score_case(c, tolerance=tolerance) for c in complete]
     passed = sum(1 for r in results if r["passed"])
     failed = len(results) - passed
-    score = (
-        round(passed / max(len(results), 1), 4) if results else None
-    )
+    score = round(passed / max(len(results), 1), 4) if results else None
 
     status = "scored"
     if incomplete and not results:
@@ -228,6 +319,7 @@ def run(cases_path: Path = CASES_PATH) -> dict:
     report = {
         "disclaimer": "SYNTHETIC DATA — Northwind Digital eval set only",
         "status": status,
+        "numeric_tolerance_amt": tolerance,
         "cases_total": len(cases),
         "cases_scored": len(results),
         "incomplete": incomplete,
@@ -239,7 +331,8 @@ def run(cases_path: Path = CASES_PATH) -> dict:
     if incomplete:
         report["message"] = (
             "Some cases still lack expected_explanation / required_facts; "
-            "scored complete cases only. Fill remaining stubs before publishing."
+            "scored complete / false-positive-only cases. Fill remaining stubs "
+            "before publishing."
         )
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -268,13 +361,16 @@ def main() -> int:
         ))
         return 1
 
-    print("=== Per-case results (complete cases only) ===")
+    print(
+        f"=== Per-case results (tol=${report['numeric_tolerance_amt']:,.0f}) ==="
+    )
     for r in report["results"]:
         status = "PASS" if r["passed"] else "FAIL"
         why = "; ".join(r["reasons"]) if r["reasons"] else "all checks ok"
+        mode = r.get("mode", "")
         print(
             f"{status} {r['id']}: {r['entity']} {r['account']} {r['period']} "
-            f"— {why}"
+            f"[{mode}] — {why}"
         )
         if not r["passed"]:
             print(f"     commentary: {r['commentary'][:220]}…")
@@ -286,7 +382,6 @@ def main() -> int:
         f"{report['cases_total']} total ==="
     )
     print(f"report: {REPORT_PATH}")
-    # Non-zero if any scored failure OR any incomplete stub remains
     if report["failed"] or report["incomplete"]:
         return 1
     return 0

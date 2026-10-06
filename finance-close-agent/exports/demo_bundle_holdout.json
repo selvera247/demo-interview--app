@@ -13,7 +13,7 @@
       "account_id": "1000",
       "name": "Cash",
       "account_type": "Asset",
-      "ending_balance": 4806715.96
+      "ending_balance": 4803276.04
     },
     {
       "period": "2026-09",
@@ -21,7 +21,7 @@
       "account_id": "1000",
       "name": "Cash",
       "account_type": "Asset",
-      "ending_balance": 4879602.38
+      "ending_balance": 4917176.62
     },
     {
       "period": "2026-08",
@@ -29,7 +29,7 @@
       "account_id": "1100",
       "name": "Accounts Receivable",
       "account_type": "Asset",
-      "ending_balance": 2458575.14
+      "ending_balance": 2449917.47
     },
     {
       "period": "2026-09",
@@ -37,7 +37,7 @@
       "account_id": "1100",
       "name": "Accounts Receivable",
       "account_type": "Asset",
-      "ending_balance": 2430509.12
+      "ending_balance": 2398193.07
     },
     {
       "period": "2026-08",
@@ -45,7 +45,7 @@
       "account_id": "1200",
       "name": "Prepaid Expenses",
       "account_type": "Asset",
-      "ending_balance": 437817.8
+      "ending_balance": 438673.86
     },
     {
       "period": "2026-09",
@@ -53,7 +53,7 @@
       "account_id": "1200",
       "name": "Prepaid Expenses",
       "account_type": "Asset",
-      "ending_balance": 441545.21
+      "ending_balance": 444536.21
     },
     {
       "period": "2026-08",
@@ -61,7 +61,7 @@
       "account_id": "1300",
       "name": "Other Current Assets",
       "account_type": "Asset",
-      "ending_balance": 240461.81
+      "ending_balance": 242352.85
     },
     {
       "period": "2026-09",
@@ -69,7 +69,7 @@
       "account_id": "1300",
       "name": "Other Current Assets",
       "account_type": "Asset",
-      "ending_balance": 241007.42
+      "ending_balance": 242791.76
     },
     {
       "period": "2026-08",
@@ -77,7 +77,7 @@
       "account_id": "1400",
       "name": "Property Plant & Equipment",
       "account_type": "Asset",
-      "ending_balance": 3889997.1
+      "ending_balance": 3905248.23
     },
     {
       "period": "2026-09",
@@ -85,7 +85,7 @@
       "account_id": "1400",
       "name": "Property Plant & Equipment",
       "account_type": "Asset",
-      "ending_balance": 3942939.03
+      "ending_balance": 3907364.83
     },
     {
       "period": "2026-08",
@@ -93,7 +93,7 @@
       "account_id": "1500",
       "name": "Accumulated Depreciation",
       "account_type": "Asset",
-      "ending_balance": -1128027.81
+      "ending_balance": -1135510.52
     },
     {
       "period": "2026-09",
@@ -101,7 +101,7 @@
       "account_id": "1500",
       "name": "Accumulated Depreciation",
       "account_type": "Asset",
-      "ending_balance": -1147051.88
+      "ending_balance": -1136603.14
     },
     {
       "period": "2026-08",
@@ -109,7 +109,7 @@
       "account_id": "1600",
       "name": "Intangible Assets",
       "account_type": "Asset",
-      "ending_balance": 827098.58
+      "ending_balance": 824672.13
     },
     {
       "period": "2026-09",
@@ -117,7 +117,7 @@
       "account_id": "1600",
       "name": "Intangible Assets",
       "account_type": "Asset",
-      "ending_balance": 841625.43
+      "ending_balance": 830486.4
     },
     {
       "period": "2026-08",
@@ -125,7 +125,7 @@
       "account_id": "2000",
       "name": "Accounts Payable",
       "account_type": "Liability",
-      "ending_balance": -1018923.57
+      "ending_balance": -1033938.91
     },
     {
       "period": "2026-09",
@@ -133,7 +133,7 @@
       "account_id": "2000",
       "name": "Accounts Payable",
       "account_type": "Liability",
-      "ending_balance": -1023966.73
+      "ending_balance": -1019897.67
     },
     {
       "period": "2026-08",
@@ -141,7 +141,7 @@
       "account_id": "2100",
       "name": "Accrued Expenses",
       "account_type": "Liability",
-      "ending_balance": -484382.86
+      "ending_balance": -491085.29
     },
     {
       "period": "2026-09",
@@ -149,7 +149,7 @@
       "account_id": "2100",
       "name": "Accrued Expenses",
       "account_type": "Liability",
-      "ending_balance": -491256.35
+      "ending_balance": -490863.15
     },
     {
       "period": "2026-08",
@@ -157,7 +157,7 @@
       "account_id": "2200",
       "name": "Accrued Payroll",
       "account_type": "Liability",
-      "ending_balance": -358167.8
+      "ending_balance": -358112.04
     },
     {
       "period": "2026-09",
@@ -165,7 +165,7 @@
       "account_id": "2200",
       "name": "Accrued Payroll",
       "account_type": "Liability",
-      "ending_balance": -355218.62
+      "ending_balance": -357924.22
     },
     {
       "period": "2026-08",
@@ -173,7 +173,7 @@
       "account_id": "2300",
       "name": "Deferred Revenue",
       "account_type": "Liability",
-      "ending_balance": -1316945.62
+      "ending_balance": -1319053.47
     },
     {
       "period": "2026-09",
@@ -181,7 +181,7 @@
       "account_id": "2300",
       "name": "Deferred Revenue",
       "account_type": "Liability",
-      "ending_balance": -1341863.67
+      "ending_balance": -1330077.54
     },
     {
       "period": "2026-08",
@@ -189,7 +189,7 @@
       "account_id": "2400",
       "name": "Short-term Debt",
       "account_type": "Liability",
-      "ending_balance": -289404.45
+      "ending_balance": -287919.24
     },
     {
       "period": "2026-09",
@@ -197,7 +197,7 @@
       "account_id": "2400",
       "name": "Short-term Debt",
       "account_type": "Liability",
-      "ending_balance": -290190.78
+      "ending_balance": -289247.01
     },
     {
       "period": "2026-08",
@@ -205,7 +205,7 @@
       "account_id": "2500",
       "name": "Long-term Debt",
       "account_type": "Liability",
-      "ending_balance": -2058517.82
+      "ending_balance": -2073539.04
     },
     {
       "period": "2026-09",
@@ -213,7 +213,7 @@
       "account_id": "2500",
       "name": "Long-term Debt",
       "account_type": "Liability",
-      "ending_balance": -2059489.46
+      "ending_balance": -2098902.68
     },
     {
       "period": "2026-08",
@@ -221,7 +221,7 @@
       "account_id": "3000",
       "name": "Common Stock",
       "account_type": "Equity",
-      "ending_balance": -115672.67
+      "ending_balance": -114804.71
     },
     {
       "period": "2026-09",
@@ -229,7 +229,7 @@
       "account_id": "3000",
       "name": "Common Stock",
       "account_type": "Equity",
-      "ending_balance": -115665.93
+      "ending_balance": -116012.86
     },
     {
       "period": "2026-08",
@@ -237,7 +237,7 @@
       "account_id": "3100",
       "name": "Additional Paid-in Capital",
       "account_type": "Equity",
-      "ending_balance": -5263182.33
+      "ending_balance": -5171166.43
     },
     {
       "period": "2026-09",
@@ -245,7 +245,7 @@
       "account_id": "3100",
       "name": "Additional Paid-in Capital",
       "account_type": "Equity",
-      "ending_balance": -5214609.74
+      "ending_balance": -5226331.55
     },
     {
       "period": "2026-08",
@@ -253,7 +253,7 @@
       "account_id": "3200",
       "name": "Retained Earnings",
       "account_type": "Equity",
-      "ending_balance": -2524298.59
+      "ending_balance": -2558346.91
     },
     {
       "period": "2026-09",
@@ -261,7 +261,7 @@
       "account_id": "3200",
       "name": "Retained Earnings",
       "account_type": "Equity",
-      "ending_balance": -2550890.12
+      "ending_balance": -2568420.2
     },
     {
       "period": "2026-08",
@@ -269,7 +269,7 @@
       "account_id": "4000",
       "name": "Subscription Revenue",
       "account_type": "Revenue",
-      "ending_balance": -2157540.08
+      "ending_balance": -2134632.3
     },
     {
       "period": "2026-09",
@@ -277,7 +277,7 @@
       "account_id": "4000",
       "name": "Subscription Revenue",
       "account_type": "Revenue",
-      "ending_balance": -2128320.39
+      "ending_balance": -2118943.96
     },
     {
       "period": "2026-08",
@@ -285,7 +285,7 @@
       "account_id": "4100",
       "name": "Usage Revenue",
       "account_type": "Revenue",
-      "ending_balance": -715100.21
+      "ending_balance": -719017.33
     },
     {
       "period": "2026-09",
@@ -293,7 +293,7 @@
       "account_id": "4100",
       "name": "Usage Revenue",
       "account_type": "Revenue",
-      "ending_balance": -708504.36
+      "ending_balance": -709345.26
     },
     {
       "period": "2026-08",
@@ -301,7 +301,7 @@
       "account_id": "4200",
       "name": "Services Revenue",
       "account_type": "Revenue",
-      "ending_balance": -472768.8
+      "ending_balance": -473043.81
     },
     {
       "period": "2026-09",
@@ -309,7 +309,7 @@
       "account_id": "4200",
       "name": "Services Revenue",
       "account_type": "Revenue",
-      "ending_balance": -475423.66
+      "ending_balance": -473702.41
     },
     {
       "period": "2026-08",
@@ -317,7 +317,7 @@
       "account_id": "4300",
       "name": "Other Revenue",
       "account_type": "Revenue",
-      "ending_balance": -64359.69
+      "ending_balance": -63300.63
     },
     {
       "period": "2026-09",
@@ -325,7 +325,7 @@
       "account_id": "4300",
       "name": "Other Revenue",
       "account_type": "Revenue",
-      "ending_balance": -63573.32
+      "ending_balance": -63540.73
     },
     {
       "period": "2026-08",
@@ -333,7 +333,7 @@
       "account_id": "5000",
       "name": "Cost of Subscription",
       "account_type": "Expense",
-      "ending_balance": 483333.3
+      "ending_balance": 481619.86
     },
     {
       "period": "2026-09",
@@ -341,7 +341,7 @@
       "account_id": "5000",
       "name": "Cost of Subscription",
       "account_type": "Expense",
-      "ending_balance": 476689.5
+      "ending_balance": 478359.78
     },
     {
       "period": "2026-08",
@@ -349,7 +349,7 @@
       "account_id": "5100",
       "name": "Cost of Usage",
       "account_type": "Expense",
-      "ending_balance": 205890.9
+      "ending_balance": 205712.91
     },
     {
       "period": "2026-09",
@@ -357,7 +357,7 @@
       "account_id": "5100",
       "name": "Cost of Usage",
       "account_type": "Expense",
-      "ending_balance": 207793.53
+      "ending_balance": 204871.56
     },
     {
       "period": "2026-08",
@@ -365,7 +365,7 @@
       "account_id": "5200",
       "name": "Cost of Services Delivery",
       "account_type": "Expense",
-      "ending_balance": 165433.28
+      "ending_balance": 166857.81
     },
     {
       "period": "2026-09",
@@ -373,7 +373,7 @@
       "account_id": "5200",
       "name": "Cost of Services Delivery",
       "account_type": "Expense",
-      "ending_balance": 164770.14
+      "ending_balance": 167269.8
     },
     {
       "period": "2026-08",
@@ -381,7 +381,7 @@
       "account_id": "6000",
       "name": "Salaries & Wages",
       "account_type": "Expense",
-      "ending_balance": 1122235.46
+      "ending_balance": 995419.3
     },
     {
       "period": "2026-09",
@@ -389,7 +389,7 @@
       "account_id": "6000",
       "name": "Salaries & Wages",
       "account_type": "Expense",
-      "ending_balance": 1137524.58
+      "ending_balance": 995294.85
     },
     {
       "period": "2026-08",
@@ -397,7 +397,7 @@
       "account_id": "6010",
       "name": "Employee Benefits",
       "account_type": "Expense",
-      "ending_balance": 129901.52
+      "ending_balance": 239486.38
     },
     {
       "period": "2026-09",
@@ -405,7 +405,7 @@
       "account_id": "6010",
       "name": "Employee Benefits",
       "account_type": "Expense",
-      "ending_balance": 128543.19
+      "ending_balance": 239538.31
     },
     {
       "period": "2026-08",
@@ -413,7 +413,7 @@
       "account_id": "6020",
       "name": "Contractors",
       "account_type": "Expense",
-      "ending_balance": 185264.38
+      "ending_balance": 183767.3
     },
     {
       "period": "2026-09",
@@ -421,7 +421,7 @@
       "account_id": "6020",
       "name": "Contractors",
       "account_type": "Expense",
-      "ending_balance": 185192.05
+      "ending_balance": 183513.93
     },
     {
       "period": "2026-08",
@@ -429,7 +429,7 @@
       "account_id": "6100",
       "name": "Software Subscriptions",
       "account_type": "Expense",
-      "ending_balance": 109986.8
+      "ending_balance": 200073.32
     },
     {
       "period": "2026-09",
@@ -437,7 +437,7 @@
       "account_id": "6100",
       "name": "Software Subscriptions",
       "account_type": "Expense",
-      "ending_balance": 109438.77
+      "ending_balance": 197860.8
     },
     {
       "period": "2026-08",
@@ -445,7 +445,7 @@
       "account_id": "6110",
       "name": "Cloud Hosting",
       "account_type": "Expense",
-      "ending_balance": 284158.28
+      "ending_balance": 201699.49
     },
     {
       "period": "2026-09",
@@ -453,7 +453,7 @@
       "account_id": "6110",
       "name": "Cloud Hosting",
       "account_type": "Expense",
-      "ending_balance": 283596.04
+      "ending_balance": 202896.15
     },
     {
       "period": "2026-08",
@@ -461,7 +461,7 @@
       "account_id": "6200",
       "name": "Marketing & Advertising",
       "account_type": "Expense",
-      "ending_balance": 268552.19
+      "ending_balance": 265338.01
     },
     {
       "period": "2026-09",
@@ -469,7 +469,7 @@
       "account_id": "6200",
       "name": "Marketing & Advertising",
       "account_type": "Expense",
-      "ending_balance": 346329.08
+      "ending_balance": 267397.33
     },
     {
       "period": "2026-08",
@@ -477,7 +477,7 @@
       "account_id": "6300",
       "name": "Travel",
       "account_type": "Expense",
-      "ending_balance": 54104.32
+      "ending_balance": 53110.58
     },
     {
       "period": "2026-09",
@@ -485,7 +485,7 @@
       "account_id": "6300",
       "name": "Travel",
       "account_type": "Expense",
-      "ending_balance": 53939.67
+      "ending_balance": 123378.14
     },
     {
       "period": "2026-08",
@@ -493,7 +493,7 @@
       "account_id": "6310",
       "name": "Meals & Entertainment",
       "account_type": "Expense",
-      "ending_balance": 24796.68
+      "ending_balance": 24501.08
     },
     {
       "period": "2026-09",
@@ -501,7 +501,7 @@
       "account_id": "6310",
       "name": "Meals & Entertainment",
       "account_type": "Expense",
-      "ending_balance": 94970.68
+      "ending_balance": 24868.59
     },
     {
       "period": "2026-08",
@@ -509,7 +509,7 @@
       "account_id": "6400",
       "name": "Rent & Facilities",
       "account_type": "Expense",
-      "ending_balance": 148091.11
+      "ending_balance": 149701.18
     },
     {
       "period": "2026-09",
@@ -517,7 +517,7 @@
       "account_id": "6400",
       "name": "Rent & Facilities",
       "account_type": "Expense",
-      "ending_balance": 147805.46
+      "ending_balance": 148134.97
     },
     {
       "period": "2026-08",
@@ -525,7 +525,7 @@
       "account_id": "6500",
       "name": "Professional Fees",
       "account_type": "Expense",
-      "ending_balance": 97832.08
+      "ending_balance": 96781.76
     },
     {
       "period": "2026-09",
@@ -533,7 +533,7 @@
       "account_id": "6500",
       "name": "Professional Fees",
       "account_type": "Expense",
-      "ending_balance": 97180.55
+      "ending_balance": 98521.32
     },
     {
       "period": "2026-08",
@@ -541,7 +541,7 @@
       "account_id": "6600",
       "name": "Recruiting",
       "account_type": "Expense",
-      "ending_balance": 100014.91
+      "ending_balance": 45067.01
     },
     {
       "period": "2026-09",
@@ -549,7 +549,7 @@
       "account_id": "6600",
       "name": "Recruiting",
       "account_type": "Expense",
-      "ending_balance": 100118.48
+      "ending_balance": 44500.43
     },
     {
       "period": "2026-08",
@@ -557,7 +557,7 @@
       "account_id": "6700",
       "name": "Depreciation Expense",
       "account_type": "Expense",
-      "ending_balance": 176086.61
+      "ending_balance": 86382.91
     },
     {
       "period": "2026-09",
@@ -565,7 +565,7 @@
       "account_id": "6700",
       "name": "Depreciation Expense",
       "account_type": "Expense",
-      "ending_balance": 175115.85
+      "ending_balance": 85693.34
     },
     {
       "period": "2026-08",
@@ -573,7 +573,7 @@
       "account_id": "6800",
       "name": "Training & Development",
       "account_type": "Expense",
-      "ending_balance": 20472.52
+      "ending_balance": 20878.9
     },
     {
       "period": "2026-09",
@@ -581,7 +581,7 @@
       "account_id": "6800",
       "name": "Training & Development",
       "account_type": "Expense",
-      "ending_balance": 20717.3
+      "ending_balance": 20405.7
     },
     {
       "period": "2026-08",
@@ -589,7 +589,7 @@
       "account_id": "6900",
       "name": "Office Supplies",
       "account_type": "Expense",
-      "ending_balance": 123852.33
+      "ending_balance": 133649.54
     },
     {
       "period": "2026-09",
@@ -597,7 +597,7 @@
       "account_id": "6900",
       "name": "Office Supplies",
       "account_type": "Expense",
-      "ending_balance": 123613.78
+      "ending_balance": 133797.7
     },
     {
       "period": "2026-08",
@@ -605,7 +605,7 @@
       "account_id": "6950",
       "name": "Insurance",
       "account_type": "Expense",
-      "ending_balance": 40089.17
+      "ending_balance": 40583.39
     },
     {
       "period": "2026-09",
@@ -613,7 +613,7 @@
       "account_id": "6950",
       "name": "Insurance",
       "account_type": "Expense",
-      "ending_balance": 39825.2
+      "ending_balance": 40121.79
     },
     {
       "period": "2026-08",
@@ -621,7 +621,7 @@
       "account_id": "7000",
       "name": "Bad Debt Expense",
       "account_type": "Expense",
-      "ending_balance": 17427.89
+      "ending_balance": 17077.89
     },
     {
       "period": "2026-09",
@@ -629,7 +629,7 @@
       "account_id": "7000",
       "name": "Bad Debt Expense",
       "account_type": "Expense",
-      "ending_balance": 17125.34
+      "ending_balance": 17380.71
     },
     {
       "period": "2026-08",
@@ -637,7 +637,7 @@
       "account_id": "7100",
       "name": "Bank Fees",
       "account_type": "Expense",
-      "ending_balance": 9270.38
+      "ending_balance": 9251.15
     },
     {
       "period": "2026-09",
@@ -645,7 +645,7 @@
       "account_id": "7100",
       "name": "Bank Fees",
       "account_type": "Expense",
-      "ending_balance": 9105.18
+      "ending_balance": 9216.26
     }
   ],
   "subledger": [
@@ -655,9 +655,9 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-03",
-      "party_id": "C-100",
-      "memo": "Invoice Cedar Analytics \u2014 subscription / usage",
-      "amount": 504841.99,
+      "party_id": "C-101",
+      "memo": "Invoice Helios Retail Group \u2014 subscription / usage",
+      "amount": 668679.06,
       "source_system": "Billing",
       "entry_type": "ar_invoice"
     },
@@ -669,7 +669,7 @@
       "txn_date": "2026-09-04",
       "party_id": "V-203",
       "memo": "Vendor bill \u2014 Orbit Travel Desk",
-      "amount": -198892.56,
+      "amount": -244851.85,
       "source_system": "ERP",
       "entry_type": "ap_bill"
     },
@@ -679,9 +679,9 @@
       "entity": "ND-US",
       "account_id": "5000",
       "txn_date": "2026-09-05",
-      "party_id": "V-200",
+      "party_id": "V-205",
       "memo": "Cost of Subscription \u2014 period activity",
-      "amount": 140833.38,
+      "amount": 186965.41,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -691,9 +691,9 @@
       "entity": "ND-US",
       "account_id": "5100",
       "txn_date": "2026-09-05",
-      "party_id": "V-201",
+      "party_id": "V-207",
       "memo": "Cost of Usage \u2014 period activity",
-      "amount": 73533.89,
+      "amount": 91561.47,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -703,9 +703,9 @@
       "entity": "ND-US",
       "account_id": "5200",
       "txn_date": "2026-09-05",
-      "party_id": "V-203",
+      "party_id": "V-207",
       "memo": "Cost of Services Delivery \u2014 period activity",
-      "amount": 74375.17,
+      "amount": 63927.87,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -717,7 +717,7 @@
       "txn_date": "2026-09-05",
       "party_id": null,
       "memo": "Salaries & Wages \u2014 period activity",
-      "amount": 448705.2,
+      "amount": 367875.9,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -729,7 +729,7 @@
       "txn_date": "2026-09-05",
       "party_id": null,
       "memo": "Employee Benefits \u2014 period activity",
-      "amount": 71783.02,
+      "amount": 64473.5,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -739,9 +739,9 @@
       "entity": "ND-US",
       "account_id": "6020",
       "txn_date": "2026-09-05",
-      "party_id": "V-200",
+      "party_id": "V-201",
       "memo": "Contractors \u2014 period activity",
-      "amount": 63701.12,
+      "amount": 51679.36,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -753,7 +753,7 @@
       "txn_date": "2026-09-05",
       "party_id": "V-203",
       "memo": "Software Subscriptions \u2014 period activity",
-      "amount": 33967.28,
+      "amount": 32023.92,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -763,9 +763,9 @@
       "entity": "ND-US",
       "account_id": "6110",
       "txn_date": "2026-09-05",
-      "party_id": "V-206",
+      "party_id": "V-205",
       "memo": "Cloud Hosting \u2014 period activity",
-      "amount": 39636.86,
+      "amount": 61812.57,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -775,9 +775,9 @@
       "entity": "ND-US",
       "account_id": "6200",
       "txn_date": "2026-09-05",
-      "party_id": "V-207",
+      "party_id": "V-201",
       "memo": "Marketing & Advertising \u2014 period activity",
-      "amount": 69586.87,
+      "amount": 105010.17,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -787,9 +787,9 @@
       "entity": "ND-US",
       "account_id": "6300",
       "txn_date": "2026-09-05",
-      "party_id": "V-206",
+      "party_id": "V-201",
       "memo": "Travel \u2014 period activity",
-      "amount": 17730.47,
+      "amount": 12267.28,
       "source_system": "Expense Tool",
       "entry_type": "expense_detail"
     },
@@ -799,9 +799,9 @@
       "entity": "ND-US",
       "account_id": "6310",
       "txn_date": "2026-09-05",
-      "party_id": "V-200",
+      "party_id": "V-205",
       "memo": "Meals & Entertainment \u2014 period activity",
-      "amount": 13497.93,
+      "amount": 10311.58,
       "source_system": "Expense Tool",
       "entry_type": "expense_detail"
     },
@@ -811,9 +811,9 @@
       "entity": "ND-US",
       "account_id": "6400",
       "txn_date": "2026-09-05",
-      "party_id": "V-203",
+      "party_id": "V-204",
       "memo": "Rent & Facilities \u2014 period activity",
-      "amount": 55599.68,
+      "amount": 47196.22,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -825,7 +825,7 @@
       "txn_date": "2026-09-05",
       "party_id": "V-205",
       "memo": "Professional Fees \u2014 period activity",
-      "amount": 38200.83,
+      "amount": 39117.04,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -835,9 +835,9 @@
       "entity": "ND-US",
       "account_id": "6600",
       "txn_date": "2026-09-05",
-      "party_id": "V-201",
+      "party_id": "V-202",
       "memo": "Recruiting \u2014 period activity",
-      "amount": 18303.36,
+      "amount": 16620.04,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -847,9 +847,9 @@
       "entity": "ND-US",
       "account_id": "6700",
       "txn_date": "2026-09-05",
-      "party_id": "V-206",
+      "party_id": "V-202",
       "memo": "Depreciation Expense \u2014 period activity",
-      "amount": 29928.28,
+      "amount": 27002.11,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -861,7 +861,7 @@
       "txn_date": "2026-09-05",
       "party_id": "V-205",
       "memo": "Training & Development \u2014 period activity",
-      "amount": 10811.83,
+      "amount": 10702.02,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -871,9 +871,9 @@
       "entity": "ND-US",
       "account_id": "6900",
       "txn_date": "2026-09-05",
-      "party_id": "V-206",
+      "party_id": "V-204",
       "memo": "Office Supplies \u2014 period activity",
-      "amount": 6084.25,
+      "amount": 5754.16,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -883,9 +883,9 @@
       "entity": "ND-US",
       "account_id": "6950",
       "txn_date": "2026-09-05",
-      "party_id": "V-204",
+      "party_id": "V-207",
       "memo": "Insurance \u2014 period activity",
-      "amount": 17592.02,
+      "amount": 11586.58,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -895,9 +895,9 @@
       "entity": "ND-US",
       "account_id": "7000",
       "txn_date": "2026-09-05",
-      "party_id": "V-202",
+      "party_id": "V-200",
       "memo": "Bad Debt Expense \u2014 period activity",
-      "amount": 9212.82,
+      "amount": 8102.54,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -909,7 +909,7 @@
       "txn_date": "2026-09-05",
       "party_id": "V-200",
       "memo": "Bank Fees \u2014 period activity",
-      "amount": 4892.7,
+      "amount": 4541.56,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -919,9 +919,9 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-06",
-      "party_id": "C-104",
-      "memo": "Invoice Cascade Health Systems \u2014 subscription / usage",
-      "amount": 774342.86,
+      "party_id": "C-105",
+      "memo": "Invoice Meridian Media Co \u2014 subscription / usage",
+      "amount": 661504.66,
       "source_system": "Billing",
       "entry_type": "ar_invoice"
     },
@@ -931,9 +931,9 @@
       "entity": "ND-US",
       "account_id": "4000",
       "txn_date": "2026-09-06",
-      "party_id": "C-101",
+      "party_id": "C-106",
       "memo": "Subscription Revenue \u2014 recognized billing",
-      "amount": -682238.06,
+      "amount": -694659.32,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -943,9 +943,9 @@
       "entity": "ND-US",
       "account_id": "4100",
       "txn_date": "2026-09-06",
-      "party_id": "C-104",
+      "party_id": "C-105",
       "memo": "Usage Revenue \u2014 recognized billing",
-      "amount": -276585.93,
+      "amount": -198184.83,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -955,9 +955,9 @@
       "entity": "ND-US",
       "account_id": "4200",
       "txn_date": "2026-09-06",
-      "party_id": "C-104",
+      "party_id": "C-102",
       "memo": "Services Revenue \u2014 recognized billing",
-      "amount": -140969.5,
+      "amount": -149970.86,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -967,9 +967,9 @@
       "entity": "ND-US",
       "account_id": "4300",
       "txn_date": "2026-09-06",
-      "party_id": "C-103",
+      "party_id": "C-100",
       "memo": "Other Revenue \u2014 recognized billing",
-      "amount": -31355.15,
+      "amount": -34802.48,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -981,9 +981,21 @@
       "txn_date": "2026-09-09",
       "party_id": "V-204",
       "memo": "Vendor bill \u2014 Prime Temp Staffing",
-      "amount": -293796.35,
+      "amount": -215629.15,
       "source_system": "ERP",
       "entry_type": "ap_bill"
+    },
+    {
+      "txn_id": "APP-LICENSE-2026-US-2026-09",
+      "period": "2026-09",
+      "entity": "ND-US",
+      "account_id": "6100",
+      "txn_date": "2026-09-09",
+      "party_id": "V-207",
+      "memo": "Annual application license renewal \u2014 APP-LICENSE-2026-US",
+      "amount": 60000.0,
+      "source_system": "ERP",
+      "entry_type": "expense_detail"
     },
     {
       "txn_id": "AR-INV-ND-US-2026-09-003",
@@ -991,35 +1003,11 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-09",
-      "party_id": "C-103",
-      "memo": "Invoice Blue Harbor Logistics \u2014 subscription / usage",
-      "amount": 768085.4,
+      "party_id": "C-104",
+      "memo": "Invoice Cascade Health Systems \u2014 subscription / usage",
+      "amount": 568983.18,
       "source_system": "Billing",
       "entry_type": "ar_invoice"
-    },
-    {
-      "txn_id": "INS-ANNUAL-2026-US-2026-09",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6700",
-      "txn_date": "2026-09-09",
-      "party_id": "V-204",
-      "memo": "Annual equipment support contract renewal 2026",
-      "amount": 81000.0,
-      "source_system": "ERP",
-      "entry_type": "expense_detail"
-    },
-    {
-      "txn_id": "HIRING-SURGE-2026-Q1-2026-09",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6600",
-      "txn_date": "2026-09-10",
-      "party_id": "V-206",
-      "memo": "Hiring surge recruiting fees \u2014 HIRING-SURGE-2026-Q1",
-      "amount": 55000.0,
-      "source_system": "HRIS",
-      "entry_type": "expense_detail"
     },
     {
       "txn_id": "AR-PAY-ND-US-2026-09-001",
@@ -1027,9 +1015,9 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-11",
-      "party_id": "C-101",
-      "memo": "Payment from Helios Retail Group",
-      "amount": -481561.77,
+      "party_id": "C-103",
+      "memo": "Payment from Blue Harbor Logistics",
+      "amount": -463182.86,
       "source_system": "Billing",
       "entry_type": "ar_payment"
     },
@@ -1039,9 +1027,9 @@
       "entity": "ND-US",
       "account_id": "5000",
       "txn_date": "2026-09-11",
-      "party_id": "V-202",
+      "party_id": "V-207",
       "memo": "Cost of Subscription \u2014 period activity",
-      "amount": 172642.47,
+      "amount": 156445.95,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1051,9 +1039,9 @@
       "entity": "ND-US",
       "account_id": "5100",
       "txn_date": "2026-09-11",
-      "party_id": "V-202",
+      "party_id": "V-201",
       "memo": "Cost of Usage \u2014 period activity",
-      "amount": 67415.04,
+      "amount": 55209.67,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1063,9 +1051,9 @@
       "entity": "ND-US",
       "account_id": "5200",
       "txn_date": "2026-09-11",
-      "party_id": "V-205",
+      "party_id": "V-201",
       "memo": "Cost of Services Delivery \u2014 period activity",
-      "amount": 45587.71,
+      "amount": 49735.42,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1077,7 +1065,7 @@
       "txn_date": "2026-09-11",
       "party_id": null,
       "memo": "Salaries & Wages \u2014 period activity",
-      "amount": 377117.55,
+      "amount": 343622.95,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1089,7 +1077,7 @@
       "txn_date": "2026-09-11",
       "party_id": null,
       "memo": "Employee Benefits \u2014 period activity",
-      "amount": 100239.89,
+      "amount": 74323.62,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1099,9 +1087,9 @@
       "entity": "ND-US",
       "account_id": "6020",
       "txn_date": "2026-09-11",
-      "party_id": "V-201",
+      "party_id": "V-202",
       "memo": "Contractors \u2014 period activity",
-      "amount": 70507.23,
+      "amount": 49548.67,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1111,9 +1099,9 @@
       "entity": "ND-US",
       "account_id": "6100",
       "txn_date": "2026-09-11",
-      "party_id": "V-205",
+      "party_id": "V-204",
       "memo": "Software Subscriptions \u2014 period activity",
-      "amount": 38243.96,
+      "amount": 33176.7,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1125,7 +1113,7 @@
       "txn_date": "2026-09-11",
       "party_id": "V-207",
       "memo": "Cloud Hosting \u2014 period activity",
-      "amount": 33013.65,
+      "amount": 62523.51,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1135,9 +1123,9 @@
       "entity": "ND-US",
       "account_id": "6200",
       "txn_date": "2026-09-11",
-      "party_id": "V-200",
+      "party_id": "V-202",
       "memo": "Marketing & Advertising \u2014 period activity",
-      "amount": 83831.53,
+      "amount": 80028.25,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1147,9 +1135,9 @@
       "entity": "ND-US",
       "account_id": "6300",
       "txn_date": "2026-09-11",
-      "party_id": "V-207",
+      "party_id": "V-202",
       "memo": "Travel \u2014 period activity",
-      "amount": 19188.03,
+      "amount": 22326.19,
       "source_system": "Expense Tool",
       "entry_type": "expense_detail"
     },
@@ -1159,9 +1147,9 @@
       "entity": "ND-US",
       "account_id": "6310",
       "txn_date": "2026-09-11",
-      "party_id": "V-201",
+      "party_id": "V-207",
       "memo": "Meals & Entertainment \u2014 period activity",
-      "amount": 11472.75,
+      "amount": 14557.01,
       "source_system": "Expense Tool",
       "entry_type": "expense_detail"
     },
@@ -1171,9 +1159,9 @@
       "entity": "ND-US",
       "account_id": "6400",
       "txn_date": "2026-09-11",
-      "party_id": "V-204",
+      "party_id": "V-205",
       "memo": "Rent & Facilities \u2014 period activity",
-      "amount": 55622.68,
+      "amount": 49240.86,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1183,9 +1171,9 @@
       "entity": "ND-US",
       "account_id": "6500",
       "txn_date": "2026-09-11",
-      "party_id": "V-206",
+      "party_id": "V-207",
       "memo": "Professional Fees \u2014 period activity",
-      "amount": 32330.26,
+      "amount": 33168.65,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1195,9 +1183,9 @@
       "entity": "ND-US",
       "account_id": "6600",
       "txn_date": "2026-09-11",
-      "party_id": "V-203",
+      "party_id": "V-204",
       "memo": "Recruiting \u2014 period activity",
-      "amount": 14478.55,
+      "amount": 16569.45,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1207,9 +1195,9 @@
       "entity": "ND-US",
       "account_id": "6700",
       "txn_date": "2026-09-11",
-      "party_id": "V-207",
+      "party_id": "V-204",
       "memo": "Depreciation Expense \u2014 period activity",
-      "amount": 29514.78,
+      "amount": 31412.28,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1219,9 +1207,9 @@
       "entity": "ND-US",
       "account_id": "6800",
       "txn_date": "2026-09-11",
-      "party_id": "V-207",
+      "party_id": "V-206",
       "memo": "Training & Development \u2014 period activity",
-      "amount": 9905.47,
+      "amount": 9703.68,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1231,9 +1219,9 @@
       "entity": "ND-US",
       "account_id": "6900",
       "txn_date": "2026-09-11",
-      "party_id": "V-207",
+      "party_id": "V-205",
       "memo": "Office Supplies \u2014 period activity",
-      "amount": 7529.53,
+      "amount": 8043.54,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1243,9 +1231,9 @@
       "entity": "ND-US",
       "account_id": "6950",
       "txn_date": "2026-09-11",
-      "party_id": "V-205",
+      "party_id": "V-200",
       "memo": "Insurance \u2014 period activity",
-      "amount": 22233.18,
+      "amount": 15168.38,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1255,9 +1243,9 @@
       "entity": "ND-US",
       "account_id": "7000",
       "txn_date": "2026-09-11",
-      "party_id": "V-204",
+      "party_id": "V-201",
       "memo": "Bad Debt Expense \u2014 period activity",
-      "amount": 7912.52,
+      "amount": 9278.17,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1267,9 +1255,9 @@
       "entity": "ND-US",
       "account_id": "7100",
       "txn_date": "2026-09-11",
-      "party_id": "V-202",
+      "party_id": "V-201",
       "memo": "Bank Fees \u2014 period activity",
-      "amount": 4212.48,
+      "amount": 4674.7,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1281,7 +1269,7 @@
       "txn_date": "2026-09-11",
       "party_id": "C-105",
       "memo": "Subscription Revenue \u2014 recognized billing",
-      "amount": -694833.53,
+      "amount": -828302.21,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1291,9 +1279,9 @@
       "entity": "ND-US",
       "account_id": "4100",
       "txn_date": "2026-09-11",
-      "party_id": "C-101",
+      "party_id": "C-102",
       "memo": "Usage Revenue \u2014 recognized billing",
-      "amount": -215382.2,
+      "amount": -246005.05,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1305,7 +1293,7 @@
       "txn_date": "2026-09-11",
       "party_id": "C-106",
       "memo": "Services Revenue \u2014 recognized billing",
-      "amount": -149752.24,
+      "amount": -138981.11,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1315,9 +1303,9 @@
       "entity": "ND-US",
       "account_id": "4300",
       "txn_date": "2026-09-11",
-      "party_id": "C-102",
+      "party_id": "C-104",
       "memo": "Other Revenue \u2014 recognized billing",
-      "amount": -32218.17,
+      "amount": -28738.25,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1327,23 +1315,11 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-12",
-      "party_id": "C-105",
-      "memo": "Invoice Meridian Media Co \u2014 subscription / usage",
-      "amount": 587948.06,
+      "party_id": "C-101",
+      "memo": "Invoice Helios Retail Group \u2014 subscription / usage",
+      "amount": 469942.61,
       "source_system": "Billing",
       "entry_type": "ar_invoice"
-    },
-    {
-      "txn_id": "CONF-2026-ANNUAL-01",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6200",
-      "txn_date": "2026-09-13",
-      "party_id": "V-205",
-      "memo": "Annual customer conference \u2014 venue & production (CONF-2026-ANNUAL)",
-      "amount": 37500.0,
-      "source_system": "ERP",
-      "entry_type": "expense_detail"
     },
     {
       "txn_id": "AP-BILL-ND-US-2026-09-003",
@@ -1353,21 +1329,9 @@
       "txn_date": "2026-09-14",
       "party_id": "V-206",
       "memo": "Vendor bill \u2014 Cobalt Recruiting",
-      "amount": -239178.1,
+      "amount": -217902.85,
       "source_system": "ERP",
       "entry_type": "ap_bill"
-    },
-    {
-      "txn_id": "CONF-2026-ANNUAL-02",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6200",
-      "txn_date": "2026-09-14",
-      "party_id": "V-205",
-      "memo": "Annual customer conference \u2014 media buy (CONF-2026-ANNUAL)",
-      "amount": 37500.0,
-      "source_system": "ERP",
-      "entry_type": "expense_detail"
     },
     {
       "txn_id": "AR-INV-ND-US-2026-09-005",
@@ -1375,9 +1339,9 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-15",
-      "party_id": "C-102",
-      "memo": "Invoice Atlas Manufacturing \u2014 subscription / usage",
-      "amount": 605460.52,
+      "party_id": "C-103",
+      "memo": "Invoice Blue Harbor Logistics \u2014 subscription / usage",
+      "amount": 828481.25,
       "source_system": "Billing",
       "entry_type": "ar_invoice"
     },
@@ -1387,21 +1351,21 @@
       "entity": "ND-US",
       "account_id": "1100",
       "txn_date": "2026-09-15",
-      "party_id": "C-105",
-      "memo": "Payment from Meridian Media Co",
-      "amount": -328607.94,
+      "party_id": "C-102",
+      "memo": "Payment from Atlas Manufacturing",
+      "amount": -336214.83,
       "source_system": "Billing",
       "entry_type": "ar_payment"
     },
     {
-      "txn_id": "INS-RESIDUAL-UNMATCHED-2026-09",
+      "txn_id": "APP-RESIDUAL-UNMATCHED-2026-09",
       "period": "2026-09",
       "entity": "ND-US",
-      "account_id": "6700",
-      "txn_date": "2026-09-15",
-      "party_id": "V-204",
+      "account_id": "6100",
+      "txn_date": "2026-09-16",
+      "party_id": "V-207",
       "memo": "Vendor invoice \u2014 no PO / no matching contract reference",
-      "amount": 9000.0,
+      "amount": 30000.0,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1411,9 +1375,9 @@
       "entity": "ND-US",
       "account_id": "4000",
       "txn_date": "2026-09-16",
-      "party_id": "C-100",
+      "party_id": "C-102",
       "memo": "Subscription Revenue \u2014 recognized billing",
-      "amount": -751248.8,
+      "amount": -595982.43,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1423,9 +1387,9 @@
       "entity": "ND-US",
       "account_id": "4100",
       "txn_date": "2026-09-16",
-      "party_id": "C-100",
+      "party_id": "C-101",
       "memo": "Usage Revenue \u2014 recognized billing",
-      "amount": -216536.23,
+      "amount": -265155.38,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1435,9 +1399,9 @@
       "entity": "ND-US",
       "account_id": "4200",
       "txn_date": "2026-09-16",
-      "party_id": "C-100",
+      "party_id": "C-105",
       "memo": "Services Revenue \u2014 recognized billing",
-      "amount": -184701.92,
+      "amount": -184750.44,
       "source_system": "Billing",
       "entry_type": "revenue_detail"
     },
@@ -1447,9 +1411,9 @@
       "entity": "ND-US",
       "account_id": "5000",
       "txn_date": "2026-09-17",
-      "party_id": "V-203",
+      "party_id": "V-200",
       "memo": "Cost of Subscription \u2014 period activity",
-      "amount": 163213.65,
+      "amount": 134948.42,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1459,9 +1423,9 @@
       "entity": "ND-US",
       "account_id": "5100",
       "txn_date": "2026-09-17",
-      "party_id": "V-204",
+      "party_id": "V-202",
       "memo": "Cost of Usage \u2014 period activity",
-      "amount": 66844.6,
+      "amount": 58100.42,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1471,9 +1435,9 @@
       "entity": "ND-US",
       "account_id": "5200",
       "txn_date": "2026-09-17",
-      "party_id": "V-206",
+      "party_id": "V-202",
       "memo": "Cost of Services Delivery \u2014 period activity",
-      "amount": 44807.26,
+      "amount": 53606.51,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1485,7 +1449,7 @@
       "txn_date": "2026-09-17",
       "party_id": null,
       "memo": "Salaries & Wages \u2014 period activity",
-      "amount": 311701.83,
+      "amount": 403796.0,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1497,7 +1461,7 @@
       "txn_date": "2026-09-17",
       "party_id": null,
       "memo": "Employee Benefits \u2014 period activity",
-      "amount": 66520.28,
+      "amount": 100741.19,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1507,9 +1471,9 @@
       "entity": "ND-US",
       "account_id": "6020",
       "txn_date": "2026-09-17",
-      "party_id": "V-203",
+      "party_id": "V-204",
       "memo": "Contractors \u2014 period activity",
-      "amount": 50983.7,
+      "amount": 82285.9,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1521,7 +1485,7 @@
       "txn_date": "2026-09-17",
       "party_id": "V-206",
       "memo": "Software Subscriptions \u2014 period activity",
-      "amount": 37227.53,
+      "amount": 42660.18,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1533,7 +1497,7 @@
       "txn_date": "2026-09-17",
       "party_id": "V-200",
       "memo": "Cloud Hosting \u2014 period activity",
-      "amount": 40945.53,
+      "amount": 78560.07,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1543,9 +1507,9 @@
       "entity": "ND-US",
       "account_id": "6200",
       "txn_date": "2026-09-17",
-      "party_id": "V-201",
+      "party_id": "V-204",
       "memo": "Marketing & Advertising \u2014 period activity",
-      "amount": 117910.68,
+      "amount": 82358.91,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1555,9 +1519,9 @@
       "entity": "ND-US",
       "account_id": "6300",
       "txn_date": "2026-09-17",
-      "party_id": "V-201",
+      "party_id": "V-204",
       "memo": "Travel \u2014 period activity",
-      "amount": 17021.17,
+      "amount": 18784.67,
       "source_system": "Expense Tool",
       "entry_type": "expense_detail"
     },
@@ -1567,9 +1531,9 @@
       "entity": "ND-US",
       "account_id": "6400",
       "txn_date": "2026-09-17",
-      "party_id": "V-206",
+      "party_id": "V-207",
       "memo": "Rent & Facilities \u2014 period activity",
-      "amount": 36583.1,
+      "amount": 51697.89,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1581,7 +1545,7 @@
       "txn_date": "2026-09-17",
       "party_id": "V-200",
       "memo": "Professional Fees \u2014 period activity",
-      "amount": 26649.46,
+      "amount": 26235.63,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1591,9 +1555,9 @@
       "entity": "ND-US",
       "account_id": "6600",
       "txn_date": "2026-09-17",
-      "party_id": "V-204",
+      "party_id": "V-205",
       "memo": "Recruiting \u2014 period activity",
-      "amount": 12336.57,
+      "amount": 11310.94,
       "source_system": "HRIS",
       "entry_type": "expense_detail"
     },
@@ -1603,9 +1567,21 @@
       "entity": "ND-US",
       "account_id": "6700",
       "txn_date": "2026-09-17",
-      "party_id": "V-201",
+      "party_id": "V-205",
       "memo": "Depreciation Expense \u2014 period activity",
-      "amount": 25672.79,
+      "amount": 27278.95,
+      "source_system": "ERP",
+      "entry_type": "expense_detail"
+    },
+    {
+      "txn_id": "EXP-6950-ND-US-2026-09-003",
+      "period": "2026-09",
+      "entity": "ND-US",
+      "account_id": "6950",
+      "txn_date": "2026-09-17",
+      "party_id": "V-201",
+      "memo": "Insurance \u2014 period activity",
+      "amount": 13366.83,
       "source_system": "ERP",
       "entry_type": "expense_detail"
     },
@@ -1617,31 +1593,31 @@
       "txn_date": "2026-09-19",
       "party_id": "V-207",
       "memo": "Vendor bill \u2014 Parcel Softwares Ltd",
-      "amount": -292099.72,
+      "amount": -341513.82,
       "source_system": "ERP",
       "entry_type": "ap_bill"
     },
     {
-      "txn_id": "JE-MOVE-6010-2026-09",
+      "txn_id": "JE-RCL-HOLD-6000-2026-09",
       "period": "2026-09",
       "entity": "ND-US",
-      "account_id": "6010",
+      "account_id": "6000",
       "txn_date": "2026-09-19",
       "party_id": null,
-      "memo": "Cost center alignment per controller worksheet",
-      "amount": -110000.0,
+      "memo": "Reclass Salaries \u2192 Other Opex (holdout paired JE)",
+      "amount": -120000.0,
       "source_system": "ERP",
       "entry_type": "reclass"
     },
     {
-      "txn_id": "JE-MOVE-6900-2026-09",
+      "txn_id": "JE-RCL-HOLD-6900-2026-09",
       "period": "2026-09",
       "entity": "ND-US",
       "account_id": "6900",
       "txn_date": "2026-09-19",
       "party_id": null,
-      "memo": "Cost center alignment per controller worksheet",
-      "amount": 110000.0,
+      "memo": "Reclass Salaries \u2192 Other Opex (holdout paired JE)",
+      "amount": 120000.0,
       "source_system": "ERP",
       "entry_type": "reclass"
     },
@@ -1651,9 +1627,9 @@
       "entity": "ND-US",
       "account_id": "2100",
       "txn_date": "2026-09-21",
-      "party_id": "V-205",
+      "party_id": "V-206",
       "memo": "Month-end operating accrual",
-      "amount": -210052.14,
+      "amount": -201244.31,
       "source_system": "ERP",
       "entry_type": "accrual"
     },
@@ -1665,7 +1641,7 @@
       "txn_date": "2026-09-21",
       "party_id": null,
       "memo": "Month-end payroll accrual",
-      "amount": -125808.33,
+      "amount": -144417.08,
       "source_system": "HRIS",
       "entry_type": "accrual"
     },
@@ -1675,9 +1651,9 @@
       "entity": "ND-US",
       "account_id": "2100",
       "txn_date": "2026-09-22",
-      "party_id": "V-207",
+      "party_id": "V-200",
       "memo": "Month-end operating accrual",
-      "amount": -134456.71,
+      "amount": -130502.98,
       "source_system": "ERP",
       "entry_type": "accrual"
     },
@@ -1689,7 +1665,7 @@
       "txn_date": "2026-09-22",
       "party_id": null,
       "memo": "Month-end payroll accrual",
-      "amount": -126512.06,
+      "amount": -115840.65,
       "source_system": "HRIS",
       "entry_type": "accrual"
     },
@@ -1699,9 +1675,9 @@
       "entity": "ND-US",
       "account_id": "2100",
       "txn_date": "2026-09-23",
-      "party_id": "V-200",
+      "party_id": "V-201",
       "memo": "Month-end operating accrual",
-      "amount": -146747.5,
+      "amount": -159115.86,
       "source_system": "ERP",
       "entry_type": "accrual"
     },
@@ -1713,39 +1689,15 @@
       "txn_date": "2026-09-23",
       "party_id": null,
       "memo": "Month-end payroll accrual",
-      "amount": -102898.23,
+      "amount": -97666.49,
       "source_system": "HRIS",
       "entry_type": "accrual"
     },
     {
-      "txn_id": "ACCR-CLOUD-6110-BASE-2026-09",
+      "txn_id": "JE-MANUAL-EMPTY",
       "period": "2026-09",
       "entity": "ND-US",
-      "account_id": "6110",
-      "txn_date": "2026-09-23",
-      "party_id": "V-200",
-      "memo": "ACCR-CLOUD-6110 Cloud Hosting month-end accrual",
-      "amount": 85000.0,
-      "source_system": "ERP",
-      "entry_type": "accrual"
-    },
-    {
-      "txn_id": "ACCR-CLOUD-6110-DUP-2026-09",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6110",
-      "txn_date": "2026-09-23",
-      "party_id": "V-200",
-      "memo": "ACCR-CLOUD-6110 Cloud Hosting month-end accrual",
-      "amount": 85000.0,
-      "source_system": "ERP",
-      "entry_type": "accrual"
-    },
-    {
-      "txn_id": "JE-MANUAL-BLANK",
-      "period": "2026-09",
-      "entity": "ND-US",
-      "account_id": "6310",
+      "account_id": "6300",
       "txn_date": "2026-09-28",
       "party_id": null,
       "memo": "",
@@ -1816,10 +1768,10 @@
       "account_name": "Cash",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 4806715.96,
-      "balance_b": 4879602.38,
-      "variance_amt": 72886.42,
-      "variance_pct": 0.0152,
+      "balance_a": 4803276.04,
+      "balance_b": 4917176.62,
+      "variance_amt": 113900.58,
+      "variance_pct": 0.0237,
       "over_threshold": false
     },
     {
@@ -1827,10 +1779,10 @@
       "account_name": "Accounts Receivable",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 2458575.14,
-      "balance_b": 2430509.12,
-      "variance_amt": -28066.02,
-      "variance_pct": -0.0114,
+      "balance_a": 2449917.47,
+      "balance_b": 2398193.07,
+      "variance_amt": -51724.4,
+      "variance_pct": -0.0211,
       "over_threshold": false
     },
     {
@@ -1838,10 +1790,10 @@
       "account_name": "Prepaid Expenses",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 437817.8,
-      "balance_b": 441545.21,
-      "variance_amt": 3727.41,
-      "variance_pct": 0.0085,
+      "balance_a": 438673.86,
+      "balance_b": 444536.21,
+      "variance_amt": 5862.35,
+      "variance_pct": 0.0134,
       "over_threshold": false
     },
     {
@@ -1849,10 +1801,10 @@
       "account_name": "Other Current Assets",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 240461.81,
-      "balance_b": 241007.42,
-      "variance_amt": 545.61,
-      "variance_pct": 0.0023,
+      "balance_a": 242352.85,
+      "balance_b": 242791.76,
+      "variance_amt": 438.91,
+      "variance_pct": 0.0018,
       "over_threshold": false
     },
     {
@@ -1860,10 +1812,10 @@
       "account_name": "Property Plant & Equipment",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 3889997.1,
-      "balance_b": 3942939.03,
-      "variance_amt": 52941.93,
-      "variance_pct": 0.0136,
+      "balance_a": 3905248.23,
+      "balance_b": 3907364.83,
+      "variance_amt": 2116.6,
+      "variance_pct": 0.0005,
       "over_threshold": false
     },
     {
@@ -1871,10 +1823,10 @@
       "account_name": "Accumulated Depreciation",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -1128027.81,
-      "balance_b": -1147051.88,
-      "variance_amt": -19024.07,
-      "variance_pct": 0.0169,
+      "balance_a": -1135510.52,
+      "balance_b": -1136603.14,
+      "variance_amt": -1092.62,
+      "variance_pct": 0.001,
       "over_threshold": false
     },
     {
@@ -1882,10 +1834,10 @@
       "account_name": "Intangible Assets",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 827098.58,
-      "balance_b": 841625.43,
-      "variance_amt": 14526.85,
-      "variance_pct": 0.0176,
+      "balance_a": 824672.13,
+      "balance_b": 830486.4,
+      "variance_amt": 5814.27,
+      "variance_pct": 0.0071,
       "over_threshold": false
     },
     {
@@ -1893,10 +1845,10 @@
       "account_name": "Accounts Payable",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -1018923.57,
-      "balance_b": -1023966.73,
-      "variance_amt": -5043.16,
-      "variance_pct": 0.0049,
+      "balance_a": -1033938.91,
+      "balance_b": -1019897.67,
+      "variance_amt": 14041.24,
+      "variance_pct": -0.0136,
       "over_threshold": false
     },
     {
@@ -1904,10 +1856,10 @@
       "account_name": "Accrued Expenses",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -484382.86,
-      "balance_b": -491256.35,
-      "variance_amt": -6873.49,
-      "variance_pct": 0.0142,
+      "balance_a": -491085.29,
+      "balance_b": -490863.15,
+      "variance_amt": 222.14,
+      "variance_pct": -0.0005,
       "over_threshold": false
     },
     {
@@ -1915,10 +1867,10 @@
       "account_name": "Accrued Payroll",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -358167.8,
-      "balance_b": -355218.62,
-      "variance_amt": 2949.18,
-      "variance_pct": -0.0082,
+      "balance_a": -358112.04,
+      "balance_b": -357924.22,
+      "variance_amt": 187.82,
+      "variance_pct": -0.0005,
       "over_threshold": false
     },
     {
@@ -1926,10 +1878,10 @@
       "account_name": "Deferred Revenue",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -1316945.62,
-      "balance_b": -1341863.67,
-      "variance_amt": -24918.05,
-      "variance_pct": 0.0189,
+      "balance_a": -1319053.47,
+      "balance_b": -1330077.54,
+      "variance_amt": -11024.07,
+      "variance_pct": 0.0084,
       "over_threshold": false
     },
     {
@@ -1937,10 +1889,10 @@
       "account_name": "Short-term Debt",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -289404.45,
-      "balance_b": -290190.78,
-      "variance_amt": -786.33,
-      "variance_pct": 0.0027,
+      "balance_a": -287919.24,
+      "balance_b": -289247.01,
+      "variance_amt": -1327.77,
+      "variance_pct": 0.0046,
       "over_threshold": false
     },
     {
@@ -1948,10 +1900,10 @@
       "account_name": "Long-term Debt",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -2058517.82,
-      "balance_b": -2059489.46,
-      "variance_amt": -971.64,
-      "variance_pct": 0.0005,
+      "balance_a": -2073539.04,
+      "balance_b": -2098902.68,
+      "variance_amt": -25363.64,
+      "variance_pct": 0.0122,
       "over_threshold": false
     },
     {
@@ -1959,10 +1911,10 @@
       "account_name": "Common Stock",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -115672.67,
-      "balance_b": -115665.93,
-      "variance_amt": 6.74,
-      "variance_pct": -0.0001,
+      "balance_a": -114804.71,
+      "balance_b": -116012.86,
+      "variance_amt": -1208.15,
+      "variance_pct": 0.0105,
       "over_threshold": false
     },
     {
@@ -1970,10 +1922,10 @@
       "account_name": "Additional Paid-in Capital",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -5263182.33,
-      "balance_b": -5214609.74,
-      "variance_amt": 48572.59,
-      "variance_pct": -0.0092,
+      "balance_a": -5171166.43,
+      "balance_b": -5226331.55,
+      "variance_amt": -55165.12,
+      "variance_pct": 0.0107,
       "over_threshold": false
     },
     {
@@ -1981,10 +1933,10 @@
       "account_name": "Retained Earnings",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -2524298.59,
-      "balance_b": -2550890.12,
-      "variance_amt": -26591.53,
-      "variance_pct": 0.0105,
+      "balance_a": -2558346.91,
+      "balance_b": -2568420.2,
+      "variance_amt": -10073.29,
+      "variance_pct": 0.0039,
       "over_threshold": false
     },
     {
@@ -1992,10 +1944,10 @@
       "account_name": "Subscription Revenue",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -2157540.08,
-      "balance_b": -2128320.39,
-      "variance_amt": 29219.69,
-      "variance_pct": -0.0135,
+      "balance_a": -2134632.3,
+      "balance_b": -2118943.96,
+      "variance_amt": 15688.34,
+      "variance_pct": -0.0073,
       "over_threshold": false
     },
     {
@@ -2003,10 +1955,10 @@
       "account_name": "Usage Revenue",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -715100.21,
-      "balance_b": -708504.36,
-      "variance_amt": 6595.85,
-      "variance_pct": -0.0092,
+      "balance_a": -719017.33,
+      "balance_b": -709345.26,
+      "variance_amt": 9672.07,
+      "variance_pct": -0.0135,
       "over_threshold": false
     },
     {
@@ -2014,10 +1966,10 @@
       "account_name": "Services Revenue",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -472768.8,
-      "balance_b": -475423.66,
-      "variance_amt": -2654.86,
-      "variance_pct": 0.0056,
+      "balance_a": -473043.81,
+      "balance_b": -473702.41,
+      "variance_amt": -658.6,
+      "variance_pct": 0.0014,
       "over_threshold": false
     },
     {
@@ -2025,10 +1977,10 @@
       "account_name": "Other Revenue",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": -64359.69,
-      "balance_b": -63573.32,
-      "variance_amt": 786.37,
-      "variance_pct": -0.0122,
+      "balance_a": -63300.63,
+      "balance_b": -63540.73,
+      "variance_amt": -240.1,
+      "variance_pct": 0.0038,
       "over_threshold": false
     },
     {
@@ -2036,10 +1988,10 @@
       "account_name": "Cost of Subscription",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 483333.3,
-      "balance_b": 476689.5,
-      "variance_amt": -6643.8,
-      "variance_pct": -0.0137,
+      "balance_a": 481619.86,
+      "balance_b": 478359.78,
+      "variance_amt": -3260.08,
+      "variance_pct": -0.0068,
       "over_threshold": false
     },
     {
@@ -2047,10 +1999,10 @@
       "account_name": "Cost of Usage",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 205890.9,
-      "balance_b": 207793.53,
-      "variance_amt": 1902.63,
-      "variance_pct": 0.0092,
+      "balance_a": 205712.91,
+      "balance_b": 204871.56,
+      "variance_amt": -841.35,
+      "variance_pct": -0.0041,
       "over_threshold": false
     },
     {
@@ -2058,10 +2010,10 @@
       "account_name": "Cost of Services Delivery",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 165433.28,
-      "balance_b": 164770.14,
-      "variance_amt": -663.14,
-      "variance_pct": -0.004,
+      "balance_a": 166857.81,
+      "balance_b": 167269.8,
+      "variance_amt": 411.99,
+      "variance_pct": 0.0025,
       "over_threshold": false
     },
     {
@@ -2069,10 +2021,10 @@
       "account_name": "Salaries & Wages",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 1122235.46,
-      "balance_b": 1137524.58,
-      "variance_amt": 15289.12,
-      "variance_pct": 0.0136,
+      "balance_a": 995419.3,
+      "balance_b": 995294.85,
+      "variance_amt": -124.45,
+      "variance_pct": -0.0001,
       "over_threshold": false
     },
     {
@@ -2080,10 +2032,10 @@
       "account_name": "Employee Benefits",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 129901.52,
-      "balance_b": 128543.19,
-      "variance_amt": -1358.33,
-      "variance_pct": -0.0105,
+      "balance_a": 239486.38,
+      "balance_b": 239538.31,
+      "variance_amt": 51.93,
+      "variance_pct": 0.0002,
       "over_threshold": false
     },
     {
@@ -2091,10 +2043,10 @@
       "account_name": "Contractors",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 185264.38,
-      "balance_b": 185192.05,
-      "variance_amt": -72.33,
-      "variance_pct": -0.0004,
+      "balance_a": 183767.3,
+      "balance_b": 183513.93,
+      "variance_amt": -253.37,
+      "variance_pct": -0.0014,
       "over_threshold": false
     },
     {
@@ -2102,10 +2054,10 @@
       "account_name": "Software Subscriptions",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 109986.8,
-      "balance_b": 109438.77,
-      "variance_amt": -548.03,
-      "variance_pct": -0.005,
+      "balance_a": 200073.32,
+      "balance_b": 197860.8,
+      "variance_amt": -2212.52,
+      "variance_pct": -0.0111,
       "over_threshold": false
     },
     {
@@ -2113,10 +2065,10 @@
       "account_name": "Cloud Hosting",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 284158.28,
-      "balance_b": 283596.04,
-      "variance_amt": -562.24,
-      "variance_pct": -0.002,
+      "balance_a": 201699.49,
+      "balance_b": 202896.15,
+      "variance_amt": 1196.66,
+      "variance_pct": 0.0059,
       "over_threshold": false
     },
     {
@@ -2124,43 +2076,43 @@
       "account_name": "Marketing & Advertising",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 268552.19,
-      "balance_b": 346329.08,
-      "variance_amt": 77776.89,
-      "variance_pct": 0.2896,
-      "over_threshold": true
+      "balance_a": 265338.01,
+      "balance_b": 267397.33,
+      "variance_amt": 2059.32,
+      "variance_pct": 0.0078,
+      "over_threshold": false
     },
     {
       "account_id": "6300",
       "account_name": "Travel",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 54104.32,
-      "balance_b": 53939.67,
-      "variance_amt": -164.65,
-      "variance_pct": -0.003,
-      "over_threshold": false
+      "balance_a": 53110.58,
+      "balance_b": 123378.14,
+      "variance_amt": 70267.56,
+      "variance_pct": 1.323,
+      "over_threshold": true
     },
     {
       "account_id": "6310",
       "account_name": "Meals & Entertainment",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 24796.68,
-      "balance_b": 94970.68,
-      "variance_amt": 70174.0,
-      "variance_pct": 2.83,
-      "over_threshold": true
+      "balance_a": 24501.08,
+      "balance_b": 24868.59,
+      "variance_amt": 367.51,
+      "variance_pct": 0.015,
+      "over_threshold": false
     },
     {
       "account_id": "6400",
       "account_name": "Rent & Facilities",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 148091.11,
-      "balance_b": 147805.46,
-      "variance_amt": -285.65,
-      "variance_pct": -0.0019,
+      "balance_a": 149701.18,
+      "balance_b": 148134.97,
+      "variance_amt": -1566.21,
+      "variance_pct": -0.0105,
       "over_threshold": false
     },
     {
@@ -2168,10 +2120,10 @@
       "account_name": "Professional Fees",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 97832.08,
-      "balance_b": 97180.55,
-      "variance_amt": -651.53,
-      "variance_pct": -0.0067,
+      "balance_a": 96781.76,
+      "balance_b": 98521.32,
+      "variance_amt": 1739.56,
+      "variance_pct": 0.018,
       "over_threshold": false
     },
     {
@@ -2179,10 +2131,10 @@
       "account_name": "Recruiting",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 100014.91,
-      "balance_b": 100118.48,
-      "variance_amt": 103.57,
-      "variance_pct": 0.001,
+      "balance_a": 45067.01,
+      "balance_b": 44500.43,
+      "variance_amt": -566.58,
+      "variance_pct": -0.0126,
       "over_threshold": false
     },
     {
@@ -2190,10 +2142,10 @@
       "account_name": "Depreciation Expense",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 176086.61,
-      "balance_b": 175115.85,
-      "variance_amt": -970.76,
-      "variance_pct": -0.0055,
+      "balance_a": 86382.91,
+      "balance_b": 85693.34,
+      "variance_amt": -689.57,
+      "variance_pct": -0.008,
       "over_threshold": false
     },
     {
@@ -2201,10 +2153,10 @@
       "account_name": "Training & Development",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 20472.52,
-      "balance_b": 20717.3,
-      "variance_amt": 244.78,
-      "variance_pct": 0.012,
+      "balance_a": 20878.9,
+      "balance_b": 20405.7,
+      "variance_amt": -473.2,
+      "variance_pct": -0.0227,
       "over_threshold": false
     },
     {
@@ -2212,10 +2164,10 @@
       "account_name": "Office Supplies",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 123852.33,
-      "balance_b": 123613.78,
-      "variance_amt": -238.55,
-      "variance_pct": -0.0019,
+      "balance_a": 133649.54,
+      "balance_b": 133797.7,
+      "variance_amt": 148.16,
+      "variance_pct": 0.0011,
       "over_threshold": false
     },
     {
@@ -2223,10 +2175,10 @@
       "account_name": "Insurance",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 40089.17,
-      "balance_b": 39825.2,
-      "variance_amt": -263.97,
-      "variance_pct": -0.0066,
+      "balance_a": 40583.39,
+      "balance_b": 40121.79,
+      "variance_amt": -461.6,
+      "variance_pct": -0.0114,
       "over_threshold": false
     },
     {
@@ -2234,10 +2186,10 @@
       "account_name": "Bad Debt Expense",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 17427.89,
-      "balance_b": 17125.34,
-      "variance_amt": -302.55,
-      "variance_pct": -0.0174,
+      "balance_a": 17077.89,
+      "balance_b": 17380.71,
+      "variance_amt": 302.82,
+      "variance_pct": 0.0177,
       "over_threshold": false
     },
     {
@@ -2245,163 +2197,103 @@
       "account_name": "Bank Fees",
       "period_a": "2026-08",
       "period_b": "2026-09",
-      "balance_a": 9270.38,
-      "balance_b": 9105.18,
-      "variance_amt": -165.2,
-      "variance_pct": -0.0178,
+      "balance_a": 9251.15,
+      "balance_b": 9216.26,
+      "variance_amt": -34.89,
+      "variance_pct": -0.0038,
       "over_threshold": false
     }
   ],
   "anomalies": [
     {
       "anomaly_id": "A1",
-      "account_id": "6110",
-      "entity": "ND-US",
-      "period": "2026-06",
+      "account_id": "6800",
+      "entity": "ND-EU",
+      "period": "2026-05",
       "amount": 85000.0,
       "kind": "duplicate_accrual",
       "expected_confidence": "high",
-      "explanation": "Duplicate Cloud Hosting accrual: baseline run-rate accrual ACCR-CLOUD-6110-BASE ($85,000) plus identical duplicate ACCR-CLOUD-6110-DUP ($85,000) for the same vendor/reference. The duplicate accounts for the full +$85,000 variance vs baseline; reverse ACCR-CLOUD-6110-DUP."
+      "explanation": "Duplicate Training & Development accrual (holdout)."
     },
     {
       "anomaly_id": "A2",
-      "account_id": "6020",
-      "entity": "ND-EU",
-      "period": "2026-07",
+      "account_id": "6000",
+      "entity": "ND-US",
+      "period": "2026-06",
       "amount": -120000.0,
       "kind": "opex_reclass",
       "expected_confidence": "high",
-      "explanation": "Opex reclass of $120,000 from Contractors (6020) to Professional Fees (6500) in ND-EU via paired JEs JE-RCL-6020 and JE-RCL-6500. Net zero to total opex; classification only."
+      "explanation": "Holdout reclass Salaries \u2192 Other Opex."
     },
     {
       "anomaly_id": "A2B",
-      "account_id": "6500",
-      "entity": "ND-EU",
-      "period": "2026-07",
+      "account_id": "6900",
+      "entity": "ND-US",
+      "period": "2026-06",
       "amount": 120000.0,
       "kind": "opex_reclass",
       "expected_confidence": "high",
-      "explanation": "Paired side of A2: Professional Fees increased $120,000 from Contractors reclass JE-RCL-6500 / JE-RCL-6020 in ND-EU."
+      "explanation": "Holdout paired Other Opex side."
     },
     {
       "anomaly_id": "A3",
-      "account_id": "4000",
-      "entity": "ND-US",
-      "period": "2026-06",
+      "account_id": "4100",
+      "entity": "ND-EU",
+      "period": "2026-07",
       "amount": -400000.0,
       "kind": "revenue_timing",
       "expected_confidence": "high",
-      "explanation": "Subscription Revenue pulled forward $400,000 at quarter-end even though contract CTR-4000-NDUS start date is 2026-07-01 (next quarter). Offsetting reversal posts the following month."
+      "explanation": "Holdout premature usage revenue recognition."
     },
     {
       "anomaly_id": "A3B",
-      "account_id": "4000",
-      "entity": "ND-US",
-      "period": "2026-07",
+      "account_id": "4100",
+      "entity": "ND-EU",
+      "period": "2026-08",
       "amount": 400000.0,
       "kind": "revenue_timing_offset",
       "expected_confidence": "high",
-      "explanation": "Offset side of A3: $400,000 Subscription Revenue reversal JE in the month after premature quarter-end recognition (JE-REV-TIMING-REV). TB returns to the normal monthly path."
+      "explanation": "Holdout usage revenue offset/reversal."
     },
     {
       "anomaly_id": "A4",
-      "account_id": "6310",
+      "account_id": "6300",
       "entity": "ND-US",
       "period": "2026-09",
       "amount": 70000.0,
       "kind": "unexplained",
       "expected_confidence": "low",
-      "explanation": "Unexplained +$70,000 on Meals & Entertainment (T&E) via manual JE JE-MANUAL-BLANK with blank description, no vendor, and no supporting detail. Agent must assign low confidence and send to human review."
+      "explanation": "Holdout blank manual JE on Travel."
     },
     {
       "anomaly_id": "B1",
       "account_id": "6200",
-      "entity": "ND-US",
+      "entity": "ND-EU",
       "period": "2026-09",
       "amount": 75000.0,
       "kind": "benign_conference",
       "expected_confidence": "high",
-      "explanation": "Benign threshold breach: annual customer conference spend $75,000 fully supported by labeled vendor invoices from Brightline Marketing (CONF-2026-ANNUAL)."
+      "explanation": "Holdout annual customer summit spend."
     },
     {
       "anomaly_id": "B2",
       "account_id": "6600",
-      "entity": "ND-US",
-      "period": "2026-03",
+      "entity": "ND-EU",
+      "period": "2026-02",
       "amount": 55000.0,
       "kind": "benign_hiring",
       "expected_confidence": "high",
-      "explanation": "Benign threshold breach: hiring-heavy month recruiting fees +$55,000 fully explained by Cobalt Recruiting invoices labeled HIRING-SURGE-2026-Q1."
+      "explanation": "Holdout staffing-ramp agency fees."
     },
     {
       "anomaly_id": "C1",
       "account_id": "6100",
-      "entity": "ND-EU",
-      "period": "2026-08",
+      "entity": "ND-US",
+      "period": "2026-07",
       "amount": 90000.0,
       "kind": "partial_software",
       "expected_confidence": "med",
-      "explanation": "Software Subscriptions ND-EU +~$90,000: $60,000 explained by annual license renewal SW-LICENSE-2026-EU; ~$30,000 residual invoice from a real vendor lacks PO/contract match \u2014 partial explanation (med)."
-    },
-    {
-      "anomaly_id": "H1",
-      "account_id": "6300",
-      "entity": "ND-EU",
-      "period": "2026-06",
-      "amount": 80500.0,
-      "kind": "near_duplicate_accrual",
-      "expected_confidence": "med",
-      "explanation": "Near-duplicate Travel accruals: same vendor, amounts $80,000 vs $80,500, different references \u2014 not an identical duplicate."
-    },
-    {
-      "anomaly_id": "H2",
-      "account_id": "6010",
-      "entity": "ND-US",
-      "period": "2026-07",
-      "amount": -110000.0,
-      "kind": "reclass_no_memo",
-      "expected_confidence": "med",
-      "explanation": "Benefits \u2192 Other Opex move of $110,000 via paired JEs with no 'reclass' language in the memo."
-    },
-    {
-      "anomaly_id": "H2B",
-      "account_id": "6900",
-      "entity": "ND-US",
-      "period": "2026-07",
-      "amount": 110000.0,
-      "kind": "reclass_no_memo",
-      "expected_confidence": "med",
-      "explanation": "Paired side of H2 (Other Opex)."
-    },
-    {
-      "anomaly_id": "H3",
-      "account_id": "6400",
-      "entity": "ND-EU",
-      "period": "2026-09",
-      "amount": 65000.0,
-      "kind": "vague_manual_je",
-      "expected_confidence": "low",
-      "explanation": "Manual JE +$65,000 with memo 'adjustment' and no vendor \u2014 not blank, so unsupported_je policy may not fire; still weak support."
-    },
-    {
-      "anomaly_id": "H4",
-      "account_id": "6700",
-      "entity": "ND-US",
-      "period": "2026-08",
-      "amount": 90000.0,
-      "kind": "partial_90_10",
-      "expected_confidence": "med",
-      "explanation": "Depreciation / support spend +$90,000: $81,000 (90%) annual support contract renewal supported; $9,000 (10%) residual unmatched."
-    },
-    {
-      "anomaly_id": "S1",
-      "account_id": "6950",
-      "entity": "ND-EU",
-      "period": "2026-05",
-      "amount": 4500.0,
-      "kind": "small_high_pct",
-      "expected_confidence": "high",
-      "explanation": "Misc operating expense MoM >10% but only +$4,500 \u2014 below dollar threshold; expected_flagged false under AND policy."
+      "explanation": "Holdout software partial explanation 60/30."
     }
   ],
   "note": "Planted anomalies A1\u2013A4, B1\u2013B2, C1 \u2014 see data/ANOMALIES.md."

@@ -56,6 +56,13 @@ EXPECTED_BREACHES = {
     ("ND-US", "6200", "2026-09"),
     ("ND-US", "6600", "2026-03"),
     ("ND-EU", "6100", "2026-08"),  # C1
+    # Hard variants (demo profile)
+    ("ND-EU", "6300", "2026-06"),  # H1 near-dup
+    ("ND-US", "6010", "2026-07"),  # H2
+    ("ND-US", "6900", "2026-07"),  # H2B
+    ("ND-EU", "6400", "2026-09"),  # H3
+    ("ND-US", "6700", "2026-08"),  # H4
+    # S1 (6950 ND-EU 2026-05) is intentionally NOT here: >10% but <$50k
 }
 
 

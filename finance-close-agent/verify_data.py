@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify clean Northwind Digital finance.db against slice-1 requirements."""
+"""Verify Northwind Digital finance.db (reconciliation + expected breach set)."""
 
 from __future__ import annotations
 
@@ -18,6 +18,10 @@ DETAIL_ACCOUNTS = {
     "2000",
     "2100",
     "2200",
+    "4000",
+    "4100",
+    "4200",
+    "4300",
     "5000",
     "5100",
     "5200",
@@ -40,6 +44,18 @@ DETAIL_ACCOUNTS = {
     "7100",
 }
 
+# Expected MoM breaches after slice-2 planting: (entity, account_id, period_b)
+EXPECTED_BREACHES = {
+    ("ND-US", "6110", "2026-06"),  # A1
+    ("ND-EU", "6020", "2026-07"),  # A2
+    ("ND-EU", "6500", "2026-07"),  # A2B
+    ("ND-US", "4000", "2026-06"),  # A3
+    ("ND-US", "4000", "2026-07"),  # A3B
+    ("ND-US", "6310", "2026-09"),  # A4
+    ("ND-US", "6200", "2026-09"),  # B1
+    ("ND-US", "6600", "2026-03"),  # B2
+}
+
 
 def main() -> int:
     if not DB_PATH.exists():
@@ -48,6 +64,7 @@ def main() -> int:
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    exit_code = 0
 
     print("=== 1) Counts ===")
     accounts = conn.execute("SELECT COUNT(*) AS n FROM accounts").fetchone()["n"]
@@ -66,7 +83,8 @@ def main() -> int:
     ap_accrual = conn.execute(
         """
         SELECT COUNT(*) AS n FROM subledger
-        WHERE entry_type IN ('ap_bill', 'accrual', 'expense_detail')
+        WHERE entry_type IN ('ap_bill', 'accrual', 'expense_detail', 'reclass',
+                             'manual_je', 'revenue_detail', 'revenue_timing')
         """
     ).fetchone()["n"]
     company = conn.execute(
@@ -113,6 +131,7 @@ def main() -> int:
     if not diffs:
         print(f"OK — {len(rows)} account-period-entity rows reconcile (diff ≤ $0.01)")
     else:
+        exit_code = 1
         print(f"FAIL — {len(diffs)} differences:")
         for d in diffs[:20]:
             print(
@@ -123,7 +142,6 @@ def main() -> int:
             print(f"  ... and {len(diffs) - 20} more")
 
     print("\n=== 4) Threshold breaches (>10% AND >$50K) ===")
-    # Compare consecutive periods per entity/account
     breaches = []
     periods_list = [
         r["period"]
@@ -166,15 +184,26 @@ def main() -> int:
                     )
 
     print(f"breach_count: {len(breaches)}")
-    for b in breaches[:15]:
+    for b in breaches:
         print(
             f"  {b[0]} {b[1]} {b[2]}→{b[3]} pct={b[4]:.1%} amt={b[5]:,.2f}"
         )
-    if len(breaches) > 15:
-        print(f"  ... and {len(breaches) - 15} more")
+
+    actual_keys = {(b[0], b[1], b[3]) for b in breaches}
+    missing = EXPECTED_BREACHES - actual_keys
+    extra = actual_keys - EXPECTED_BREACHES
+    print("\n=== Breach set check ===")
+    if not missing and not extra:
+        print(f"OK — exactly {len(EXPECTED_BREACHES)} expected breaches")
+    else:
+        exit_code = 1
+        if missing:
+            print(f"FAIL — missing: {sorted(missing)}")
+        if extra:
+            print(f"FAIL — unexpected: {sorted(extra)}")
 
     conn.close()
-    return 1 if diffs else 0
+    return exit_code
 
 
 if __name__ == "__main__":

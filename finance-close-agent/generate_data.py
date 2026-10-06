@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Generate clean synthetic finance data for Northwind Digital (SQLite).
+"""Generate synthetic finance data for Northwind Digital (SQLite).
 
 Company: Northwind Digital
 Entities: ND-US, ND-EU
-No planted anomalies in this generator (slice 2 will add them).
+Planted anomalies A1–A4 and benign breaches B1–B2 (see data/ANOMALIES.md).
 All figures are synthetic. source_system labels are generic only.
 """
 
@@ -14,6 +14,7 @@ import json
 import math
 import random
 import sqlite3
+from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -168,6 +169,28 @@ OPEX_DETAIL_ACCOUNTS = {
     "5100",
     "5200",
 }
+REVENUE_DETAIL_ACCOUNTS = {"4000", "4100", "4200", "4300"}
+
+# Anomaly amounts (deterministic)
+A1_DUP_AMOUNT = 85_000.0  # each of two identical accrual rows
+A2_RECLASS_AMOUNT = 120_000.0
+A3_REV_AMOUNT = 400_000.0
+A4_UNEXPLAINED_AMOUNT = 70_000.0
+B1_CONFERENCE_AMOUNT = 75_000.0
+B2_RECRUITING_AMOUNT = 55_000.0
+
+
+@dataclass(frozen=True)
+class AnomalyRecord:
+    anomaly_id: str
+    account_id: str
+    entity: str
+    period: str
+    amount: float
+    kind: str
+    explanation: str
+    expected_confidence: str
+    expected_citations: tuple[str, ...]
 
 
 def month_starts(n: int = 24, end: date | None = None) -> list[date]:
@@ -254,9 +277,12 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         CREATE TABLE anomalies (
             anomaly_id TEXT PRIMARY KEY,
             account_id TEXT NOT NULL,
+            entity TEXT NOT NULL,
             period TEXT NOT NULL,
+            amount REAL NOT NULL,
             kind TEXT NOT NULL,
             explanation TEXT NOT NULL,
+            expected_confidence TEXT NOT NULL,
             expected_citations TEXT NOT NULL
         );
 
@@ -491,6 +517,496 @@ def build_expense_detail_rows(
     return rows
 
 
+def build_revenue_detail_rows(
+    account_id: str,
+    period: str,
+    entity: str,
+    target: float,
+    day0: date,
+    rng: random.Random,
+) -> list[tuple]:
+    """P&L revenue detail (credit-normal negative) summing to TB activity."""
+    rows: list[tuple] = []
+    n = 3 if abs(target) > 80_000 else 2
+    amts = split_amount(target, n, rng)
+    name = next(a[1] for a in ACCOUNTS if a[0] == account_id)
+    for i, amt in enumerate(amts):
+        cust = CUSTOMERS[(hash((account_id, period, entity, i)) & 0xFFFF) % len(CUSTOMERS)]
+        rows.append(
+            (
+                f"REV-{account_id}-{entity}-{period}-{i+1:03d}",
+                period,
+                entity,
+                account_id,
+                (day0 + timedelta(days=5 + i * 5)).isoformat(),
+                cust[0],
+                f"{name} — recognized billing",
+                round(amt, 2),
+                "Billing",
+                "revenue_detail",
+            )
+        )
+    return rows
+
+
+def anomaly_periods(periods: list[str]) -> dict[str, str]:
+    """Map anomaly anchors from the 24-month series (latest = periods[-1])."""
+    return {
+        "latest": periods[-1],  # 2026-09
+        "a1": periods[-4],  # 2026-06 — 3 months before latest
+        "a2": periods[-3],  # 2026-07 — 2 months before latest
+        "a3_recognize": periods[-4],  # 2026-06 quarter-end
+        "a3_offset": periods[-3],  # 2026-07 following month
+        "a4": periods[-1],
+        "b1": periods[-1],
+        "b2_start": periods[-7],  # 2026-03 hiring-heavy month
+    }
+
+
+def plant_anomalies(
+    balances: dict[tuple[str, str, str], float],
+    periods: list[str],
+) -> list[AnomalyRecord]:
+    """Mutate TB balances and return anomaly metadata for the anomalies table."""
+    p = anomaly_periods(periods)
+    records: list[AnomalyRecord] = []
+
+    # A1 — duplicate Cloud Hosting accrual (sticky from a1 period onward)
+    # Two identical $85k rows → +$170k to expense; amount field stores $85k per line.
+    for period in periods[periods.index(p["a1"]) :]:
+        key = (period, "ND-US", "6110")
+        balances[key] = round(balances[key] + 2 * A1_DUP_AMOUNT, 2)
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A1",
+            account_id="6110",
+            entity="ND-US",
+            period=p["a1"],
+            amount=A1_DUP_AMOUNT,
+            kind="duplicate_accrual",
+            explanation=(
+                "Duplicate Cloud Hosting accrual: two identical $85,000 accrual rows "
+                "(same vendor Nimbus Hosting Co, same reference ACCR-CLOUD-6110) "
+                "posted in ND-US for the period. Reverse one duplicate."
+            ),
+            expected_confidence="high",
+            expected_citations=(
+                "ACCR-CLOUD-6110-A",
+                "ACCR-CLOUD-6110-B",
+                "V-200",
+            ),
+        )
+    )
+
+    # A2 — opex reclass Contractors → Professional Fees (sticky from a2)
+    for period in periods[periods.index(p["a2"]) :]:
+        balances[(period, "ND-EU", "6020")] = round(
+            balances[(period, "ND-EU", "6020")] - A2_RECLASS_AMOUNT, 2
+        )
+        balances[(period, "ND-EU", "6500")] = round(
+            balances[(period, "ND-EU", "6500")] + A2_RECLASS_AMOUNT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A2",
+            account_id="6020",
+            entity="ND-EU",
+            period=p["a2"],
+            amount=-A2_RECLASS_AMOUNT,
+            kind="opex_reclass",
+            explanation=(
+                "Opex reclass of $120,000 from Contractors (6020) to Professional Fees "
+                "(6500) in ND-EU via paired JEs JE-RCL-6020 and JE-RCL-6500. "
+                "Net zero to total opex; classification only."
+            ),
+            expected_confidence="high",
+            expected_citations=("JE-RCL-6020", "JE-RCL-6500", "6020", "6500"),
+        )
+    )
+    # Paired side documented as A2B for DB query convenience (same mechanism)
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A2B",
+            account_id="6500",
+            entity="ND-EU",
+            period=p["a2"],
+            amount=A2_RECLASS_AMOUNT,
+            kind="opex_reclass",
+            explanation=(
+                "Paired side of A2: Professional Fees increased $120,000 from Contractors "
+                "reclass JE-RCL-6500 / JE-RCL-6020 in ND-EU."
+            ),
+            expected_confidence="high",
+            expected_citations=("JE-RCL-6020", "JE-RCL-6500"),
+        )
+    )
+
+    # A3 — revenue timing across quarter boundary
+    # Recognize extra revenue in quarter-end month only. Following month stays on the
+    # clean TB path but carries an explicit reversing JE in the subledger so Jul→Aug
+    # does not create an extra threshold breach.
+    balances[(p["a3_recognize"], "ND-US", "4000")] = round(
+        balances[(p["a3_recognize"], "ND-US", "4000")] - A3_REV_AMOUNT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A3",
+            account_id="4000",
+            entity="ND-US",
+            period=p["a3_recognize"],
+            amount=-A3_REV_AMOUNT,
+            kind="revenue_timing",
+            explanation=(
+                "Subscription Revenue pulled forward $400,000 at quarter-end even though "
+                "contract CTR-4000-NDUS start date is 2026-07-01 (next quarter). "
+                "Offsetting reversal posts the following month."
+            ),
+            expected_confidence="high",
+            expected_citations=("JE-REV-TIMING-FWD", "CTR-4000-NDUS", "2026-07-01"),
+        )
+    )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A3B",
+            account_id="4000",
+            entity="ND-US",
+            period=p["a3_offset"],
+            amount=A3_REV_AMOUNT,
+            kind="revenue_timing_offset",
+            explanation=(
+                "Offset side of A3: $400,000 Subscription Revenue reversal JE in the "
+                "month after premature quarter-end recognition (JE-REV-TIMING-REV). "
+                "TB returns to the normal monthly path."
+            ),
+            expected_confidence="high",
+            expected_citations=("JE-REV-TIMING-REV", "CTR-4000-NDUS"),
+        )
+    )
+
+    # A4 — unexplained T&E (Meals & Entertainment) manual JE
+    balances[(p["a4"], "ND-US", "6310")] = round(
+        balances[(p["a4"], "ND-US", "6310")] + A4_UNEXPLAINED_AMOUNT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="A4",
+            account_id="6310",
+            entity="ND-US",
+            period=p["a4"],
+            amount=A4_UNEXPLAINED_AMOUNT,
+            kind="unexplained",
+            explanation=(
+                "Unexplained +$70,000 on Meals & Entertainment (T&E) via manual JE "
+                "JE-MANUAL-BLANK with blank description, no vendor, and no supporting "
+                "detail. Agent must assign low confidence and send to human review."
+            ),
+            expected_confidence="low",
+            expected_citations=("JE-MANUAL-BLANK",),
+        )
+    )
+
+    # B1 — benign Marketing conference (latest month only)
+    balances[(p["b1"], "ND-US", "6200")] = round(
+        balances[(p["b1"], "ND-US", "6200")] + B1_CONFERENCE_AMOUNT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="B1",
+            account_id="6200",
+            entity="ND-US",
+            period=p["b1"],
+            amount=B1_CONFERENCE_AMOUNT,
+            kind="benign_conference",
+            explanation=(
+                "Benign threshold breach: annual customer conference spend $75,000 "
+                "fully supported by labeled vendor invoices from Brightline Marketing "
+                "(CONF-2026-ANNUAL)."
+            ),
+            expected_confidence="high",
+            expected_citations=("CONF-2026-ANNUAL", "V-205"),
+        )
+    )
+
+    # B2 — benign Recruiting surge (sticky from hiring-heavy month)
+    for period in periods[periods.index(p["b2_start"]) :]:
+        balances[(period, "ND-US", "6600")] = round(
+            balances[(period, "ND-US", "6600")] + B2_RECRUITING_AMOUNT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            anomaly_id="B2",
+            account_id="6600",
+            entity="ND-US",
+            period=p["b2_start"],
+            amount=B2_RECRUITING_AMOUNT,
+            kind="benign_hiring",
+            explanation=(
+                "Benign threshold breach: hiring-heavy month recruiting fees +$55,000 "
+                "fully explained by Cobalt Recruiting invoices labeled "
+                "HIRING-SURGE-2026-Q1."
+            ),
+            expected_confidence="high",
+            expected_citations=("HIRING-SURGE-2026-Q1", "V-206"),
+        )
+    )
+
+    return records
+
+
+def _day0(period: str) -> date:
+    return date.fromisoformat(f"{period}-01")
+
+
+def override_subledger_for_anomalies(
+    sub_rows: list[tuple],
+    balances: dict[tuple[str, str, str], float],
+    periods: list[str],
+) -> list[tuple]:
+    """Replace subledger rows for anomaly keys with crafted, reconciling detail."""
+    p = anomaly_periods(periods)
+
+    def drop(account: str, entity: str, period: str) -> None:
+        nonlocal sub_rows
+        sub_rows = [
+            r
+            for r in sub_rows
+            if not (r[3] == account and r[2] == entity and r[1] == period)
+        ]
+
+    # --- A1: from a1 period onward, two identical accruals + remainder ---
+    for period in periods[periods.index(p["a1"]) :]:
+        drop("6110", "ND-US", period)
+        tb = balances[(period, "ND-US", "6110")]
+        remainder = round(tb - 2 * A1_DUP_AMOUNT, 2)
+        day0 = _day0(period)
+        for suffix, txn_id in (("A", "ACCR-CLOUD-6110-A"), ("B", "ACCR-CLOUD-6110-B")):
+            # Identical rows: same vendor, amount, reference in memo
+            sub_rows.append(
+                (
+                    f"{txn_id}-{period}",
+                    period,
+                    "ND-US",
+                    "6110",
+                    (day0 + timedelta(days=22)).isoformat(),
+                    "V-200",
+                    "ACCR-CLOUD-6110 Cloud Hosting month-end accrual",
+                    A1_DUP_AMOUNT,
+                    "ERP",
+                    "accrual",
+                )
+            )
+        if abs(remainder) > 0.005:
+            rng = random.Random(f"{SEED}:a1rem:{period}")
+            sub_rows.extend(
+                build_expense_detail_rows("6110", period, "ND-US", remainder, day0, rng)
+            )
+
+    # --- A2: reclass months from a2 onward ---
+    for period in periods[periods.index(p["a2"]) :]:
+        day0 = _day0(period)
+        # Contractors
+        drop("6020", "ND-EU", period)
+        tb_c = balances[(period, "ND-EU", "6020")]
+        # Include explicit reclass JE (-120k) plus remainder activity
+        rem_c = round(tb_c - (-A2_RECLASS_AMOUNT), 2)
+        # Wait: TB already has -120k baked in. Subledger must sum to TB.
+        # Put reclass JE as -120k and remainder = TB - (-120k) = TB + 120k
+        rem_c = round(tb_c - (-A2_RECLASS_AMOUNT), 2)
+        sub_rows.append(
+            (
+                f"JE-RCL-6020-{period}",
+                period,
+                "ND-EU",
+                "6020",
+                (day0 + timedelta(days=18)).isoformat(),
+                "V-204",
+                "Reclass Contractors → Professional Fees (A2 paired JE)",
+                -A2_RECLASS_AMOUNT,
+                "ERP",
+                "reclass",
+            )
+        )
+        if abs(rem_c) > 0.005:
+            rng = random.Random(f"{SEED}:a2c:{period}")
+            sub_rows.extend(
+                build_expense_detail_rows("6020", period, "ND-EU", rem_c, day0, rng)
+            )
+
+        # Professional Fees
+        drop("6500", "ND-EU", period)
+        tb_p = balances[(period, "ND-EU", "6500")]
+        rem_p = round(tb_p - A2_RECLASS_AMOUNT, 2)
+        sub_rows.append(
+            (
+                f"JE-RCL-6500-{period}",
+                period,
+                "ND-EU",
+                "6500",
+                (day0 + timedelta(days=18)).isoformat(),
+                "V-201",
+                "Reclass Contractors → Professional Fees (A2 paired JE)",
+                A2_RECLASS_AMOUNT,
+                "ERP",
+                "reclass",
+            )
+        )
+        if abs(rem_p) > 0.005:
+            rng = random.Random(f"{SEED}:a2p:{period}")
+            sub_rows.extend(
+                build_expense_detail_rows("6500", period, "ND-EU", rem_p, day0, rng)
+            )
+
+    # --- A3 recognize month ---
+    period = p["a3_recognize"]
+    drop("4000", "ND-US", period)
+    day0 = _day0(period)
+    tb = balances[(period, "ND-US", "4000")]
+    # Extra revenue -400k (credit); remainder = TB - (-400k)
+    rem = round(tb - (-A3_REV_AMOUNT), 2)
+    sub_rows.append(
+        (
+            "JE-REV-TIMING-FWD",
+            period,
+            "ND-US",
+            "4000",
+            (day0 + timedelta(days=25)).isoformat(),
+            "C-100",
+            "CTR-4000-NDUS start 2026-07-01 — premature quarter-end recognition",
+            -A3_REV_AMOUNT,
+            "Billing",
+            "revenue_timing",
+        )
+    )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{SEED}:a3f:{period}")
+        sub_rows.extend(
+            build_revenue_detail_rows("4000", period, "ND-US", rem, day0, rng)
+        )
+
+    # --- A3 offset month ---
+    period = p["a3_offset"]
+    drop("4000", "ND-US", period)
+    day0 = _day0(period)
+    tb = balances[(period, "ND-US", "4000")]
+    rem = round(tb - A3_REV_AMOUNT, 2)
+    sub_rows.append(
+        (
+            "JE-REV-TIMING-REV",
+            period,
+            "ND-US",
+            "4000",
+            (day0 + timedelta(days=5)).isoformat(),
+            "C-100",
+            "CTR-4000-NDUS reverse premature recognition — contract starts this quarter",
+            A3_REV_AMOUNT,
+            "Billing",
+            "revenue_timing",
+        )
+    )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{SEED}:a3r:{period}")
+        sub_rows.extend(
+            build_revenue_detail_rows("4000", period, "ND-US", rem, day0, rng)
+        )
+
+    # --- A4 unexplained ---
+    period = p["a4"]
+    drop("6310", "ND-US", period)
+    day0 = _day0(period)
+    tb = balances[(period, "ND-US", "6310")]
+    rem = round(tb - A4_UNEXPLAINED_AMOUNT, 2)
+    sub_rows.append(
+        (
+            "JE-MANUAL-BLANK",
+            period,
+            "ND-US",
+            "6310",
+            (day0 + timedelta(days=27)).isoformat(),
+            None,
+            "",  # blank description
+            A4_UNEXPLAINED_AMOUNT,
+            "ERP",
+            "manual_je",
+        )
+    )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{SEED}:a4:{period}")
+        sub_rows.extend(
+            build_expense_detail_rows("6310", period, "ND-US", rem, day0, rng)
+        )
+
+    # --- B1 conference (latest only) ---
+    period = p["b1"]
+    drop("6200", "ND-US", period)
+    day0 = _day0(period)
+    tb = balances[(period, "ND-US", "6200")]
+    rem = round(tb - B1_CONFERENCE_AMOUNT, 2)
+    # Split conference across two clearly labeled invoices
+    half = round(B1_CONFERENCE_AMOUNT / 2, 2)
+    other = round(B1_CONFERENCE_AMOUNT - half, 2)
+    sub_rows.append(
+        (
+            "CONF-2026-ANNUAL-01",
+            period,
+            "ND-US",
+            "6200",
+            (day0 + timedelta(days=12)).isoformat(),
+            "V-205",
+            "Annual customer conference — venue & production (CONF-2026-ANNUAL)",
+            half,
+            "ERP",
+            "expense_detail",
+        )
+    )
+    sub_rows.append(
+        (
+            "CONF-2026-ANNUAL-02",
+            period,
+            "ND-US",
+            "6200",
+            (day0 + timedelta(days=13)).isoformat(),
+            "V-205",
+            "Annual customer conference — media buy (CONF-2026-ANNUAL)",
+            other,
+            "ERP",
+            "expense_detail",
+        )
+    )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{SEED}:b1:{period}")
+        sub_rows.extend(
+            build_expense_detail_rows("6200", period, "ND-US", rem, day0, rng)
+        )
+
+    # --- B2 recruiting sticky ---
+    for period in periods[periods.index(p["b2_start"]) :]:
+        drop("6600", "ND-US", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-US", "6600")]
+        rem = round(tb - B2_RECRUITING_AMOUNT, 2)
+        sub_rows.append(
+            (
+                f"HIRING-SURGE-2026-Q1-{period}",
+                period,
+                "ND-US",
+                "6600",
+                (day0 + timedelta(days=9)).isoformat(),
+                "V-206",
+                "Hiring surge recruiting fees — HIRING-SURGE-2026-Q1",
+                B2_RECRUITING_AMOUNT,
+                "HRIS",
+                "expense_detail",
+            )
+        )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{SEED}:b2:{period}")
+            sub_rows.extend(
+                build_expense_detail_rows("6600", period, "ND-US", rem, day0, rng)
+            )
+
+    return sub_rows
+
+
 def build_close_tasks(period: str) -> list[tuple]:
     return [
         (f"T-{period}-01", period, "ND-US", "Post payroll accrual", "Close lead", "done", 1),
@@ -526,7 +1042,7 @@ def generate(db_path: Path = DB_PATH) -> dict:
     )
     conn.execute(
         "INSERT INTO meta(key, value) VALUES (?, ?)",
-        ("anomalies", "none — clean baseline (slice 1)"),
+        ("anomalies", "A1,A2,A2B,A3,A3B,A4,B1,B2"),
     )
 
     conn.executemany("INSERT INTO accounts VALUES (?, ?, ?, ?)", ACCOUNTS)
@@ -545,6 +1061,8 @@ def generate(db_path: Path = DB_PATH) -> dict:
                     acct, entity, mi, d.month, rng
                 )
 
+    anomaly_records = plant_anomalies(balances, periods)
+
     conn.executemany(
         "INSERT INTO trial_balance(period, entity, account_id, ending_balance) VALUES (?, ?, ?, ?)",
         [(p, e, a, bal) for (p, e, a), bal in balances.items()],
@@ -554,28 +1072,42 @@ def generate(db_path: Path = DB_PATH) -> dict:
     for period, d in zip(periods, periods_dates):
         for entity in ENTITIES:
             rng = random.Random(f"{SEED}:sub:{entity}:{period}")
-            # AR
             sub_rows.extend(
                 build_ar_rows(period, entity, balances[(period, entity, AR_ACCOUNT)], d, rng)
             )
-            # AP
             sub_rows.extend(
                 build_ap_rows(period, entity, balances[(period, entity, AP_ACCOUNT)], d, rng)
             )
-            # Accruals
             for acct in sorted(ACCRUAL_ACCOUNTS):
                 sub_rows.extend(
                     build_accrual_rows(
                         acct, period, entity, balances[(period, entity, acct)], d, rng
                     )
                 )
-            # Expense / COGS detail
             for acct in sorted(OPEX_DETAIL_ACCOUNTS):
                 sub_rows.extend(
                     build_expense_detail_rows(
                         acct, period, entity, balances[(period, entity, acct)], d, rng
                     )
                 )
+            for acct in sorted(REVENUE_DETAIL_ACCOUNTS):
+                sub_rows.extend(
+                    build_revenue_detail_rows(
+                        acct, period, entity, balances[(period, entity, acct)], d, rng
+                    )
+                )
+
+    sub_rows = override_subledger_for_anomalies(sub_rows, balances, periods)
+
+    # Ensure txn_ids unique after overrides
+    seen: set[str] = set()
+    deduped: list[tuple] = []
+    for row in sub_rows:
+        if row[0] in seen:
+            continue
+        seen.add(row[0])
+        deduped.append(row)
+    sub_rows = deduped
 
     conn.executemany(
         "INSERT INTO subledger VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -585,10 +1117,31 @@ def generate(db_path: Path = DB_PATH) -> dict:
         "INSERT INTO close_tasks VALUES (?, ?, ?, ?, ?, ?, ?)",
         build_close_tasks(periods[-1]),
     )
-    # anomalies table intentionally empty (slice 2)
+    conn.executemany(
+        """
+        INSERT INTO anomalies(
+            anomaly_id, account_id, entity, period, amount, kind,
+            explanation, expected_confidence, expected_citations
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                a.anomaly_id,
+                a.account_id,
+                a.entity,
+                a.period,
+                a.amount,
+                a.kind,
+                a.explanation,
+                a.expected_confidence,
+                json.dumps(list(a.expected_citations)),
+            )
+            for a in anomaly_records
+        ],
+    )
     conn.commit()
 
-    export = export_demo_bundle(conn, periods)
+    export = export_demo_bundle(conn, periods, anomaly_records)
     export_path = EXPORT_DIR / "demo_bundle.json"
     export_path.write_text(json.dumps(export, indent=2), encoding="utf-8")
 
@@ -600,14 +1153,18 @@ def generate(db_path: Path = DB_PATH) -> dict:
         "periods": len(periods),
         "as_of_period": periods[-1],
         "subledger_rows": len(sub_rows),
-        "anomalies": 0,
+        "anomalies": [a.anomaly_id for a in anomaly_records],
         "export_path": str(export_path),
     }
     conn.close()
     return summary
 
 
-def export_demo_bundle(conn: sqlite3.Connection, periods: list[str]) -> dict:
+def export_demo_bundle(
+    conn: sqlite3.Connection,
+    periods: list[str],
+    anomaly_records: list[AnomalyRecord],
+) -> dict:
     period = periods[-1]
     prior = periods[-2]
     entity = "ND-US"
@@ -670,8 +1227,20 @@ def export_demo_bundle(conn: sqlite3.Connection, periods: list[str]) -> dict:
         "subledger": sub,
         "close_tasks": tasks,
         "variances": variances,
-        "anomalies": [],
-        "note": "Clean baseline — planted anomalies deferred to slice 2.",
+        "anomalies": [
+            {
+                "anomaly_id": a.anomaly_id,
+                "account_id": a.account_id,
+                "entity": a.entity,
+                "period": a.period,
+                "amount": a.amount,
+                "kind": a.kind,
+                "expected_confidence": a.expected_confidence,
+                "explanation": a.explanation,
+            }
+            for a in anomaly_records
+        ],
+        "note": "Planted anomalies A1–A4 and benign breaches B1–B2 — see data/ANOMALIES.md.",
     }
 
 

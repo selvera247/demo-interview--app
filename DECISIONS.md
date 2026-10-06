@@ -16,3 +16,9 @@
   - MoM growth/seasonality tuned so dual-threshold breaches are rare on clean data.
   - Stale generated eval JSON cleared to `[]` / null score until hand-written `cases.yaml` exists.
   - Agent/MCP/UI defaults left untouched this slice (may still reference legacy entity ids until a later slice).
+
+## 2026-10-06 — Slice 2 anomaly planting
+
+- **Decision:** Plant A1–A4 and benign B1–B2 in the generator with sticky vs one-period mutations so the MoM breach set is exactly eight keys (A1, A2, A2B, A3, A3B, A4, B1, B2). Extend `anomalies` table with `entity`, `amount`, `expected_confidence`. Map T&E → `6310 Meals & Entertainment`. Store paired/offset sides as `A2B` / `A3B`. For A3, only mutate the quarter-end TB; the following month keeps the clean TB but includes an explicit reversing JE (avoids a third revenue breach in August).
+- **Why:** Need deterministic, documented exceptions for the close-agent demo without polluting clean months with extra threshold breaches. Sticky A1/A2/B2 avoids reverse-side MoM breaches; latest-period A4/B1 and A3’s clean-TB offset month keep the breach list exact.
+- **Implications:** `data/ANOMALIES.md` is source docs; `verify_anomalies.py` prints DB rows; `verify_data.py` asserts the expected breach set. Revenue accounts now carry reconciling subledger detail. Agent/MCP/UI/evals still untouched.

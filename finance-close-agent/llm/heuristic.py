@@ -22,7 +22,7 @@ class HeuristicProvider(LLMProvider):
     ) -> dict[str, Any]:
         """Parse the user payload (JSON) and run structural assess_flux offline.
 
-        The drafting layer passes a JSON user message with variance + evidence.
+        Prefer pre-computed residual/explained from the drafting layer when present.
         """
         from policy import load_policy
         from tools import assess_flux
@@ -52,13 +52,15 @@ class HeuristicProvider(LLMProvider):
             pct_threshold,
             evidence=evidence,
         )
-        # Map to drafting contract
-        explained = None
-        residual = None
-        for flag in assessed.get("flags") or []:
-            if flag == "partial_subledger_coverage":
-                # Best-effort parse from commentary is avoided; leave null
-                pass
+        # Prefer drafting-layer precompute when provided (must not diverge).
+        explained = payload.get("explained_amount")
+        residual = payload.get("residual_amount")
+        if explained is None:
+            explained = assessed.get("explained_amount")
+        if residual is None:
+            residual = assessed.get("residual_amount")
+        assessed["explained_amount"] = explained
+        assessed["residual_amount"] = residual
         return {
             "commentary": assessed["commentary"],
             "cited_ids": list(assessed.get("citations") or []),

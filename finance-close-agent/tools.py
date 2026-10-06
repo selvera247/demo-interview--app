@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -11,6 +12,25 @@ from db import connect, get_meta, log_tool_call, rows_to_dicts
 from policy import Policy, load_policy
 
 _POLICY: Policy | None = None
+
+_UNMATCHED_RE = re.compile(
+    r"no\s+po|no\s+matching\s+contract|unmatched|unexplained|no\s+vendor",
+    re.I,
+)
+_CONTRACT_PO_RE = re.compile(
+    r"\b(CTR-[A-Z0-9-]+|contract|PO\b|P\.O\.|purchase order|license|renewal)\b",
+    re.I,
+)
+_TIMING_RE = re.compile(
+    r"(premature|revers(?:e|al|ing)?|timing|start\s+\d{4}-\d{2}|contract starts)",
+    re.I,
+)
+_PLANNED_RE = re.compile(
+    r"(conference|summit|hiring|staffing|agency|retainer|advisory|"
+    r"leadership|training program|planned|installment)",
+    re.I,
+)
+_REF_TOKEN_RE = re.compile(r"\b([A-Z]{2,}[-_][A-Z0-9][-A-Z0-9_]*)\b")
 
 
 def get_policy(policy: Policy | None = None) -> Policy:
@@ -192,6 +212,142 @@ def list_open_close_tasks(period: str | None = None, entity: str | None = None) 
         return payload
 
 
+def _memo_refs(memo: str) -> set[str]:
+    return set(_REF_TOKEN_RE.findall(memo or ""))
+
+
+def _is_unmatched_row(txn: dict[str, Any]) -> bool:
+    return bool(_UNMATCHED_RE.search(txn.get("memo") or ""))
+
+
+def _is_timing_row(txn: dict[str, Any]) -> bool:
+    return bool(_TIMING_RE.search(txn.get("memo") or ""))
+
+
+def _is_contract_or_po_row(txn: dict[str, Any]) -> bool:
+    if _is_unmatched_row(txn):
+        return False
+    return bool(_CONTRACT_PO_RE.search(txn.get("memo") or ""))
+
+
+def _is_planned_labeled_row(txn: dict[str, Any]) -> bool:
+    """Labeled planned spend (conference/hiring/etc.) with a memo reference."""
+    if _is_unmatched_row(txn):
+        return False
+    memo = txn.get("memo") or ""
+    if not _PLANNED_RE.search(memo):
+        return False
+    return bool(_memo_refs(memo)) or bool(memo.strip())
+
+
+def _has_reclass_pair(
+    txn: dict[str, Any],
+    counterparts: dict[str, list[dict[str, Any]]],
+) -> bool:
+    if (txn.get("entry_type") or "").strip() == "reclass":
+        return True
+    memo = (txn.get("memo") or "").lower()
+    if "reclass" in memo:
+        return True
+    amt = float(txn.get("amount") or 0)
+    if abs(amt) < 0.005:
+        return False
+    for rows in counterparts.values():
+        for other in rows:
+            if abs(float(other.get("amount") or 0) + amt) < 1.0:
+                return True
+    return False
+
+
+def _same_reference_or_identical_memo(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    ma = (a.get("memo") or "").strip()
+    mb = (b.get("memo") or "").strip()
+    if ma and mb and ma == mb:
+        return True
+    ra, rb = _memo_refs(ma), _memo_refs(mb)
+    if ra and rb and (ra & rb):
+        return True
+    return False
+
+
+def _is_planned_split_pair(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    """Different memos describing planned split spend ⇒ not a duplicate.
+
+    Same party/amount alone is insufficient. Identical memos are still
+    duplicate candidates; differing conference/hiring/etc. memos are not.
+    """
+    ma = (a.get("memo") or "").strip()
+    mb = (b.get("memo") or "").strip()
+    if ma and mb and ma == mb:
+        return False
+    combined = f"{ma} {mb}"
+    return bool(_PLANNED_RE.search(combined))
+
+
+def _find_duplicate_groups(current: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+    """Duplicates require same party, same amount, AND same ref or identical memo."""
+    by_key: dict[tuple[str, float], list[dict[str, Any]]] = {}
+    for t in current:
+        party = (t.get("party_id") or "").strip()
+        if not party:
+            continue
+        amt = round(float(t.get("amount") or 0), 2)
+        if abs(amt) < 1000:
+            continue
+        by_key.setdefault((party, amt), []).append(t)
+
+    groups: list[list[dict[str, Any]]] = []
+    for (_party, _amt), candidates in by_key.items():
+        if len(candidates) < 2:
+            continue
+        used: set[int] = set()
+        for i, a in enumerate(candidates):
+            if i in used:
+                continue
+            cluster = [a]
+            used.add(i)
+            for j, b in enumerate(candidates):
+                if j in used:
+                    continue
+                if _is_planned_split_pair(a, b):
+                    continue
+                if _same_reference_or_identical_memo(a, b):
+                    cluster.append(b)
+                    used.add(j)
+            if len(cluster) >= 2:
+                groups.append(cluster)
+    return groups
+
+
+def _find_near_amount_pairs(
+    current: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Same party, amounts within $500, different refs — cite for review, not duplicate."""
+    keyed: list[tuple[str, float, dict[str, Any]]] = []
+    for t in current:
+        party = (t.get("party_id") or "").strip()
+        if not party:
+            continue
+        keyed.append((party, float(t.get("amount") or 0), t))
+    pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    used: set[str] = set()
+    for i, (p1, a1, t1) in enumerate(keyed):
+        for p2, a2, t2 in keyed[i + 1 :]:
+            if p1 != p2:
+                continue
+            if not (0 < abs(abs(a1) - abs(a2)) <= 500):
+                continue
+            if _same_reference_or_identical_memo(t1, t2):
+                continue
+            ids = tuple(sorted([t1["txn_id"], t2["txn_id"]]))
+            key = "|".join(ids)
+            if key in used:
+                continue
+            used.add(key)
+            pairs.append((t1, t2))
+    return pairs
+
+
 def assess_flux(
     account: str,
     entity: str,
@@ -203,159 +359,233 @@ def assess_flux(
     pct_threshold: float,
     evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Score evidence generically (no planted IDs / seed-specific strings).
+    """Score evidence with residual accounting (no planted IDs / dollar-rank coverage).
 
-    Structural signals only:
-      - unsupported JE policy
-      - identical or near-identical amount pairs (same party)
-      - magnitude coverage of the variance by retrieved rows
-      - counterpart activity when present
+    General rules (from first honest heuristic eval):
+      - residual = variance − sum(supported row amounts); no ranking by dollar size
+      - supported = contract/PO match, reclass pair, true duplicate excess, timing JE,
+        or planned labeled spend
+      - every unmatched/unsupported row is cited and labeled unexplained
+      - high only if |residual| ≤ policy residual_tolerance_amt; med if residual with
+        some support; low if no support or unsupported_je — coverage % never raises
+      - duplicates need same party, amount, AND same ref/identical memo
+      - timing/reversal JEs are cited before routine billing
     """
     thr = policy.thresholds_for(account)
     flags: list[str] = []
     citations: list[str] = []
     driver_lines: list[str] = []
-    evidence_score = 0.0
 
     current = list(txns)
     if evidence is not None:
         current = list(evidence.get("current") or txns)
+    counterparts: dict[str, list[dict[str, Any]]] = (
+        (evidence or {}).get("counterparts") or {}
+    )
+
+    var_amt = float(variance.get("variance_amt") or 0)
 
     unsupported_txns = [t for t in current if policy.is_unsupported_txn(t)]
+    unmatched_txns = [
+        t for t in current if _is_unmatched_row(t) and t not in unsupported_txns
+    ]
+
+    dup_groups = _find_duplicate_groups(current)
+    dup_member_ids = {t["txn_id"] for g in dup_groups for t in g}
+
+    timing_rows = [t for t in current if _is_timing_row(t)]
+    reclass_rows = [t for t in current if _has_reclass_pair(t, counterparts)]
+    contract_rows = [
+        t
+        for t in current
+        if _is_contract_or_po_row(t)
+        and t["txn_id"] not in {x["txn_id"] for x in timing_rows}
+        and t["txn_id"] not in dup_member_ids
+        and not _is_unmatched_row(t)
+    ]
+    planned_rows = [
+        t
+        for t in current
+        if _is_planned_labeled_row(t)
+        and t["txn_id"] not in {x["txn_id"] for x in timing_rows}
+        and t["txn_id"] not in {x["txn_id"] for x in contract_rows}
+        and t["txn_id"] not in dup_member_ids
+        and t["txn_id"] not in {x["txn_id"] for x in reclass_rows}
+        and not _is_unmatched_row(t)
+    ]
+
+    # --- Explained amount from supported rows (not dollar-rank coverage) ---
+    explained = 0.0
+    supported_ids: list[str] = []
+
+    if dup_groups:
+        flags.append("possible_duplicate_je")
+        for group in dup_groups:
+            amt = float(group[0].get("amount") or 0)
+            # Excess copies explain the MoM bump (n-1), not both sides of sticky base
+            excess = amt * (len(group) - 1)
+            explained += excess
+            for t in group:
+                supported_ids.append(t["txn_id"])
+                citations.append(t["txn_id"])
+                driver_lines.append(
+                    f"{t['txn_id']} ({t.get('party_name') or t.get('party_id')}: "
+                    f"{amt:,.0f}) matches another posting with the same party, "
+                    f"amount, and reference/memo."
+                )
+            driver_lines.append(
+                f"Identical same-party/reference postings indicate a duplicate "
+                f"accrual explaining {abs(excess):,.0f} of the variance."
+            )
+
+    for t in timing_rows:
+        explained += float(t.get("amount") or 0)
+        supported_ids.append(t["txn_id"])
+        citations.append(t["txn_id"])
+        driver_lines.append(
+            f"{t['txn_id']}: timing/reversal JE — {t.get('memo') or '(blank)'} "
+            f"({float(t['amount']):,.0f})."
+        )
+        flags.append("timing_or_reversal_je")
+
+    for t in reclass_rows:
+        if t["txn_id"] in supported_ids:
+            continue
+        explained += float(t.get("amount") or 0)
+        supported_ids.append(t["txn_id"])
+        citations.append(t["txn_id"])
+        driver_lines.append(
+            f"{t['txn_id']}: reclass pair — {t.get('memo') or '(blank)'} "
+            f"({float(t['amount']):,.0f})."
+        )
+        flags.append("paired_offset_activity")
+
+    # Cite counterpart reclass legs so both sides of a pair are visible
+    if counterparts and (reclass_rows or any("reclass" in (t.get("memo") or "").lower() for t in current)):
+        flags.append("paired_offset_activity")
+        for other_acct, rows in counterparts.items():
+            for t in rows:
+                memo = (t.get("memo") or "").lower()
+                et = (t.get("entry_type") or "").strip()
+                if et == "reclass" or "reclass" in memo:
+                    citations.append(t["txn_id"])
+                    if t["txn_id"] not in supported_ids:
+                        driver_lines.append(
+                            f"Paired reclass on {other_acct}: {t['txn_id']} "
+                            f"({t.get('memo') or 'no memo'}: {t['amount']:,.0f})."
+                        )
+
+    for t in contract_rows:
+        if t["txn_id"] in supported_ids:
+            continue
+        explained += float(t.get("amount") or 0)
+        supported_ids.append(t["txn_id"])
+        citations.append(t["txn_id"])
+        driver_lines.append(
+            f"{t['txn_id']}: contract/PO-supported — {t.get('memo') or '(blank)'} "
+            f"({float(t['amount']):,.0f})."
+        )
+        flags.append("contract_or_po_support")
+
+    for t in planned_rows:
+        if t["txn_id"] in supported_ids:
+            continue
+        explained += float(t.get("amount") or 0)
+        supported_ids.append(t["txn_id"])
+        citations.append(t["txn_id"])
+        driver_lines.append(
+            f"{t['txn_id']}: planned labeled spend — {t.get('memo') or '(blank)'} "
+            f"({float(t['amount']):,.0f})."
+        )
+        flags.append("planned_labeled_spend")
+
+    # Near-identical amounts with different refs: cite for review, do not treat as dup,
+    # and do not count toward explained (coverage must not raise confidence).
+    if "possible_duplicate_je" not in flags:
+        for t1, t2 in _find_near_amount_pairs(current):
+            flags.append("near_amount_review")
+            for t in (t1, t2):
+                citations.append(t["txn_id"])
+                driver_lines.append(
+                    f"{t['txn_id']}: near-identical same-party amount with a different "
+                    f"reference ({t.get('memo') or 'no memo'}: {float(t['amount']):,.0f}); "
+                    f"not treated as a duplicate."
+                )
+
+    residual = round(var_amt - explained, 2)
+
+    # --- Unmatched / unsupported: always cite + label unexplained ---
     if unsupported_txns:
         flags.append("unsupported_je")
         for t in unsupported_txns:
             citations.append(t["txn_id"])
             driver_lines.append(
                 f"{t['txn_id']} is unsupported (blank description and/or no vendor); "
-                "do not invent a driver."
+                f"unexplained amount {float(t['amount']):,.0f}."
             )
-        evidence_score = 0.0
 
-    # Identical-amount pairs (same party) → possible duplicate accruals
-    by_key: dict[tuple[Any, float], list[dict]] = {}
-    for t in current:
-        party = t.get("party_id") or ""
-        amt = round(float(t.get("amount") or 0), 2)
-        by_key.setdefault((party, amt), []).append(t)
-    for (party, amt), group in by_key.items():
-        if party and abs(amt) >= 1000 and len(group) >= 2:
-            flags.append("possible_duplicate_je")
-            evidence_score = max(evidence_score, 0.92)
-            for t in group:
-                citations.append(t["txn_id"])
-                driver_lines.append(
-                    f"{t['txn_id']} ({t.get('party_name') or party}: {amt:,.0f}) "
-                    f"matches another posting for the same party/amount."
-                )
-            driver_lines.append(
-                "Identical same-party postings may indicate a duplicate accrual; "
-                f"they cover {abs(amt) * len(group):,.0f} of activity."
-            )
-            break
-
-    # Near-identical amounts (diff <= $500), same party
-    if "possible_duplicate_je" not in flags:
-        keyed: list[tuple[str, float, dict]] = []
-        for t in current:
-            party = t.get("party_id") or ""
-            if not party:
-                continue
-            keyed.append((party, float(t.get("amount") or 0), t))
-        for i, (p1, a1, t1) in enumerate(keyed):
-            for p2, a2, t2 in keyed[i + 1 :]:
-                if p1 == p2 and 0 < abs(abs(a1) - abs(a2)) <= 500:
-                    flags.append("near_duplicate_je")
-                    evidence_score = max(evidence_score, 0.65)
-                    citations.extend([t1["txn_id"], t2["txn_id"]])
-                    driver_lines.append(
-                        f"Near-duplicate same-party amounts "
-                        f"({a1:,.0f} vs {a2:,.0f}) on {t1['txn_id']} / {t2['txn_id']}."
-                    )
-                    break
-            if "near_duplicate_je" in flags:
-                break
-
-    # Counterpart structural pairs (opposite-signed activity on another account)
-    counterparts = (evidence or {}).get("counterparts") or {}
-    if counterparts and "possible_duplicate_je" not in flags:
-        flags.append("paired_offset_activity")
-        evidence_score = max(evidence_score, 0.88)
-        for other_acct, rows in counterparts.items():
-            for t in rows[:3]:
-                citations.append(t["txn_id"])
-                driver_lines.append(
-                    f"Paired activity on {other_acct}: {t['txn_id']} "
-                    f"({t.get('memo') or 'no memo'}: {t['amount']:,.0f})."
-                )
-
-    # Magnitude coverage: largest absolute current-period rows vs variance
-    var_amt = abs(float(variance.get("variance_amt") or 0))
-    if current and var_amt > 0 and not unsupported_txns:
-        ranked = sorted(
-            current, key=lambda t: abs(float(t.get("amount") or 0)), reverse=True
+    for t in unmatched_txns:
+        citations.append(t["txn_id"])
+        driver_lines.append(
+            f"{t['txn_id']} is unmatched/unexplained "
+            f"({t.get('memo') or 'no memo'}: {float(t['amount']):,.0f})."
         )
-        covered = 0.0
-        explaining: list[dict] = []
-        for t in ranked:
-            covered += abs(float(t.get("amount") or 0))
-            explaining.append(t)
-            citations.append(t["txn_id"])
-            if covered >= var_amt * 0.95:
-                break
-        if explaining and "possible_duplicate_je" not in flags:
-            for t in explaining[:5]:
-                driver_lines.append(
-                    f"{t['txn_id']}: {t.get('memo') or '(blank memo)'} "
-                    f"({float(t['amount']):,.0f})."
-                )
-            residual = max(0.0, var_amt - covered)
-            if residual <= max(500.0, var_amt * 0.05):
-                evidence_score = max(evidence_score, 0.90)
-                flags.append("subledger_covers_variance")
-            elif covered >= var_amt * 0.55:
-                evidence_score = max(evidence_score, 0.65)
-                flags.append("partial_subledger_coverage")
-                driver_lines.append(
-                    f"Partial explanation: ${covered:,.0f} supported; "
-                    f"${residual:,.0f} unexplained residual."
-                )
-            else:
-                evidence_score = max(evidence_score, 0.35)
-                flags.append("weak_subledger_coverage")
-                driver_lines.append(
-                    f"Retrieved activity covers ${covered:,.0f} of "
-                    f"${var_amt:,.0f} variance; ${residual:,.0f} unexplained."
-                )
+        flags.append("unmatched_unexplained")
+
+    # If residual remains with no unmatched row to carry it, state the residual
+    if (
+        abs(residual) > policy.confidence.residual_tolerance_amt
+        and not unmatched_txns
+        and not unsupported_txns
+        and supported_ids
+    ):
+        driver_lines.append(
+            f"Unexplained residual amount {residual:,.0f} after supported evidence."
+        )
+        flags.append("residual_after_support")
 
     citations = list(dict.fromkeys(c for c in citations if c))
+    flags = list(dict.fromkeys(flags))
+    has_support = bool(supported_ids)
+    unsupported_flag = bool(unsupported_txns)
+    has_unmatched = bool(unmatched_txns)
 
-    if unsupported_txns:
-        evidence_score = 0.0
+    # Residual-based confidence; coverage % never raises. Any unmatched row
+    # means a residual exists → at most med when some support is present.
+    if unsupported_flag or not has_support:
+        confidence: str = "low"
+    elif has_unmatched or abs(residual) > policy.confidence.residual_tolerance_amt:
+        confidence = "med"
+    else:
+        confidence = "high"
+    # Legacy score mirror for exports / UI (not used to raise confidence)
+    evidence_score = {"high": 0.92, "med": 0.65, "low": 0.0}[confidence]
 
     if not citations:
-        evidence_score = 0.0
         flags.append("no_citations")
+        confidence = "low"
+        evidence_score = 0.0
         if not driver_lines:
             driver_lines.append(
                 "No citable subledger transactions; confidence capped at low."
             )
 
-    if not driver_lines and not unsupported_txns:
+    if not driver_lines:
         flags.append("needs_human_review")
+        confidence = "low"
         evidence_score = 0.0
         driver_lines.append(
             "No clear subledger driver; marking for human review rather than guessing."
         )
 
-    confidence = policy.confidence.label_for_score(evidence_score)
-    if unsupported_txns or not citations:
-        confidence = "low"
+    if abs(residual) <= policy.confidence.residual_tolerance_amt and has_support:
+        flags.append("residual_within_tolerance")
+    elif has_support and abs(residual) > policy.confidence.residual_tolerance_amt:
+        flags.append("partial_subledger_coverage")
 
     over = abs(variance["variance_pct"]) > pct_threshold and abs(
         variance["variance_amt"]
     ) > thr.threshold_amt
-    unsupported_flag = bool(unsupported_txns)
 
     commentary = (
         f"{variance['account_name']} ({account}) moved {variance['variance_pct']:.1%} "
@@ -385,8 +615,12 @@ def assess_flux(
         "status": status,
         "threshold_pct": pct_threshold,
         "threshold_amt": thr.threshold_amt,
-        "explained_amount": None,
-        "residual_amount": None,
+        "explained_amount": round(explained, 2),
+        "residual_amount": residual,
+        "supported_txn_ids": list(dict.fromkeys(supported_ids)),
+        "unexplained_txn_ids": [
+            t["txn_id"] for t in unmatched_txns + unsupported_txns
+        ],
     }
 
 
@@ -436,8 +670,27 @@ def draft_flux_commentary(
     txns = evidence.get("current") or []
     evidence_ids = set(evidence.get("evidence_txn_ids") or [])
 
+    # Structural pass owns residual, confidence, citations, unsupported_je.
+    structural = assess_flux(
+        account,
+        entity,
+        as_of,
+        prior_period,
+        txns,
+        variance,
+        pol,
+        pct_threshold,
+        evidence=evidence,
+    )
     user_payload = build_user_payload(
-        account, entity, as_of, prior_period, variance, evidence, pct_threshold
+        account,
+        entity,
+        as_of,
+        prior_period,
+        variance,
+        evidence,
+        pct_threshold,
+        structural=structural,
     )
     provider_name = get_llm_provider_name()
     draft_meta: dict[str, Any] = {
@@ -449,52 +702,75 @@ def draft_flux_commentary(
     }
 
     def _heuristic_assess() -> dict[str, Any]:
-        return assess_flux(
-            account,
-            entity,
-            as_of,
-            prior_period,
-            txns,
-            variance,
-            pol,
-            pct_threshold,
-            evidence=evidence,
-        )
+        # Reuse the precomputed structural result (residual must not drift).
+        return dict(structural)
 
     def _apply_llm_draft(raw: dict[str, Any], base: dict[str, Any]) -> dict[str, Any]:
+        # Confidence / residual / explained stay code-owned.
+        locked_conf = base.get("confidence")
+        locked_explained = base.get("explained_amount")
+        locked_residual = base.get("residual_amount")
+        locked_status = base.get("status")
+        locked_flags = list(base.get("flags") or [])
+        structural_cites = list(base.get("citations") or [])
+
         cited = [str(x) for x in (raw.get("cited_ids") or [])]
         bad = [c for c in cited if c not in evidence_ids]
         draft_meta["citation_errors"] = bad
         if bad:
             log.warning("hallucinated citations %s → downgrade low", bad)
-            base["confidence"] = "low"
-            base["flags"] = list(base.get("flags") or []) + ["hallucinated_citation"]
-            base["status"] = (
+            locked_conf = "low"
+            locked_flags = locked_flags + ["hallucinated_citation"]
+            locked_status = (
                 "queued_for_review"
                 if pol.confidence.low_routes_to_human_review
-                else base.get("status")
+                else locked_status
             )
-            if base["status"] == "approved":
+            if locked_status == "approved":
                 raise RuntimeError("agent must never auto-approve")
+
         commentary = str(raw.get("commentary") or "").strip()
         if not commentary:
             commentary = base.get("commentary") or ""
-        # Ensure citations appear in commentary when valid
-        valid_cites = [c for c in cited if c in evidence_ids] or list(
-            base.get("citations") or []
-        )
+
+        # Union: structural required cites + any valid LLM cites
+        valid_extra = [c for c in cited if c in evidence_ids]
+        valid_cites = list(dict.fromkeys(structural_cites + valid_extra))
         if valid_cites and "Citations:" not in commentary:
-            commentary = commentary.rstrip(".") + ". Citations: " + ", ".join(valid_cites) + "."
+            commentary = (
+                commentary.rstrip(".")
+                + ". Citations: "
+                + ", ".join(valid_cites)
+                + "."
+            )
         if (
-            base.get("confidence") == "low"
+            locked_conf == "low"
             and pol.confidence.low_routes_to_human_review
             and "LOW CONFIDENCE" not in commentary
         ):
             commentary += " LOW CONFIDENCE — queued for human review (no auto-approve)."
+
+        # LLM must not alter residual / explained / confidence.
+        if raw.get("residual_amount") not in (None, locked_residual):
+            log.warning(
+                "LLM residual_amount %s ignored; keeping structural %s",
+                raw.get("residual_amount"),
+                locked_residual,
+            )
+        if raw.get("explained_amount") not in (None, locked_explained):
+            log.warning(
+                "LLM explained_amount %s ignored; keeping structural %s",
+                raw.get("explained_amount"),
+                locked_explained,
+            )
+
         base["commentary"] = commentary
         base["citations"] = valid_cites
-        base["explained_amount"] = raw.get("explained_amount")
-        base["residual_amount"] = raw.get("residual_amount")
+        base["confidence"] = locked_conf
+        base["explained_amount"] = locked_explained
+        base["residual_amount"] = locked_residual
+        base["status"] = locked_status
+        base["flags"] = locked_flags
         return base
 
     t0 = time.perf_counter()
@@ -517,15 +793,15 @@ def draft_flux_commentary(
         elif draft_meta["provider"] == "heuristic" or isinstance(
             provider, HeuristicProvider
         ):
-            # Heuristic returns _heuristic_assessed for full policy fields
             assessed = raw.get("_heuristic_assessed") or _heuristic_assess()
+            # Still lock residual/explained from structural precompute
+            assessed["explained_amount"] = structural.get("explained_amount")
+            assessed["residual_amount"] = structural.get("residual_amount")
+            assessed["confidence"] = structural.get("confidence")
             assessed = _apply_llm_draft(raw, assessed)
         else:
-            assessed = _heuristic_assess()
-            # Keep policy confidence/unsupported from structural pass, overlay LLM prose
+            assessed = dict(structural)
             assessed = _apply_llm_draft(raw, assessed)
-            # If LLM provided citations and none hallucinated, prefer structural confidence
-            # unless unsupported / no citations after filter
             if assessed.get("unsupported_je") or not assessed.get("citations"):
                 assessed["confidence"] = "low"
                 assessed["status"] = "queued_for_review"

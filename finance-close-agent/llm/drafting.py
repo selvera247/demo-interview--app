@@ -25,11 +25,14 @@ Return a single JSON object with keys:
   residual_amount (number or null).
 
 Rules:
+- The user message includes code-computed explained_amount and residual_amount.
+  Copy those two numbers EXACTLY into your JSON. Do not recalculate or alter them.
+- cited_ids must include every id listed under required_citations.
 - If evidence is missing or insufficient, say you cannot explain the variance.
 - Never speculate on causes that are not supported by the retrieved rows.
-- If part of the variance is unexplained, state the unexplained residual amount.
-- cited_ids must be txn_id values that appear in the evidence; do not invent IDs.
-- Do not invent vendors, contracts, or amounts not present in the evidence.
+- If residual_amount is non-zero outside tolerance, state the unexplained residual amount.
+- Label unmatched/unsupported rows as unexplained with their amounts.
+- Do not invent vendors, contracts, amounts, or txn ids.
 """
 
 
@@ -41,6 +44,7 @@ def build_user_payload(
     variance: dict[str, Any],
     evidence: dict[str, Any],
     pct_threshold: float,
+    structural: dict[str, Any] | None = None,
 ) -> str:
     slim_evidence = {
         "current": evidence.get("current") or [],
@@ -48,6 +52,7 @@ def build_user_payload(
         "counterparts": evidence.get("counterparts") or {},
         "evidence_txn_ids": evidence.get("evidence_txn_ids") or [],
     }
+    structural = structural or {}
     payload = {
         "account": account,
         "entity": entity,
@@ -62,5 +67,13 @@ def build_user_payload(
             "balance_b": variance.get("balance_b"),
         },
         "evidence": slim_evidence,
+        # Code-computed — drafting must not alter these.
+        "explained_amount": structural.get("explained_amount"),
+        "residual_amount": structural.get("residual_amount"),
+        "required_citations": list(structural.get("citations") or []),
+        "supported_txn_ids": list(structural.get("supported_txn_ids") or []),
+        "unexplained_txn_ids": list(structural.get("unexplained_txn_ids") or []),
+        "confidence": structural.get("confidence"),
+        "flags": list(structural.get("flags") or []),
     }
     return json.dumps(payload, default=str)

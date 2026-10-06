@@ -28,3 +28,13 @@
 - **Decision:** Centralize variance thresholds, optional per-account overrides, and confidence cutoff placeholders in `config/policy.yaml`. Agent/MCP tools load via `policy.py` with validation; remove hardcoded threshold constants from Python. Close pass scans all entities/periods when flagging.
 - **Why:** SPEC requires config in YAML, never hardcoded. Enables pytest to prove threshold changes alter the flagged set without touching anomaly data.
 - **Implications:** Confidence high/med/low *mapping* remains slice 4 (cutoffs only stored now). `draft_flux_commentary(threshold=...)` still accepts an optional percent override; dollar threshold always comes from policy. Added deps: `pyyaml`, `pytest`.
+
+## 2026-10-06 — Slice 4 confidence labels + unsupported JE policy
+
+- **Decision:** Replace float confidence with **high / med / low** labels using `confidence.high_min` / `med_min` cutoffs in `policy.yaml`. Add `unsupported_je` rules so blank-description / no-vendor manual JEs are **always flagged** and **always routed to human review**, independent of dollar/percent thresholds. Agent never writes `approved` for low items; approve requires an explicit `reviewer_note` (human action).
+- **Confidence mapping (evidence → score → label):**
+  - **high** (`evidence_score >= high_min`, default 0.80): subledger drivers fully explain the variance and commentary cites specific txn IDs (duplicate accruals, reclass pairs, revenue timing JEs, labeled conference/hiring invoices).
+  - **med** (`med_min <= score < high_min`): partial drivers / incomplete explanation.
+  - **low** (`score < med_min`, or hard-capped): unexplained variance, **unsupported JE**, or **zero citations** (no txn IDs to cite ⇒ confidence capped at low).
+- **Why:** Controllers need an explicit human gate for unsupported entries (A4) even when thresholds are raised, and explainable anomalies must show receipt-level citations.
+- **Implications:** `assess_flux` + `draft_flux_commentary` return string labels; review queue stores TEXT confidence; Streamlit shows high/med/low; evals untouched aside from dropping a hardcoded default threshold fallback.

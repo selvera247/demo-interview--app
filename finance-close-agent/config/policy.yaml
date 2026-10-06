@@ -3,20 +3,25 @@
 
 variance:
   # Flag when BOTH conditions are true (AND).
-  threshold_pct: 0.10          # 10%
-  threshold_amt: 50000         # $50,000
+  threshold_pct: 0.10          # ten percent MoM
+  threshold_amt: 50000         # fifty thousand USD
   require_both: true
 
 # Optional per-account overrides (account_id -> thresholds).
-# Example:
-#   "6200":
-#     threshold_pct: 0.15
-#     threshold_amt: 100000
 account_overrides: {}
 
 confidence:
-  # Numeric cutoffs reserved for slice 4 mapping (high / med / low).
+  # Map internal evidence_score in [0, 1] → high / med / low.
   high_min: 0.80
   med_min: 0.55
-  # Scores below med_min are low.
+  # low is anything below med_min
   low_routes_to_human_review: true
+
+# Manual / unsupported journal entries — always surface, never auto-approve.
+unsupported_je:
+  always_flag: true
+  always_route_to_human_review: true
+  treat_blank_description_as_unsupported: true
+  treat_missing_vendor_as_unsupported: true
+  entry_types:
+    - manual_je

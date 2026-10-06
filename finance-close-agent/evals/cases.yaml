@@ -1,0 +1,252 @@
+# Close-agent eval cases (synthetic Northwind Digital only).
+# Answer-key fields left blank for the author to fill:
+#   expected_explanation, required_facts, must_not_say
+# must_cite is pre-filled from finance.db txn ids.
+# expected_confidence / notes also blank until the answer key is written.
+#
+# Adversarial / negative stubs: account + entity + period only.
+
+cases:
+  # --- Planted anomalies (A1–A4, B1–B2, C1 + pairs) ---
+
+  - id: A1
+    account: "6110"
+    entity: ND-US
+    period: "2026-06"
+    variance: 81419.97
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - ACCR-CLOUD-6110-BASE-2026-06
+      - ACCR-CLOUD-6110-DUP-2026-06
+    must_not_say: []
+    notes: ""
+
+  - id: A2
+    account: "6020"
+    entity: ND-EU
+    period: "2026-07"
+    variance: -118855.81
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-6020-2026-07
+    must_not_say: []
+    notes: ""
+
+  - id: A2B
+    account: "6500"
+    entity: ND-EU
+    period: "2026-07"
+    variance: 119467.08
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-6500-2026-07
+    must_not_say: []
+    notes: ""
+
+  - id: A3
+    account: "4000"
+    entity: ND-US
+    period: "2026-06"
+    variance: -388209.91
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-REV-TIMING-FWD
+    must_not_say: []
+    notes: ""
+
+  - id: A3B
+    account: "4000"
+    entity: ND-US
+    period: "2026-07"
+    variance: 391978.75
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-REV-TIMING-REV
+    must_not_say: []
+    notes: ""
+
+  - id: A4
+    account: "6310"
+    entity: ND-US
+    period: "2026-09"
+    variance: 70174.0
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MANUAL-BLANK
+    must_not_say: []
+    notes: ""
+
+  - id: B1
+    account: "6200"
+    entity: ND-US
+    period: "2026-09"
+    variance: 77776.89
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - CONF-2026-ANNUAL-01
+      - CONF-2026-ANNUAL-02
+    must_not_say: []
+    notes: ""
+
+  - id: B2
+    account: "6600"
+    entity: ND-US
+    period: "2026-03"
+    variance: 55568.52
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - HIRING-SURGE-2026-Q1-2026-03
+    must_not_say: []
+    notes: ""
+
+  - id: C1
+    account: "6100"
+    entity: ND-EU
+    period: "2026-08"
+    variance: 89901.89
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - SW-LICENSE-2026-EU-2026-08
+      - SW-RESIDUAL-UNMATCHED-2026-08
+    must_not_say: []
+    notes: ""
+
+  # --- Negative / adversarial stubs (account, entity, period only) ---
+
+  - id: N01
+    account: "4100"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N02
+    account: "4200"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N03
+    account: "5000"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N04
+    account: "6000"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N05
+    account: "6010"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N06
+    account: "6400"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N07
+    account: "6700"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N08
+    account: "6800"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N09
+    account: "4100"
+    entity: ND-US
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N10
+    account: "4200"
+    entity: ND-US
+    period: "2026-01"
+    variance: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""

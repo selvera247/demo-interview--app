@@ -15,7 +15,7 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 | MCP tools | `tools.py`, `mcp_server.py` |
 | Close agent pass | `agent/close_agent.py` |
 | Review UI (approve / edit / reject + tool audit log) | `ui/review_app.py` |
-| Eval harness (hand-written cases TBD) | `evals/` |
+| Eval harness (`cases.yaml` stubs + deterministic scorer) | `evals/` |
 | Static export | `exports/demo_bundle.json` |
 
 ### MCP tools
@@ -83,11 +83,16 @@ streamlit run ui/review_app.py
 
 ## Run evals
 
-Hand-written `evals/cases.yaml` is not in place yet. Do not treat any prior score as valid.
+`evals/cases.yaml` has stubs (must_cite pre-filled). Fill `expected_explanation`,
+`required_facts`, `must_not_say`, and `expected_confidence` before treating any
+score as valid. Incomplete answer keys exit non-zero and pytest fails until filled.
 
 ```bash
-python evals/run_evals.py
+python3 evals/run_evals.py
+python3 -m pytest tests/test_evals.py -q
 ```
+
+Do not publish a score in this README until the answer key is complete.
 
 ## Claude Desktop (MCP)
 

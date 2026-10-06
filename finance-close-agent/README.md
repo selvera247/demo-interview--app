@@ -25,12 +25,12 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 - `list_open_close_tasks()`
 - `draft_flux_commentary(account, threshold)`
 
-### Data model (slice 1)
+### Data model (slice 1–2)
 
 - Company: Northwind Digital
 - Entities: `ND-US`, `ND-EU`
 - ~40 accounts, 24 months trial balance
-- Clean baseline — **no planted anomalies yet** (slice 2)
+- Planted anomalies A1–A4 and benign breaches B1–B2 — see `data/ANOMALIES.md`
 - `source_system` labels: `ERP`, `Billing`, `HRIS`, `Expense Tool` only
 
 ## Setup

@@ -22,3 +22,9 @@
 - **Decision:** Plant A1–A4 and benign B1–B2 in the generator with sticky vs one-period mutations so the MoM breach set is exactly eight keys (A1, A2, A2B, A3, A3B, A4, B1, B2). Extend `anomalies` table with `entity`, `amount`, `expected_confidence`. Map T&E → `6310 Meals & Entertainment`. Store paired/offset sides as `A2B` / `A3B`. For A3, only mutate the quarter-end TB; the following month keeps the clean TB but includes an explicit reversing JE (avoids a third revenue breach in August).
 - **Why:** Need deterministic, documented exceptions for the close-agent demo without polluting clean months with extra threshold breaches. Sticky A1/A2/B2 avoids reverse-side MoM breaches; latest-period A4/B1 and A3’s clean-TB offset month keep the breach list exact.
 - **Implications:** `data/ANOMALIES.md` is source docs; `verify_anomalies.py` prints DB rows; `verify_data.py` asserts the expected breach set. Revenue accounts now carry reconciling subledger detail. Agent/MCP/UI/evals still untouched.
+
+## 2026-10-06 — Slice 3 policy.yaml thresholds
+
+- **Decision:** Centralize variance thresholds, optional per-account overrides, and confidence cutoff placeholders in `config/policy.yaml`. Agent/MCP tools load via `policy.py` with validation; remove hardcoded threshold constants from Python. Close pass scans all entities/periods when flagging.
+- **Why:** SPEC requires config in YAML, never hardcoded. Enables pytest to prove threshold changes alter the flagged set without touching anomaly data.
+- **Implications:** Confidence high/med/low *mapping* remains slice 4 (cutoffs only stored now). `draft_flux_commentary(threshold=...)` still accepts an optional percent override; dollar threshold always comes from policy. Added deps: `pyyaml`, `pytest`.

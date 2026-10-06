@@ -9,6 +9,7 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 | Piece | Path |
 | --- | --- |
 | Synthetic data generator (24 months TB, AR + AP/accrual detail) | `generate_data.py` |
+| Policy (thresholds, confidence cutoffs) | `config/policy.yaml`, `policy.py` |
 | Data verification script | `verify_data.py` |
 | SQLite database | `data/finance.db` |
 | MCP tools | `tools.py`, `mcp_server.py` |

@@ -8,11 +8,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DB_PATH = ROOT / "data" / "finance.db"
-THRESHOLD_PCT = 0.10
-THRESHOLD_AMT = 50_000.0
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-# Accounts expected to have reconciling subledger detail
+from policy import flag_variances, load_policy  # noqa: E402
+
+DB_PATH = ROOT / "data" / "finance.db"
+
 DETAIL_ACCOUNTS = {
     "1100",
     "2000",
@@ -44,16 +46,15 @@ DETAIL_ACCOUNTS = {
     "7100",
 }
 
-# Expected MoM breaches after slice-2 planting: (entity, account_id, period_b)
 EXPECTED_BREACHES = {
-    ("ND-US", "6110", "2026-06"),  # A1
-    ("ND-EU", "6020", "2026-07"),  # A2
-    ("ND-EU", "6500", "2026-07"),  # A2B
-    ("ND-US", "4000", "2026-06"),  # A3
-    ("ND-US", "4000", "2026-07"),  # A3B
-    ("ND-US", "6310", "2026-09"),  # A4
-    ("ND-US", "6200", "2026-09"),  # B1
-    ("ND-US", "6600", "2026-03"),  # B2
+    ("ND-US", "6110", "2026-06"),
+    ("ND-EU", "6020", "2026-07"),
+    ("ND-EU", "6500", "2026-07"),
+    ("ND-US", "4000", "2026-06"),
+    ("ND-US", "4000", "2026-07"),
+    ("ND-US", "6310", "2026-09"),
+    ("ND-US", "6200", "2026-09"),
+    ("ND-US", "6600", "2026-03"),
 }
 
 
@@ -65,6 +66,7 @@ def main() -> int:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     exit_code = 0
+    policy = load_policy()
 
     print("=== 1) Counts ===")
     accounts = conn.execute("SELECT COUNT(*) AS n FROM accounts").fetchone()["n"]
@@ -96,6 +98,10 @@ def main() -> int:
     print(f"periods:           {periods}")
     print(f"AR invoices:       {ar_invoices}")
     print(f"AP/accrual/opex:   {ap_accrual}")
+    print(
+        f"policy thresholds: pct>{policy.variance.threshold_pct} AND "
+        f"amt>{policy.variance.threshold_amt}"
+    )
 
     print("\n=== 2) Subledger ↔ TB reconciliation ===")
     diffs = []
@@ -118,16 +124,7 @@ def main() -> int:
     for r in rows:
         delta = round(r["tb"] - r["sub_sum"], 2)
         if abs(delta) > 0.01:
-            diffs.append(
-                {
-                    "period": r["period"],
-                    "entity": r["entity"],
-                    "account_id": r["account_id"],
-                    "tb": r["tb"],
-                    "sub_sum": r["sub_sum"],
-                    "diff": delta,
-                }
-            )
+            diffs.append(dict(r) | {"diff": delta})
     if not diffs:
         print(f"OK — {len(rows)} account-period-entity rows reconcile (diff ≤ $0.01)")
     else:
@@ -138,58 +135,17 @@ def main() -> int:
                 f"  {d['period']} {d['entity']} {d['account_id']}: "
                 f"TB={d['tb']} SUB={d['sub_sum']} DIFF={d['diff']}"
             )
-        if len(diffs) > 20:
-            print(f"  ... and {len(diffs) - 20} more")
 
-    print("\n=== 4) Threshold breaches (>10% AND >$50K) ===")
-    breaches = []
-    periods_list = [
-        r["period"]
-        for r in conn.execute(
-            "SELECT DISTINCT period FROM trial_balance ORDER BY period"
-        )
-    ]
-    for entity in entities:
-        for i in range(1, len(periods_list)):
-            a_per, b_per = periods_list[i - 1], periods_list[i]
-            pairs = conn.execute(
-                """
-                SELECT a.account_id,
-                       a.ending_balance AS bal_a,
-                       b.ending_balance AS bal_b
-                FROM trial_balance a
-                JOIN trial_balance b
-                  ON b.account_id = a.account_id
-                 AND b.entity = a.entity
-                WHERE a.entity = ? AND a.period = ? AND b.period = ?
-                """,
-                (entity, a_per, b_per),
-            ).fetchall()
-            for p in pairs:
-                delta = p["bal_b"] - p["bal_a"]
-                if abs(p["bal_a"]) > 1:
-                    pct = delta / p["bal_a"]
-                else:
-                    pct = 1.0 if abs(delta) else 0.0
-                if abs(pct) > THRESHOLD_PCT and abs(delta) > THRESHOLD_AMT:
-                    breaches.append(
-                        (
-                            entity,
-                            p["account_id"],
-                            a_per,
-                            b_per,
-                            round(pct, 4),
-                            round(delta, 2),
-                        )
-                    )
-
+    print("\n=== 4) Threshold breaches (from policy.yaml) ===")
+    breaches = flag_variances(policy, conn)
     print(f"breach_count: {len(breaches)}")
     for b in breaches:
         print(
-            f"  {b[0]} {b[1]} {b[2]}→{b[3]} pct={b[4]:.1%} amt={b[5]:,.2f}"
+            f"  {b['entity']} {b['account_id']} {b['period_a']}→{b['period_b']} "
+            f"pct={b['variance_pct']:.1%} amt={b['variance_amt']:,.2f}"
         )
 
-    actual_keys = {(b[0], b[1], b[3]) for b in breaches}
+    actual_keys = {(b["entity"], b["account_id"], b["period_b"]) for b in breaches}
     missing = EXPECTED_BREACHES - actual_keys
     extra = actual_keys - EXPECTED_BREACHES
     print("\n=== Breach set check ===")

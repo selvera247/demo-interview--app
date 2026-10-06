@@ -1,0 +1,22 @@
+# Close-agent policy for Northwind Digital (synthetic demo).
+# Agent and MCP tools load this file; do not hardcode thresholds in Python.
+
+variance:
+  # Flag when BOTH conditions are true (AND).
+  threshold_pct: 0.10          # 10%
+  threshold_amt: 50000         # $50,000
+  require_both: true
+
+# Optional per-account overrides (account_id -> thresholds).
+# Example:
+#   "6200":
+#     threshold_pct: 0.15
+#     threshold_amt: 100000
+account_overrides: {}
+
+confidence:
+  # Numeric cutoffs reserved for slice 4 mapping (high / med / low).
+  high_min: 0.80
+  med_min: 0.55
+  # Scores below med_min are low.
+  low_routes_to_human_review: true

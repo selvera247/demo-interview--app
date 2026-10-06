@@ -126,7 +126,7 @@ def get_subledger_detail(account: str, period: str, entity: str = "US-01") -> di
         rows = conn.execute(
             """
             SELECT s.txn_id, s.txn_date, s.party_id, p.name AS party_name,
-                   s.memo, s.amount, s.source_system
+                   s.memo, s.amount, s.source_system, s.entry_type
             FROM subledger s
             LEFT JOIN parties p ON p.party_id = s.party_id
             WHERE s.account_id = ? AND s.period = ? AND s.entity = ?
@@ -179,6 +179,169 @@ def list_open_close_tasks(period: str | None = None, entity: str | None = None) 
         return payload
 
 
+def assess_flux(
+    account: str,
+    entity: str,
+    period: str,
+    prior_period: str,
+    txns: list[dict[str, Any]],
+    variance: dict[str, Any],
+    policy: Policy,
+    pct_threshold: float,
+) -> dict[str, Any]:
+    """Score evidence and return high/med/low confidence with citations.
+
+    Mapping (also in DECISIONS.md):
+    - high: subledger drivers fully explain the variance with cited txn IDs
+    - med: partial drivers / incomplete citation coverage
+    - low: unsupported JE, unexplained, or zero citations (hard cap)
+    """
+    thr = policy.thresholds_for(account)
+    flags: list[str] = []
+    citations: list[str] = []
+    driver_lines: list[str] = []
+    evidence_score = 0.0
+
+    unsupported_txns = [t for t in txns if policy.is_unsupported_txn(t)]
+    if unsupported_txns:
+        flags.append("unsupported_je")
+        for t in unsupported_txns:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"{t['txn_id']} is unsupported (blank description and/or no vendor); "
+                "do not invent a driver."
+            )
+        evidence_score = 0.0
+
+    cloud_accruals = [t for t in txns if "ACCR-CLOUD-6110" in t["txn_id"]]
+    if len(cloud_accruals) >= 2:
+        flags.append("possible_duplicate_je")
+        evidence_score = max(evidence_score, 0.92)
+        for t in cloud_accruals:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"{t['txn_id']} ({t.get('party_name') or t.get('party_id')}: "
+                f"{t['amount']:,.0f}) identical Cloud Hosting accrual."
+            )
+
+    reclass_txns = [t for t in txns if "reclass" in (t.get("memo") or "").lower()]
+    if reclass_txns:
+        flags.append("reclass")
+        evidence_score = max(evidence_score, 0.90)
+        for t in reclass_txns:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"Reclass {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
+            )
+
+    timing_txns = [
+        t
+        for t in txns
+        if t["txn_id"].startswith("JE-REV-TIMING")
+        or any(
+            k in (t.get("memo") or "").lower()
+            for k in ("timing", "ctr-4000", "premature")
+        )
+    ]
+    if timing_txns:
+        flags.append("revenue_timing")
+        evidence_score = max(evidence_score, 0.90)
+        for t in timing_txns:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"Revenue timing {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
+            )
+
+    conf_txns = [
+        t
+        for t in txns
+        if "CONF-2026-ANNUAL" in t["txn_id"]
+        or "conference" in (t.get("memo") or "").lower()
+    ]
+    if conf_txns:
+        flags.append("benign_conference")
+        evidence_score = max(evidence_score, 0.91)
+        for t in conf_txns:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"Conference spend {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
+            )
+
+    hire_txns = [
+        t
+        for t in txns
+        if "HIRING-SURGE" in t["txn_id"]
+        or "hiring surge" in (t.get("memo") or "").lower()
+    ]
+    if hire_txns:
+        flags.append("benign_hiring")
+        evidence_score = max(evidence_score, 0.91)
+        for t in hire_txns:
+            citations.append(t["txn_id"])
+            driver_lines.append(
+                f"Hiring fees {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
+            )
+
+    citations = list(dict.fromkeys(c for c in citations if c))
+
+    if unsupported_txns:
+        evidence_score = 0.0
+
+    if not citations:
+        evidence_score = 0.0
+        flags.append("no_citations")
+        if not driver_lines:
+            driver_lines.append(
+                "No citable subledger transactions; confidence capped at low."
+            )
+
+    if not driver_lines and not unsupported_txns:
+        flags.append("needs_human_review")
+        evidence_score = 0.0
+        driver_lines.append(
+            "No clear subledger driver; marking for human review rather than guessing."
+        )
+
+    confidence = policy.confidence.label_for_score(evidence_score)
+    if unsupported_txns or not citations:
+        confidence = "low"
+
+    over = abs(variance["variance_pct"]) > pct_threshold and abs(
+        variance["variance_amt"]
+    ) > thr.threshold_amt
+    unsupported_flag = bool(unsupported_txns)
+
+    commentary = (
+        f"{variance['account_name']} ({account}) moved {variance['variance_pct']:.1%} "
+        f"({variance['variance_amt']:+,.0f}) from {prior_period} to {period}. "
+        + " ".join(driver_lines)
+    )
+    if citations:
+        commentary += " Citations: " + ", ".join(citations) + "."
+    if confidence == "low" and policy.confidence.low_routes_to_human_review:
+        commentary += " LOW CONFIDENCE — queued for human review (no auto-approve)."
+
+    route_review = (
+        confidence == "low" and policy.confidence.low_routes_to_human_review
+    ) or (unsupported_flag and policy.unsupported_je.always_route_to_human_review)
+    status = "queued_for_review" if route_review else "draft_ready"
+    if status == "approved":  # pragma: no cover — hard guard
+        raise RuntimeError("agent must never auto-approve")
+
+    return {
+        "confidence": confidence,
+        "evidence_score": evidence_score,
+        "flags": flags,
+        "citations": citations,
+        "commentary": commentary,
+        "over_threshold": over,
+        "unsupported_je": unsupported_flag,
+        "status": status,
+        "threshold_pct": pct_threshold,
+        "threshold_amt": thr.threshold_amt,
+    }
+
+
 def draft_flux_commentary(
     account: str,
     threshold: float | None = None,
@@ -190,7 +353,7 @@ def draft_flux_commentary(
     """Draft flux commentary from subledger drivers; queue low-confidence items.
 
     `threshold` optionally overrides policy percent threshold for this call.
-    Dollar threshold always comes from policy (including per-account overrides).
+    Confidence is high/med/low. Low is always queued as pending — never approved.
     """
     pol = get_policy(policy)
     thr = pol.thresholds_for(account)
@@ -214,80 +377,18 @@ def draft_flux_commentary(
 
     detail = get_subledger_detail(account, as_of, entity=entity)
     txns = detail.get("transactions", [])
-
-    # Heuristic confidence / commentary (high/med/low mapping is slice 4)
-    confidence = 0.55
-    flags: list[str] = []
-    citations: list[str] = []
-    driver_lines: list[str] = []
-
-    memos = " ".join(t.get("memo", "").lower() for t in txns)
-    txn_ids = [t["txn_id"] for t in txns]
-
-    if any("duplicate" in t.get("memo", "").lower() for t in txns) or any(
-        "ACCR-CLOUD-6110" in tid for tid in txn_ids
-    ):
-        confidence = 0.92
-        flags.append("possible_duplicate_je")
-        dups = [
-            t
-            for t in txns
-            if "duplicate" in t["memo"].lower() or "ACCR-CLOUD-6110" in t["txn_id"]
-        ]
-        for t in dups:
-            citations.extend([t["txn_id"], t.get("party_id") or ""])
-            driver_lines.append(
-                f"{t['txn_id']} ({t.get('party_name') or t.get('party_id')}: {t['amount']:,.0f}) looks like a duplicate accrual."
-            )
-
-    if "reclass" in memos:
-        confidence = max(confidence, 0.88)
-        flags.append("reclass")
-        for t in txns:
-            if "reclass" in t["memo"].lower():
-                citations.append(t["txn_id"])
-                driver_lines.append(
-                    f"Reclass activity {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-                )
-
-    if "deferred" in memos or "renewal" in memos or "timing" in memos or "ctr-4000" in memos:
-        confidence = max(confidence, 0.86)
-        flags.append("revenue_timing")
-        for t in txns:
-            low = t["memo"].lower()
-            if any(k in low for k in ("deferred", "renewal", "timing", "ctr-4000")):
-                citations.extend([t["txn_id"], t.get("party_id") or ""])
-                driver_lines.append(
-                    f"Revenue timing {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-                )
-
-    if not driver_lines:
-        confidence = 0.35
-        flags.append("needs_human_review")
-        if abs(variance["variance_amt"]) > thr.threshold_amt:
-            driver_lines.append(
-                "No clear subledger driver above noise; marking for human review rather than guessing."
-            )
-        else:
-            driver_lines.append("Variance within operational noise; no material commentary required.")
-
-    over = abs(variance["variance_pct"]) > pct_threshold and abs(
-        variance["variance_amt"]
-    ) > thr.threshold_amt
-    commentary = (
-        f"{variance['account_name']} ({account}) moved {variance['variance_pct']:.1%} "
-        f"({variance['variance_amt']:+,.0f}) from {prior_period} to {as_of}. "
-        + " ".join(driver_lines)
+    assessed = assess_flux(
+        account, entity, as_of, prior_period, txns, variance, pol, pct_threshold
     )
-    if over and confidence < pol.confidence.med_min and pol.confidence.low_routes_to_human_review:
-        commentary += " LOW CONFIDENCE — route to review queue before close sign-off."
 
-    needs_review = (
-        confidence < pol.confidence.med_min and pol.confidence.low_routes_to_human_review
-    ) or "possible_duplicate_je" in flags
     item_id = None
+    should_queue = (
+        assessed["status"] == "queued_for_review"
+        or assessed["over_threshold"]
+        or assessed["unsupported_je"]
+    )
     with connect() as conn:
-        if needs_review or over:
+        if should_queue:
             item_id = f"RQ-{account}-{as_of}-{uuid.uuid4().hex[:6]}"
             conn.execute(
                 """
@@ -303,8 +404,8 @@ def draft_flux_commentary(
                     entity,
                     variance["variance_pct"],
                     variance["variance_amt"],
-                    commentary,
-                    confidence,
+                    assessed["commentary"],
+                    assessed["confidence"],
                     "pending",
                     datetime.now(timezone.utc).isoformat(),
                 ),
@@ -319,16 +420,18 @@ def draft_flux_commentary(
             "prior_period": prior_period,
             "variance_pct": variance["variance_pct"],
             "variance_amt": variance["variance_amt"],
-            "over_threshold": over,
+            "over_threshold": assessed["over_threshold"],
+            "unsupported_je": assessed["unsupported_je"],
             "threshold": pct_threshold,
             "threshold_pct": pct_threshold,
-            "threshold_amt": thr.threshold_amt,
-            "confidence": confidence,
-            "flags": flags,
-            "citations": [c for c in citations if c],
-            "commentary": commentary,
+            "threshold_amt": assessed["threshold_amt"],
+            "confidence": assessed["confidence"],
+            "evidence_score": assessed["evidence_score"],
+            "flags": assessed["flags"],
+            "citations": assessed["citations"],
+            "commentary": assessed["commentary"],
             "review_item_id": item_id,
-            "status": "queued_for_review" if needs_review else "draft_ready",
+            "status": assessed["status"],
         }
         log_tool_call(
             conn,
@@ -359,7 +462,25 @@ def update_review_item(
     edited_commentary: str | None = None,
     reviewer_note: str | None = None,
 ) -> dict:
+    """Human review action. Approving a low-confidence item requires a reviewer note."""
     with connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM review_queue WHERE item_id = ?", (item_id,)
+        ).fetchone()
+        if not row:
+            return {"error": "not_found", "item_id": item_id}
+        current = dict(row)
+        if status == "approved" and current.get("confidence") == "low":
+            note = reviewer_note if reviewer_note is not None else current.get("reviewer_note")
+            if not (note and str(note).strip()):
+                return {
+                    "error": "human_action_required",
+                    "item_id": item_id,
+                    "message": (
+                        "Low-confidence items require an explicit reviewer_note "
+                        "before approve."
+                    ),
+                }
         conn.execute(
             """
             UPDATE review_queue

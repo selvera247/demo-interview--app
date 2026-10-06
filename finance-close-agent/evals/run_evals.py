@@ -33,7 +33,7 @@ def score_case(case: dict) -> dict:
     variance = get_account_variance(account, period_a, period_b, entity=entity)
     draft = draft_flux_commentary(
         account,
-        threshold=case.get("threshold_pct", 0.10),
+        threshold=case.get("threshold_pct"),
         entity=entity,
         period=period_b,
         prior_period=period_a,

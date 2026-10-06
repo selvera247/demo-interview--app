@@ -294,7 +294,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             variance_pct REAL NOT NULL,
             variance_amt REAL NOT NULL,
             draft_commentary TEXT NOT NULL,
-            confidence REAL NOT NULL,
+            confidence TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'pending',
             edited_commentary TEXT,
             reviewer_note TEXT,
@@ -486,7 +486,7 @@ def build_expense_detail_rows(
 ) -> list[tuple]:
     """P&L expense detail summing to monthly TB activity."""
     rows: list[tuple] = []
-    n = 3 if abs(target) > 50_000 else 2
+    n = 3 if abs(target) > 40_000 else 2
     amts = split_amount(target, n, rng)
     name = next(a[1] for a in ACCOUNTS if a[0] == account_id)
     for i, amt in enumerate(amts):
@@ -1010,7 +1010,7 @@ def override_subledger_for_anomalies(
 def build_close_tasks(period: str) -> list[tuple]:
     return [
         (f"T-{period}-01", period, "ND-US", "Post payroll accrual", "Close lead", "done", 1),
-        (f"T-{period}-02", period, "ND-US", "Flux accounts >10% / >$50K", "FP&A", "in_progress", 2),
+        (f"T-{period}-02", period, "ND-US", "Flux accounts over policy thresholds", "FP&A", "in_progress", 2),
         (f"T-{period}-03", period, "ND-US", "AR subledger tie-out", "AR lead", "in_progress", 2),
         (f"T-{period}-04", period, "ND-US", "Review manual JEs >$100K", "Controller", "open", 3),
         (f"T-{period}-05", period, "ND-US", "Deferred revenue rollforward", "Revenue", "open", 3),

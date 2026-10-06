@@ -21,14 +21,15 @@ st.set_page_config(page_title="Close Agent Review Queue", layout="wide")
 st.title("Close Agent Review Queue")
 st.caption(
     "Synthetic demo data only — not real company financials. "
-    "Approve, edit, or send back drafts before commentary hits the flux package."
+    "Approve, edit, or send back drafts before commentary hits the flux package. "
+    "Confidence labels: high / med / low (low requires human review)."
 )
 
 col_a, col_b = st.columns([1, 1])
 with col_a:
-    if st.button("Run close pass (US-01)", type="primary"):
+    if st.button("Run close pass (all entities)", type="primary"):
         with st.spinner("Flagging variances and drafting commentary…"):
-            result = run_close_pass()
+            result = run_close_pass(draft=True)
         st.session_state["last_pass"] = result
         st.success(
             f"Flagged {result['flagged_count']} accounts · "
@@ -36,7 +37,9 @@ with col_a:
         )
 
 with col_b:
-    status = st.selectbox("Queue filter", ["pending", "approved", "edited", "rejected", None], index=0)
+    status = st.selectbox(
+        "Queue filter", ["pending", "approved", "edited", "rejected", None], index=0
+    )
 
 if "last_pass" in st.session_state:
     with st.expander("Last close pass summary", expanded=False):
@@ -50,11 +53,13 @@ if not items:
     st.info("Queue empty. Run a close pass to draft commentary.")
 
 for item in items:
+    conf = item.get("confidence")
+    conf_label = conf if isinstance(conf, str) else str(conf)
     with st.container(border=True):
         st.markdown(
             f"**{item['account_id']}** · {item['period']} · {item['entity']}  \n"
             f"Variance {item['variance_pct']:.1%} ({item['variance_amt']:+,.0f}) · "
-            f"confidence {item['confidence']:.0%} · status `{item['status']}`"
+            f"confidence **{conf_label}** · status `{item['status']}`"
         )
         edited = st.text_area(
             "Commentary",
@@ -62,11 +67,18 @@ for item in items:
             key=f"c-{item['item_id']}",
             height=120,
         )
-        note = st.text_input("Reviewer note", key=f"n-{item['item_id']}", value=item.get("reviewer_note") or "")
+        note = st.text_input(
+            "Reviewer note (required to approve low-confidence items)",
+            key=f"n-{item['item_id']}",
+            value=item.get("reviewer_note") or "",
+        )
         b1, b2, b3 = st.columns(3)
         if b1.button("Approve", key=f"a-{item['item_id']}"):
-            update_review_item(item["item_id"], "approved", edited, note)
-            st.rerun()
+            result = update_review_item(item["item_id"], "approved", edited, note)
+            if result.get("error"):
+                st.error(result.get("message") or result["error"])
+            else:
+                st.rerun()
         if b2.button("Save edit", key=f"e-{item['item_id']}"):
             update_review_item(item["item_id"], "edited", edited, note)
             st.rerun()

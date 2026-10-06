@@ -50,3 +50,9 @@
 - **Decision:** Polish `ui/review_app.py` only (plus shared `ui/queue_helpers.py` and text verifier). Queue sorts **low → med → high**, then |variance| descending. Each card shows account, entity, period, variance ($/%), commentary, cited txn IDs, confidence, and policy rule (`threshold` / `unsupported_je`). Approve/edit/reject require a reviewer note in the UI; low approve remains API-blocked without a note. Status history is session-scoped; tool-call log tab maps each call to the close-pass item it served. No MCP / agent / eval changes.
 - **Why:** Controllers need a review surface that surfaces risk order and evidence without leaving the demo.
 - **Implications:** README demo checklist documents 9 pending items and what high/med/low look like. `ui/verify_queue_text.py` prints the queue for environments that cannot screenshot Streamlit.
+
+## 2026-10-06 — Known limitation: paired anomalies are separate queue rows
+
+- **Decision:** Leave A2/A2B and A3/A3B as **four separate** review-queue entries for now (not a merge blocker). Optionally add a small “group paired entries” polish before packaging so each offset side sits next to its original.
+- **Why:** The offset side only makes sense beside the original; four independent cards are less realistic for a controller review, but confidence sort and evidence still work for the demo.
+- **Implications:** Documented limitation only — no code change this turn. If we add grouping later, keep MCP/agent/evals untouched and sort groups by the worse confidence / larger |$| of the pair.

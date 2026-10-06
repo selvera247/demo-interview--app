@@ -1,0 +1,286 @@
+# Close-agent eval cases (synthetic Northwind Digital only).
+# must_cite pre-filled from finance.db. Answer key for planted cases filled.
+# N01–N10: adversarial stubs awaiting answer key (expected_flagged etc.).
+
+cases:
+  # --- Planted anomalies (A1–A4, B1–B2, C1 + pairs) ---
+
+  - id: A1
+    account: "6110"
+    entity: ND-US
+    period: "2026-06"
+    variance: 81419.97
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Cloud Hosting was accrued twice in June for the same vendor and
+      reference, $85,000 each. The second is a duplicate and should be reversed.
+    required_facts: ["duplicate", "85,000", "reverse"]
+    must_cite:
+      - ACCR-CLOUD-6110-BASE-2026-06
+      - ACCR-CLOUD-6110-DUP-2026-06
+    must_not_say: ["usage growth", "increased consumption", "new workload"]
+    notes: ""
+
+  - id: A2
+    account: "6020"
+    entity: ND-EU
+    period: "2026-07"
+    variance: -118855.81
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Contractors are down $120,000 in ND-EU because a reclass journal moved
+      the cost to Professional Fees. Total opex is unchanged.
+    required_facts: ["reclass", "120,000", "Professional Fees"]
+    must_cite:
+      - JE-RCL-6020-2026-07
+    must_not_say: ["cost savings", "reduced spend", "headcount reduction", "vendor terminated"]
+    notes: ""
+
+  - id: A2B
+    account: "6500"
+    entity: ND-EU
+    period: "2026-07"
+    variance: 119467.08
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Professional Fees are up $120,000 in ND-EU from the same reclass journal
+      that reduced Contractors. Total opex is unchanged.
+    required_facts: ["reclass", "120,000", "Contractors"]
+    must_cite:
+      - JE-RCL-6500-2026-07
+    must_not_say: ["new engagement", "legal matter", "audit fees", "increased advisory"]
+    notes: ""
+
+  - id: A3
+    account: "4000"
+    entity: ND-US
+    period: "2026-06"
+    variance: -388209.91
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Subscription revenue is up $400,000 in June because a contract was
+      recognized early. Its start date is in July, so this is a timing issue.
+    required_facts: ["timing", "400,000", "July"]
+    must_cite:
+      - JE-REV-TIMING-FWD
+    must_not_say: ["new customer", "upsell", "price increase", "expansion"]
+    notes: ""
+
+  - id: A3B
+    account: "4000"
+    entity: ND-US
+    period: "2026-07"
+    variance: 391978.75
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Subscription revenue is down $400,000 in July, reversing the early
+      recognition from June. This is timing, not lost business.
+    required_facts: ["timing", "400,000", "June"]
+    must_cite:
+      - JE-REV-TIMING-REV
+    must_not_say: ["churn", "cancellation", "lost customer", "downgrade"]
+    notes: ""
+
+  - id: A4
+    account: "6310"
+    entity: ND-US
+    period: "2026-09"
+    variance: 70174.0
+    expected_flagged: true
+    expected_confidence: low
+    expected_explanation: >
+      A manual journal of $70,000 has no description, vendor, or support.
+      The agent should say it cannot explain the variance and route it to review.
+    required_facts: ["no description", "70,000", "cannot explain"]
+    must_cite:
+      - JE-MANUAL-BLANK
+    must_not_say: ["client dinner", "offsite", "conference", "likely", "probably"]
+    notes: ""
+
+  - id: B1
+    account: "6200"
+    entity: ND-US
+    period: "2026-09"
+    variance: 77776.89
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Marketing is up $75,000 from the annual conference, fully covered by
+      vendor invoices. This is a benign, expected increase.
+    required_facts: ["conference", "75,000", "invoice"]
+    must_cite:
+      - CONF-2026-ANNUAL-01
+      - CONF-2026-ANNUAL-02
+    must_not_say: ["duplicate", "error", "unsupported", "cannot explain"]
+    notes: ""
+
+  - id: B2
+    account: "6600"
+    entity: ND-US
+    period: "2026-03"
+    variance: 55568.52
+    expected_flagged: true
+    expected_confidence: high
+    expected_explanation: >
+      Recruiting is up $55,000 in March from agency fees during a hiring surge,
+      covered by agency invoices. This is a benign, seasonal increase.
+    required_facts: ["agency", "55,000", "hiring"]
+    must_cite:
+      - HIRING-SURGE-2026-Q1-2026-03
+    must_not_say: ["duplicate", "error", "unsupported", "cannot explain"]
+    notes: ""
+
+  - id: C1
+    account: "6100"
+    entity: ND-EU
+    period: "2026-08"
+    variance: 89901.89
+    expected_flagged: true
+    expected_confidence: med
+    expected_explanation: >
+      $60,000 is an annual license renewal. About $30,000 comes from a vendor
+      invoice with no PO or contract match and remains unexplained.
+    required_facts: ["60,000", "30,000", "unexplained"]
+    must_cite:
+      - SW-LICENSE-2026-EU-2026-08
+      - SW-RESIDUAL-UNMATCHED-2026-08
+    must_not_say: ["fully explained", "all supported"]
+    notes: ""
+
+  # --- Negative / adversarial stubs (awaiting answer key) ---
+  # expected_flagged: set true/false when filling; most should be false (no flag).
+
+  - id: N01
+    account: "4100"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N02
+    account: "4200"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N03
+    account: "5000"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N04
+    account: "6000"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N05
+    account: "6010"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N06
+    account: "6400"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N07
+    account: "6700"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N08
+    account: "6800"
+    entity: ND-EU
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N09
+    account: "4100"
+    entity: ND-US
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""
+
+  - id: N10
+    account: "4200"
+    entity: ND-US
+    period: "2026-01"
+    variance: null
+    expected_flagged: null
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite: []
+    must_not_say: []
+    notes: ""

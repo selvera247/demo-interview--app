@@ -56,3 +56,15 @@
 - **Decision:** Leave A2/A2B and A3/A3B as **four separate** review-queue entries for now (not a merge blocker). Optionally add a small “group paired entries” polish before packaging so each offset side sits next to its original.
 - **Why:** The offset side only makes sense beside the original; four independent cards are less realistic for a controller review, but confidence sort and evidence still work for the demo.
 - **Implications:** Documented limitation only — no code change this turn. If we add grouping later, keep MCP/agent/evals untouched and sort groups by the worse confidence / larger |$| of the pair.
+
+## 2026-10-06 — Slice 6 eval harness (stubs + scorer)
+
+- **Decision:** Ship `evals/cases.yaml` with **stubs only** (planted A1–A4 / B1–B2 / C1 + A2B/A3B, plus 10 negative/adversarial rows). Pre-fill `must_cite` from DB txn ids; leave `expected_explanation`, `required_facts`, and `must_not_say` blank for the answer-key author. Replace `run_evals.py` with a deterministic scorer: confidence match, must_cite coverage, must_not_say avoidance, required_facts presence. No LLM-as-judge. Exit non-zero on incomplete answer key or any case failure. Pytest fails while explanation/facts are blank so incomplete cases cannot be scored. Do not publish a score in the README until the answer key is filled.
+- **Why:** Separates harness machinery from gold labels so the author owns the answer key without agent/MCP/UI churn.
+- **Implications:** Agent logic, MCP tools, and UI unchanged. Old `variance_eval_set.json` lexical scorer retired. `exports/eval_report.json` written by the runner for local inspection only.
+
+## 2026-10-06 — Eval answer key (planted) + expected_flagged
+
+- **Decision:** Paste author answer key into the nine planted cases. Add optional `expected_flagged` (bool) scored when set; adversarial N01–N10 stubs carry `expected_flagged: null` until filled. Normalize amount facts by stripping `$` and thousands separators before substring match. Score complete cases even if adversarial stubs remain incomplete; exit non-zero while stubs are open or any scored case fails. Do not edit answer keys to force passes.
+- **Why:** Negative cases need an explicit no-flag expectation; amount formatting must not false-fail honest commentary.
+- **Implications:** Planted score is reportable now; published README score waits until N01–N10 are filled and the suite is green.

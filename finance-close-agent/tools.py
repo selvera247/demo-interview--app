@@ -188,13 +188,15 @@ def assess_flux(
     variance: dict[str, Any],
     policy: Policy,
     pct_threshold: float,
+    evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Score evidence and return high/med/low confidence with citations.
+    """Score evidence generically (no planted IDs / seed-specific strings).
 
-    Mapping (also in DECISIONS.md):
-    - high: subledger drivers fully explain the variance with cited txn IDs
-    - med: partial drivers / incomplete citation coverage
-    - low: unsupported JE, unexplained, or zero citations (hard cap)
+    Structural signals only:
+      - unsupported JE policy
+      - identical or near-identical amount pairs (same party)
+      - magnitude coverage of the variance by retrieved rows
+      - counterpart activity when present
     """
     thr = policy.thresholds_for(account)
     flags: list[str] = []
@@ -202,7 +204,11 @@ def assess_flux(
     driver_lines: list[str] = []
     evidence_score = 0.0
 
-    unsupported_txns = [t for t in txns if policy.is_unsupported_txn(t)]
+    current = list(txns)
+    if evidence is not None:
+        current = list(evidence.get("current") or txns)
+
+    unsupported_txns = [t for t in current if policy.is_unsupported_txn(t)]
     if unsupported_txns:
         flags.append("unsupported_je")
         for t in unsupported_txns:
@@ -213,111 +219,101 @@ def assess_flux(
             )
         evidence_score = 0.0
 
-    cloud_accruals = [
-        t
-        for t in txns
-        if "ACCR-CLOUD-6110" in t["txn_id"]
-    ]
-    if len(cloud_accruals) >= 2:
-        flags.append("possible_duplicate_je")
-        evidence_score = max(evidence_score, 0.92)
-        for t in cloud_accruals:
-            citations.append(t["txn_id"])
-            role = "duplicate" if "DUP" in t["txn_id"] else "baseline run-rate"
+    # Identical-amount pairs (same party) → possible duplicate accruals
+    by_key: dict[tuple[Any, float], list[dict]] = {}
+    for t in current:
+        party = t.get("party_id") or ""
+        amt = round(float(t.get("amount") or 0), 2)
+        by_key.setdefault((party, amt), []).append(t)
+    for (party, amt), group in by_key.items():
+        if party and abs(amt) >= 1000 and len(group) >= 2:
+            flags.append("possible_duplicate_je")
+            evidence_score = max(evidence_score, 0.92)
+            for t in group:
+                citations.append(t["txn_id"])
+                driver_lines.append(
+                    f"{t['txn_id']} ({t.get('party_name') or party}: {amt:,.0f}) "
+                    f"matches another posting for the same party/amount."
+                )
             driver_lines.append(
-                f"{t['txn_id']} ({role}, {t.get('party_name') or t.get('party_id')}: "
-                f"{t['amount']:,.0f}) Cloud Hosting accrual."
+                "Identical same-party postings may indicate a duplicate accrual; "
+                f"they cover {abs(amt) * len(group):,.0f} of activity."
             )
-        driver_lines.append(
-            "The duplicate accrual accounts for the full +$85,000 variance vs baseline."
+            break
+
+    # Near-identical amounts (diff <= $500), same party
+    if "possible_duplicate_je" not in flags:
+        keyed: list[tuple[str, float, dict]] = []
+        for t in current:
+            party = t.get("party_id") or ""
+            if not party:
+                continue
+            keyed.append((party, float(t.get("amount") or 0), t))
+        for i, (p1, a1, t1) in enumerate(keyed):
+            for p2, a2, t2 in keyed[i + 1 :]:
+                if p1 == p2 and 0 < abs(abs(a1) - abs(a2)) <= 500:
+                    flags.append("near_duplicate_je")
+                    evidence_score = max(evidence_score, 0.65)
+                    citations.extend([t1["txn_id"], t2["txn_id"]])
+                    driver_lines.append(
+                        f"Near-duplicate same-party amounts "
+                        f"({a1:,.0f} vs {a2:,.0f}) on {t1['txn_id']} / {t2['txn_id']}."
+                    )
+                    break
+            if "near_duplicate_je" in flags:
+                break
+
+    # Counterpart structural pairs (opposite-signed activity on another account)
+    counterparts = (evidence or {}).get("counterparts") or {}
+    if counterparts and "possible_duplicate_je" not in flags:
+        flags.append("paired_offset_activity")
+        evidence_score = max(evidence_score, 0.88)
+        for other_acct, rows in counterparts.items():
+            for t in rows[:3]:
+                citations.append(t["txn_id"])
+                driver_lines.append(
+                    f"Paired activity on {other_acct}: {t['txn_id']} "
+                    f"({t.get('memo') or 'no memo'}: {t['amount']:,.0f})."
+                )
+
+    # Magnitude coverage: largest absolute current-period rows vs variance
+    var_amt = abs(float(variance.get("variance_amt") or 0))
+    if current and var_amt > 0 and not unsupported_txns:
+        ranked = sorted(
+            current, key=lambda t: abs(float(t.get("amount") or 0)), reverse=True
         )
-
-    reclass_txns = [t for t in txns if "reclass" in (t.get("memo") or "").lower()]
-    if reclass_txns:
-        flags.append("reclass")
-        evidence_score = max(evidence_score, 0.90)
-        for t in reclass_txns:
+        covered = 0.0
+        explaining: list[dict] = []
+        for t in ranked:
+            covered += abs(float(t.get("amount") or 0))
+            explaining.append(t)
             citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Reclass {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-            )
-
-    timing_txns = [
-        t
-        for t in txns
-        if t["txn_id"].startswith("JE-REV-TIMING")
-        or any(
-            k in (t.get("memo") or "").lower()
-            for k in ("timing", "ctr-4000", "premature")
-        )
-    ]
-    if timing_txns:
-        flags.append("revenue_timing")
-        evidence_score = max(evidence_score, 0.90)
-        for t in timing_txns:
-            citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Revenue timing {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-            )
-
-    conf_txns = [
-        t
-        for t in txns
-        if "CONF-2026-ANNUAL" in t["txn_id"]
-        or "conference" in (t.get("memo") or "").lower()
-    ]
-    if conf_txns:
-        flags.append("benign_conference")
-        evidence_score = max(evidence_score, 0.91)
-        for t in conf_txns:
-            citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Conference spend {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-            )
-
-    hire_txns = [
-        t
-        for t in txns
-        if "HIRING-SURGE" in t["txn_id"]
-        or "hiring surge" in (t.get("memo") or "").lower()
-    ]
-    if hire_txns:
-        flags.append("benign_hiring")
-        evidence_score = max(evidence_score, 0.91)
-        for t in hire_txns:
-            citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Hiring fees {t['txn_id']}: {t['memo']} ({t['amount']:,.0f})."
-            )
-
-    # C1 — partial software explanation
-    license_txns = [
-        t for t in txns if t["txn_id"].startswith("SW-LICENSE-2026-EU")
-    ]
-    residual_txns = [
-        t for t in txns if t["txn_id"].startswith("SW-RESIDUAL-UNMATCHED")
-    ]
-    if license_txns or residual_txns:
-        flags.append("partial_software")
-        explained = sum(abs(t["amount"]) for t in license_txns)
-        residual = sum(abs(t["amount"]) for t in residual_txns)
-        evidence_score = max(evidence_score, 0.65)  # med band
-        for t in license_txns:
-            citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Explained license renewal {t['txn_id']}: {t['memo']} "
-                f"({t['amount']:,.0f})."
-            )
-        for t in residual_txns:
-            citations.append(t["txn_id"])
-            driver_lines.append(
-                f"Unexplained residual {t['txn_id']}: {t['memo']} "
-                f"({t['amount']:,.0f}) — no PO/contract match."
-            )
-        driver_lines.append(
-            f"Partial explanation: ${explained:,.0f} supported; "
-            f"${residual:,.0f} unexplained residual."
-        )
+            if covered >= var_amt * 0.95:
+                break
+        if explaining and "possible_duplicate_je" not in flags:
+            for t in explaining[:5]:
+                driver_lines.append(
+                    f"{t['txn_id']}: {t.get('memo') or '(blank memo)'} "
+                    f"({float(t['amount']):,.0f})."
+                )
+            residual = max(0.0, var_amt - covered)
+            if residual <= max(500.0, var_amt * 0.05):
+                evidence_score = max(evidence_score, 0.90)
+                flags.append("subledger_covers_variance")
+            elif covered >= var_amt * 0.55:
+                evidence_score = max(evidence_score, 0.65)
+                flags.append("partial_subledger_coverage")
+                driver_lines.append(
+                    f"Partial explanation: ${covered:,.0f} supported; "
+                    f"${residual:,.0f} unexplained residual."
+                )
+            else:
+                evidence_score = max(evidence_score, 0.35)
+                flags.append("weak_subledger_coverage")
+                driver_lines.append(
+                    f"Retrieved activity covers ${covered:,.0f} of "
+                    f"${var_amt:,.0f} variance; ${residual:,.0f} unexplained."
+                )
 
     citations = list(dict.fromkeys(c for c in citations if c))
 
@@ -376,6 +372,8 @@ def assess_flux(
         "status": status,
         "threshold_pct": pct_threshold,
         "threshold_amt": thr.threshold_amt,
+        "explained_amount": None,
+        "residual_amount": None,
     }
 
 
@@ -412,11 +410,22 @@ def draft_flux_commentary(
     if variance.get("error"):
         return variance
 
-    detail = get_subledger_detail(account, as_of, entity=entity)
-    txns = detail.get("transactions", [])
+    from retrieval import retrieve_flux_evidence
+
+    evidence = retrieve_flux_evidence(account, entity, as_of, prior_period)
+    txns = evidence.get("current") or []
     assessed = assess_flux(
-        account, entity, as_of, prior_period, txns, variance, pol, pct_threshold
+        account,
+        entity,
+        as_of,
+        prior_period,
+        txns,
+        variance,
+        pol,
+        pct_threshold,
+        evidence=evidence,
     )
+    assessed["evidence_txn_ids"] = list(evidence.get("evidence_txn_ids") or [])
 
     item_id = None
     should_queue = (

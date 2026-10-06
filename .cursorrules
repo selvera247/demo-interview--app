@@ -1,0 +1,24 @@
+# Project: Finance MCP Server + Close Agent (portfolio demo)
+
+## Goal
+Demo showing an AI agent answering month-end close questions and drafting flux commentary over a finance system via MCP. Audience: hiring managers for forward deployed PM / AI builder roles.
+
+## Hard rules
+- Synthetic data only. No real company names, systems, data, or internal terminology. Use the fictional company "Northwind Digital."
+- Read SPEC.md before every task. It is the source of truth. If you want to deviate, say so and wait for approval.
+- Plan before coding: list files to create/change and why. Wait for my OK.
+- Work in small slices. One component at a time, tested before moving on.
+- Every feature needs a test or a runnable verification script. Never say "should work."
+- Log meaningful decisions and tradeoffs in DECISIONS.md (date, decision, why).
+- Do not add dependencies without asking.
+
+## Stack
+Python 3.11+ (3.12 OK), SQLite, MCP Python SDK, pytest, Streamlit (review UI), PyYAML.
+Approved deps: mcp, streamlit, pandas, pyyaml, pytest. No DuckDB.
+
+## Scope (until SPEC DoD / slice 7)
+Only `finance-close-agent/` is in scope. Freeze portfolio and Deal Record; do not change them until explicitly unfrozen.
+
+## Style
+Typed Python, small functions, clear docstrings. Config (thresholds, policies, confidence cutoffs) in YAML, never hardcoded.
+README must let a stranger run the demo in under 5 minutes.

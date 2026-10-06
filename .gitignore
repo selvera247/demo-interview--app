@@ -1,3 +1,9 @@
 node_modules/
 .wrangler/
 dist/
+.venv/
+__pycache__/
+*.pyc
+finance-close-agent/.venv/
+finance-close-agent/data/*.db
+.DS_Store

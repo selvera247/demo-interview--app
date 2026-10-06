@@ -31,7 +31,7 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 - Company: Northwind Digital
 - Entities: `ND-US`, `ND-EU`
 - ~40 accounts, 24 months trial balance
-- Planted anomalies A1–A4 and benign breaches B1–B2 — see `data/ANOMALIES.md`
+- Planted anomalies A1–A4, B1–B2, and C1 (med partial Software) — see `data/ANOMALIES.md`
 - `source_system` labels: `ERP`, `Billing`, `HRIS`, `Expense Tool` only
 
 ## Setup

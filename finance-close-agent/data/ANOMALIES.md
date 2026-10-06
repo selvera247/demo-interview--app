@@ -5,7 +5,7 @@ T&E maps to account **6310 Meals & Entertainment**.
 
 | ID | Account | Entity | Period | Amount | Expected confidence |
 | --- | --- | --- | --- | --- | --- |
-| A1 | 6110 Cloud Hosting | ND-US | 2026-06 | +$85,000 × 2 identical accruals | high |
+| A1 | 6110 Cloud Hosting | ND-US | 2026-06 | +$85,000 (duplicate vs baseline run-rate) | high |
 | A2 | 6020 Contractors | ND-EU | 2026-07 | −$120,000 | high |
 | A2B | 6500 Professional Fees | ND-EU | 2026-07 | +$120,000 (paired side of A2) | high |
 | A3 | 4000 Subscription Revenue | ND-US | 2026-06 | −$400,000 (extra revenue / credit) | high |
@@ -13,13 +13,14 @@ T&E maps to account **6310 Meals & Entertainment**.
 | A4 | 6310 Meals & Entertainment (T&E) | ND-US | 2026-09 | +$70,000 | **low** |
 | B1 | 6200 Marketing & Advertising | ND-US | 2026-09 | +$75,000 | high |
 | B2 | 6600 Recruiting | ND-US | 2026-03 | +$55,000 | high |
+| C1 | 6100 Software Subscriptions | ND-EU | 2026-08 | +~$90,000 (partial: $60k explained / ~$30k residual) | **med** |
 
 ---
 
 ## A1 — Duplicate accrual
 
-- **Mechanism:** From 2026-06 onward (sticky), Cloud Hosting TB includes two identical $85,000 accrual rows: same vendor (`V-200` Nimbus Hosting Co), same amount, same reference `ACCR-CLOUD-6110` (txn ids `ACCR-CLOUD-6110-A-*` / `ACCR-CLOUD-6110-B-*`).
-- **Expected explanation:** Duplicate month-end Cloud Hosting accrual; reverse one of the two identical postings.
+- **Mechanism:** From 2026-06 onward (sticky), Cloud Hosting subledger carries a baseline run-rate accrual `ACCR-CLOUD-6110-BASE` ($85,000) plus an identical duplicate `ACCR-CLOUD-6110-DUP` ($85,000): same vendor (`V-200` Nimbus Hosting Co), same amount, same reference. Only the duplicate is added to the TB vs the clean baseline (+$85,000 variance).
+- **Expected explanation:** The duplicate accrual accounts for the full +$85,000 variance vs baseline; reverse `ACCR-CLOUD-6110-DUP`.
 - **Expected confidence:** high (clear duplicate evidence in subledger).
 
 ## A2 / A2B — Opex reclass
@@ -52,6 +53,12 @@ T&E maps to account **6310 Meals & Entertainment**.
 - **Expected explanation:** Hiring-heavy month / surge recruiting fees.
 - **Expected confidence:** high.
 
+## C1 — Partially explained Software (med)
+
+- **Mechanism:** From **2026-08** onward (sticky), ND-EU Software Subscriptions (`6100`) TB rises by ~+$90,000. Subledger supports **$60,000** via clearly labeled annual license renewal `SW-LICENSE-2026-EU` (Parcel Softwares Ltd / `V-207`). A second invoice `SW-RESIDUAL-UNMATCHED` (~**$30,000**) is from the same real vendor but has **no PO** and no description matching any contract — supported-looking but unexplained residual. Rows reconcile to the TB.
+- **Expected explanation:** Partial: cite the $60k license renewal; explicitly state the ~$30k unexplained residual. Duplicate does not apply; this is incomplete support, not a missing story.
+- **Expected confidence:** **med** → queued for human review.
+
 ## Expected threshold breaches (MoM >10% AND >$50K)
 
 Exactly these period_b breaches (nothing else):
@@ -64,3 +71,4 @@ Exactly these period_b breaches (nothing else):
 6. A4 — ND-US `6310` 2026-08→2026-09  
 7. B1 — ND-US `6200` 2026-08→2026-09  
 8. B2 — ND-US `6600` 2026-02→2026-03  
+9. C1 — ND-EU `6100` 2026-07→2026-08  

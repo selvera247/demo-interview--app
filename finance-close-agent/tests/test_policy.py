@@ -26,6 +26,7 @@ EXPECTED_DEFAULT_BREACHES = {
     ("ND-US", "6310", "2026-09"),
     ("ND-US", "6200", "2026-09"),
     ("ND-US", "6600", "2026-03"),
+    ("ND-EU", "6100", "2026-08"),  # C1
 }
 
 
@@ -43,11 +44,11 @@ def _breach_keys(flagged):
     return {(f["entity"], f["account_id"], f["period_b"]) for f in flagged}
 
 
-def test_default_policy_flags_exactly_eight_breaches(db_conn):
+def test_default_policy_flags_exactly_nine_breaches(db_conn):
     policy = load_policy(DEFAULT_POLICY)
     flagged = flag_variances(policy, db_conn)
     assert _breach_keys(flagged) == EXPECTED_DEFAULT_BREACHES
-    assert len(flagged) == 8
+    assert len(flagged) == 9
 
 
 def test_raising_dollar_threshold_changes_flagged_set(db_conn, tmp_path):
@@ -59,11 +60,12 @@ def test_raising_dollar_threshold_changes_flagged_set(db_conn, tmp_path):
     flagged = flag_variances(load_policy(path), db_conn)
     keys = _breach_keys(flagged)
 
-    # B1/B2 drop on dollar threshold; A4 remains via unsupported_je always_flag
+    # B1/B2/A1/C1 drop on dollar threshold (~55–90k); A4 remains via unsupported_je
     assert ("ND-US", "6200", "2026-09") not in keys
     assert ("ND-US", "6600", "2026-03") not in keys
+    assert ("ND-US", "6110", "2026-06") not in keys  # A1 ~+$81k < $100k
+    assert ("ND-EU", "6100", "2026-08") not in keys  # C1 ~+$90k < $100k
     assert ("ND-US", "6310", "2026-09") in keys
-    assert ("ND-US", "6110", "2026-06") in keys
     assert ("ND-US", "4000", "2026-06") in keys
     assert keys != EXPECTED_DEFAULT_BREACHES
 
@@ -84,7 +86,8 @@ def test_per_account_override_works(db_conn, tmp_path):
     keys = _breach_keys(flagged)
     assert ("ND-US", "6200", "2026-09") not in keys
     assert ("ND-US", "6310", "2026-09") in keys
-    assert len(keys) == 7
+    assert ("ND-EU", "6100", "2026-08") in keys  # C1 untouched by 6200 override
+    assert len(keys) == 8
 
 
 def test_invalid_yaml_fails_loudly(tmp_path):

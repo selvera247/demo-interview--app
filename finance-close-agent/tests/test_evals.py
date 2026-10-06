@@ -16,6 +16,7 @@ from evals.run_evals import (  # noqa: E402
     find_incomplete,
     incomplete_fields,
     load_cases,
+    normalize_text,
 )
 
 
@@ -34,6 +35,7 @@ def test_cases_have_required_structure():
         assert case.get("account"), f"{case.get('id')} missing account"
         assert case.get("entity"), f"{case.get('id')} missing entity"
         assert case.get("period"), f"{case.get('id')} missing period"
+        assert "expected_flagged" in case, f"{case.get('id')} missing expected_flagged"
 
 
 def test_incomplete_answer_key_blocks_scoring():
@@ -60,3 +62,9 @@ def test_incomplete_fields_helper_detects_blanks():
             "required_facts": ["ACCR-CLOUD-6110-DUP"],
         }
     ) == []
+
+
+def test_normalize_text_amount_formatting():
+    assert normalize_text("$85,000") == normalize_text("85,000")
+    assert "85000" in normalize_text("accrual of $85,000 posted")
+    assert normalize_text("85,000") in normalize_text("accrual of $85,000 posted")

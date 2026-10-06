@@ -104,3 +104,9 @@
 - **Decision:** Add `llm/` with `generate(system, user, json_schema) -> dict`. Adapters: OpenAI-compatible (configurable `base_url` for OpenAI / xAI / DeepSeek / Ollama), Anthropic native, and **heuristic** (wraps structural `assess_flux` as the no-LLM baseline). Config in `config/llm.yaml` (provider, model, base_url, api_key_env, temperature default 0, timeout); keys only via env (`.env.example`, gitignore `.env`). Provider selectable via config, `LLM_PROVIDER`, or `--provider`. Drafting contract JSON: `{commentary, cited_ids, explained_amount, residual_amount}`. Retrieval, confidence, unsupported_je, and low→review stay in code. Hallucinated cites → low + logged; invalid JSON → one retry then heuristic fallback (logged in `draft_meta`). Deps: `openai`, `anthropic`, `python-dotenv` only.
 - **Why:** Controllers need model-swappable commentary without letting the LLM own policy gates; heuristic remains the honest baseline.
 - **Implications:** Real API calls are opt-in via env keys; tests mock providers only. No README score publish.
+
+## 2026-10-06 — Provider eval suites + sealed seed 44
+
+- **Decision:** `run_evals.py` accepts `--provider` and `--suite` (`planted` | `holdout` | `hard` | `sealed` | `all`). Writes `exports/{provider}_{model}_{suite}.json` with provider/model/date, per-case pass/fail, citation-error count, fallback count, latency, and token usage when available. `evals/compare_evals.py` builds a markdown comparison table from `exports/`. Add `--profile sealed` (seed **44**) with the same anomaly types in accounts/entities/periods unused by seeds 42/43; stubs only in `evals/sealed_cases.yaml`. The harness **refuses** sealed without `--confirm-sealed`.
+- **Why:** Cross-provider comparison needs a stable export schema; sealed stays author-gated so scores are not run against an empty key by accident.
+- **Implications:** Do not run sealed until the author fills the key and confirms. `all` excludes sealed.

@@ -1,0 +1,137 @@
+# Sealed eval stubs (seed 44 / finance_sealed.db).
+# Same anomaly TYPES as A1–C1 in different accounts, entities, and periods
+# than seeds 42 (demo) and 43 (holdout). Answer key blank for the author.
+#
+# Generate: python3 generate_data.py --profile sealed
+# Score:    python3 evals/run_evals.py --suite sealed --provider heuristic --confirm-sealed
+# Do NOT run until the author confirms the answer key.
+
+cases:
+  - id: A1
+    account: "6400"
+    entity: ND-US
+    period: "2026-04"
+    variance: 86018.58
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - ACCR-RENT-6400-BASE-2026-04
+      - ACCR-RENT-6400-DUP-2026-04
+    must_not_say: []
+    notes: "Sealed duplicate accrual (Rent 6400), seed 44"
+
+  - id: A2
+    account: "6010"
+    entity: ND-EU
+    period: "2026-08"
+    variance: -123069.65
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-SEAL-6010-2026-08
+    must_not_say: []
+    notes: "Sealed reclass Benefits → Insurance"
+
+  - id: A2B
+    account: "6950"
+    entity: ND-EU
+    period: "2026-08"
+    variance: 119728.23
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-RCL-SEAL-6950-2026-08
+    must_not_say: []
+    notes: ""
+
+  - id: A3
+    account: "4200"
+    entity: ND-EU
+    period: "2026-03"
+    variance: -407292.37
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-SEAL-REV-FWD
+    must_not_say: []
+    notes: "Sealed services-revenue timing"
+
+  - id: A3B
+    account: "4200"
+    entity: ND-EU
+    period: "2026-04"
+    variance: 397851.04
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-SEAL-REV-REV
+    must_not_say: []
+    notes: ""
+
+  - id: A4
+    account: "7000"
+    entity: ND-EU
+    period: "2026-09"
+    variance: 69900.84
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MANUAL-SEALED
+    must_not_say: []
+    notes: "Sealed blank manual JE on Bad Debt"
+
+  - id: B1
+    account: "6500"
+    entity: ND-US
+    period: "2026-05"
+    variance: 75453.03
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - ADVISORY-2026-01
+      - ADVISORY-2026-02
+    must_not_say: []
+    notes: "Sealed advisory retainer spend"
+
+  - id: B2
+    account: "6800"
+    entity: ND-US
+    period: "2026-01"
+    variance: 55452.93
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - LEAD-PROG-2026-Q1-2026-01
+    must_not_say: []
+    notes: "Sealed leadership-program training fees"
+
+  - id: C1
+    account: "6110"
+    entity: ND-EU
+    period: "2026-06"
+    variance: 90755.33
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - HOST-CONTRACT-2026-EU-2026-06
+      - HOST-RESIDUAL-UNMATCHED-2026-06
+    must_not_say: []
+    notes: "Sealed partial cloud (HOST-* prefixes)"

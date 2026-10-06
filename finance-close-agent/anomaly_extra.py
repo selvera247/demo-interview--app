@@ -834,3 +834,468 @@ def override_holdout(
             )
 
     return sub_rows
+
+
+def plant_sealed(
+    balances: dict[tuple[str, str, str], float],
+    periods: list[str],
+) -> list:
+    """Same anomaly TYPES as A1–C1 in accounts/entities/periods unused by seeds 42/43."""
+    AnomalyRecord = _gd().AnomalyRecord
+    # Distinct from demo (42) and holdout (43) placements
+    a1 = "2026-04"
+    a2 = "2026-08"
+    a3_rec = "2026-03"
+    a3_off = "2026-04"
+    a4 = "2026-09"
+    b1 = "2026-05"
+    b2 = "2026-01"
+    c1 = "2026-06"
+
+    A1_AMT = 85_000.0
+    A2_AMT = 120_000.0
+    A3_AMT = 400_000.0
+    A4_AMT = 70_000.0
+    B1_AMT = 75_000.0
+    B2_AMT = 55_000.0
+    C1_TOT, C1_EXP, C1_RES = 90_000.0, 60_000.0, 30_000.0
+
+    records = []
+
+    # A1-type: duplicate accrual on Rent ND-US (not Cloud Hosting / Training)
+    for period in periods[periods.index(a1) :]:
+        balances[(period, "ND-US", "6400")] = round(
+            balances[(period, "ND-US", "6400")] + A1_AMT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            "A1",
+            "6400",
+            "ND-US",
+            a1,
+            A1_AMT,
+            "duplicate_accrual",
+            "Sealed duplicate Rent & Facilities accrual.",
+            "high",
+            ("ACCR-RENT-6400-BASE", "ACCR-RENT-6400-DUP"),
+        )
+    )
+
+    # A2-type: Benefits → Insurance ND-EU
+    for period in periods[periods.index(a2) :]:
+        balances[(period, "ND-EU", "6010")] = round(
+            balances[(period, "ND-EU", "6010")] - A2_AMT, 2
+        )
+        balances[(period, "ND-EU", "6950")] = round(
+            balances[(period, "ND-EU", "6950")] + A2_AMT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            "A2",
+            "6010",
+            "ND-EU",
+            a2,
+            -A2_AMT,
+            "opex_reclass",
+            "Sealed reclass Benefits → Insurance.",
+            "high",
+            ("JE-RCL-SEAL-6010", "JE-RCL-SEAL-6950"),
+        )
+    )
+    records.append(
+        AnomalyRecord(
+            "A2B",
+            "6950",
+            "ND-EU",
+            a2,
+            A2_AMT,
+            "opex_reclass",
+            "Sealed paired Insurance side.",
+            "high",
+            ("JE-RCL-SEAL-6010", "JE-RCL-SEAL-6950"),
+        )
+    )
+
+    # A3-type: Services Revenue ND-EU timing
+    balances[(a3_rec, "ND-EU", "4200")] = round(
+        balances[(a3_rec, "ND-EU", "4200")] - A3_AMT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            "A3",
+            "4200",
+            "ND-EU",
+            a3_rec,
+            -A3_AMT,
+            "revenue_timing",
+            "Sealed premature services revenue recognition.",
+            "high",
+            ("JE-SEAL-REV-FWD", "CTR-4200-NDEU"),
+        )
+    )
+    records.append(
+        AnomalyRecord(
+            "A3B",
+            "4200",
+            "ND-EU",
+            a3_off,
+            A3_AMT,
+            "revenue_timing_offset",
+            "Sealed services revenue offset/reversal.",
+            "high",
+            ("JE-SEAL-REV-REV", "CTR-4200-NDEU"),
+        )
+    )
+
+    # A4-type: blank manual JE on Bad Debt ND-EU
+    balances[(a4, "ND-EU", "7000")] = round(
+        balances[(a4, "ND-EU", "7000")] + A4_AMT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            "A4",
+            "7000",
+            "ND-EU",
+            a4,
+            A4_AMT,
+            "unexplained",
+            "Sealed blank manual JE on Bad Debt.",
+            "low",
+            ("JE-MANUAL-SEALED",),
+        )
+    )
+
+    # B1-type: Professional Fees ND-US labeled spend
+    balances[(b1, "ND-US", "6500")] = round(
+        balances[(b1, "ND-US", "6500")] + B1_AMT, 2
+    )
+    records.append(
+        AnomalyRecord(
+            "B1",
+            "6500",
+            "ND-US",
+            b1,
+            B1_AMT,
+            "benign_conference",
+            "Sealed annual advisory retainer spend.",
+            "high",
+            ("ADVISORY-2026-01", "ADVISORY-2026-02"),
+        )
+    )
+
+    # B2-type: Training ND-US sticky
+    for period in periods[periods.index(b2) :]:
+        balances[(period, "ND-US", "6800")] = round(
+            balances[(period, "ND-US", "6800")] + B2_AMT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            "B2",
+            "6800",
+            "ND-US",
+            b2,
+            B2_AMT,
+            "benign_hiring",
+            "Sealed leadership-program training fees.",
+            "high",
+            ("LEAD-PROG-2026-Q1",),
+        )
+    )
+
+    # C1-type: Cloud Hosting ND-EU partial
+    for period in periods[periods.index(c1) :]:
+        balances[(period, "ND-EU", "6110")] = round(
+            balances[(period, "ND-EU", "6110")] + C1_TOT, 2
+        )
+    records.append(
+        AnomalyRecord(
+            "C1",
+            "6110",
+            "ND-EU",
+            c1,
+            C1_TOT,
+            "partial_software",
+            "Sealed cloud partial explanation 60/30.",
+            "med",
+            ("HOST-CONTRACT-2026-EU", "HOST-RESIDUAL-UNMATCHED"),
+        )
+    )
+
+    plant_sealed._amounts = {  # type: ignore[attr-defined]
+        "A1": A1_AMT,
+        "A2": A2_AMT,
+        "A3": A3_AMT,
+        "A4": A4_AMT,
+        "B1": B1_AMT,
+        "B2": B2_AMT,
+        "C1_TOT": C1_TOT,
+        "C1_EXP": C1_EXP,
+        "C1_RES": C1_RES,
+        "periods": {
+            "a1": a1,
+            "a2": a2,
+            "a3_rec": a3_rec,
+            "a3_off": a3_off,
+            "a4": a4,
+            "b1": b1,
+            "b2": b2,
+            "c1": c1,
+        },
+    }
+    return records
+
+
+def override_sealed(
+    sub_rows: list[tuple],
+    balances: dict[tuple[str, str, str], float],
+    periods: list[str],
+    seed: int,
+) -> list[tuple]:
+    am = plant_sealed._amounts  # type: ignore[attr-defined]
+    p = am["periods"]
+    A1_AMT, A2_AMT = am["A1"], am["A2"]
+    A3_AMT, A4_AMT = am["A3"], am["A4"]
+    B1_AMT, B2_AMT = am["B1"], am["B2"]
+    C1_TOT, C1_EXP, C1_RES = am["C1_TOT"], am["C1_EXP"], am["C1_RES"]
+
+    def drop(account: str, entity: str, period: str) -> None:
+        nonlocal sub_rows
+        sub_rows = [
+            r
+            for r in sub_rows
+            if not (r[3] == account and r[2] == entity and r[1] == period)
+        ]
+
+    # A1 Rent ND-US duplicate
+    for period in periods[periods.index(p["a1"]) :]:
+        drop("6400", "ND-US", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-US", "6400")]
+        rem = round(tb - 2 * A1_AMT, 2)
+        for tag, txn in (("BASE", "ACCR-RENT-6400-BASE"), ("DUP", "ACCR-RENT-6400-DUP")):
+            sub_rows.append(
+                (
+                    f"{txn}-{period}",
+                    period,
+                    "ND-US",
+                    "6400",
+                    (day0 + timedelta(days=22)).isoformat(),
+                    "V-210",
+                    "ACCR-RENT-6400 Facilities month-end accrual",
+                    A1_AMT,
+                    "ERP",
+                    "accrual",
+                )
+            )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{seed}:sa1:{period}")
+            sub_rows.extend(
+                _gd().build_expense_detail_rows("6400", period, "ND-US", rem, day0, rng)
+            )
+
+    # A2 reclass Benefits → Insurance
+    for period in periods[periods.index(p["a2"]) :]:
+        day0 = _day0(period)
+        drop("6010", "ND-EU", period)
+        drop("6950", "ND-EU", period)
+        tb_a = balances[(period, "ND-EU", "6010")]
+        tb_b = balances[(period, "ND-EU", "6950")]
+        rem_a = round(tb_a - (-A2_AMT), 2)
+        rem_b = round(tb_b - A2_AMT, 2)
+        sub_rows.append(
+            (
+                f"JE-RCL-SEAL-6010-{period}",
+                period,
+                "ND-EU",
+                "6010",
+                (day0 + timedelta(days=18)).isoformat(),
+                None,
+                "Reclass Benefits → Insurance (sealed paired JE)",
+                -A2_AMT,
+                "ERP",
+                "reclass",
+            )
+        )
+        sub_rows.append(
+            (
+                f"JE-RCL-SEAL-6950-{period}",
+                period,
+                "ND-EU",
+                "6950",
+                (day0 + timedelta(days=18)).isoformat(),
+                None,
+                "Reclass Benefits → Insurance (sealed paired JE)",
+                A2_AMT,
+                "ERP",
+                "reclass",
+            )
+        )
+        if abs(rem_a) > 0.005:
+            rng = random.Random(f"{seed}:sa2a:{period}")
+            sub_rows.extend(
+                _gd().build_expense_detail_rows("6010", period, "ND-EU", rem_a, day0, rng)
+            )
+        if abs(rem_b) > 0.005:
+            rng = random.Random(f"{seed}:sa2b:{period}")
+            sub_rows.extend(
+                _gd().build_expense_detail_rows("6950", period, "ND-EU", rem_b, day0, rng)
+            )
+
+    # A3 services revenue timing
+    for period, txn, amt, memo in (
+        (
+            p["a3_rec"],
+            "JE-SEAL-REV-FWD",
+            -A3_AMT,
+            "CTR-4200-NDEU start next month — premature recognition",
+        ),
+        (
+            p["a3_off"],
+            "JE-SEAL-REV-REV",
+            A3_AMT,
+            "CTR-4200-NDEU reverse premature recognition",
+        ),
+    ):
+        drop("4200", "ND-EU", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-EU", "4200")]
+        rem = round(tb - amt, 2)
+        sub_rows.append(
+            (
+                txn,
+                period,
+                "ND-EU",
+                "4200",
+                (day0 + timedelta(days=25 if amt < 0 else 5)).isoformat(),
+                "C-102",
+                memo,
+                amt,
+                "Billing",
+                "revenue_timing",
+            )
+        )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{seed}:sa3:{period}")
+            sub_rows.extend(
+                _gd().build_revenue_detail_rows("4200", period, "ND-EU", rem, day0, rng)
+            )
+
+    # A4 blank JE Bad Debt
+    drop("7000", "ND-EU", p["a4"])
+    day0 = _day0(p["a4"])
+    tb = balances[(p["a4"], "ND-EU", "7000")]
+    rem = round(tb - A4_AMT, 2)
+    sub_rows.append(
+        (
+            "JE-MANUAL-SEALED",
+            p["a4"],
+            "ND-EU",
+            "7000",
+            (day0 + timedelta(days=27)).isoformat(),
+            None,
+            "",
+            A4_AMT,
+            "ERP",
+            "manual_je",
+        )
+    )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{seed}:sa4")
+        sub_rows.extend(
+            _gd().build_expense_detail_rows("7000", p["a4"], "ND-EU", rem, day0, rng)
+        )
+
+    # B1 advisory retainer
+    drop("6500", "ND-US", p["b1"])
+    day0 = _day0(p["b1"])
+    tb = balances[(p["b1"], "ND-US", "6500")]
+    half = round(B1_AMT / 2, 2)
+    rem = round(tb - B1_AMT, 2)
+    for i, txn in enumerate(("ADVISORY-2026-01", "ADVISORY-2026-02")):
+        sub_rows.append(
+            (
+                txn,
+                p["b1"],
+                "ND-US",
+                "6500",
+                (day0 + timedelta(days=12 + i)).isoformat(),
+                "V-208",
+                "Annual advisory retainer — board / strategy (ADVISORY-2026)",
+                half,
+                "ERP",
+                "expense_detail",
+            )
+        )
+    if abs(rem) > 0.005:
+        rng = random.Random(f"{seed}:sb1")
+        sub_rows.extend(
+            _gd().build_expense_detail_rows("6500", p["b1"], "ND-US", rem, day0, rng)
+        )
+
+    # B2 leadership program
+    for period in periods[periods.index(p["b2"]) :]:
+        drop("6800", "ND-US", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-US", "6800")]
+        rem = round(tb - B2_AMT, 2)
+        sub_rows.append(
+            (
+                f"LEAD-PROG-2026-Q1-{period}",
+                period,
+                "ND-US",
+                "6800",
+                (day0 + timedelta(days=9)).isoformat(),
+                "V-209",
+                "Leadership program fees — LEAD-PROG-2026-Q1",
+                B2_AMT,
+                "ERP",
+                "expense_detail",
+            )
+        )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{seed}:sb2:{period}")
+            sub_rows.extend(
+                _gd().build_expense_detail_rows("6800", period, "ND-US", rem, day0, rng)
+            )
+
+    # C1 partial cloud ND-EU
+    for period in periods[periods.index(p["c1"]) :]:
+        drop("6110", "ND-EU", period)
+        day0 = _day0(period)
+        tb = balances[(period, "ND-EU", "6110")]
+        rem = round(tb - C1_TOT, 2)
+        sub_rows.append(
+            (
+                f"HOST-CONTRACT-2026-EU-{period}",
+                period,
+                "ND-EU",
+                "6110",
+                (day0 + timedelta(days=8)).isoformat(),
+                "V-200",
+                "Annual cloud capacity contract — HOST-CONTRACT-2026-EU",
+                C1_EXP,
+                "ERP",
+                "expense_detail",
+            )
+        )
+        sub_rows.append(
+            (
+                f"HOST-RESIDUAL-UNMATCHED-{period}",
+                period,
+                "ND-EU",
+                "6110",
+                (day0 + timedelta(days=15)).isoformat(),
+                "V-200",
+                "Vendor invoice — no PO / no matching contract reference",
+                C1_RES,
+                "ERP",
+                "expense_detail",
+            )
+        )
+        if abs(rem) > 0.005:
+            rng = random.Random(f"{seed}:sc1:{period}")
+            sub_rows.extend(
+                _gd().build_expense_detail_rows("6110", period, "ND-EU", rem, day0, rng)
+            )
+
+    return sub_rows

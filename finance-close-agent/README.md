@@ -1,8 +1,23 @@
 # Finance MCP Server + Close Agent
 
-Synthetic close demo for fictional company **Northwind Digital**: MCP tools over a miniature finance system, a close agent that flags variances and drafts flux commentary, a human review queue, and (later) a scored eval set.
+Synthetic close demo for fictional company **Northwind Digital**: MCP tools over a miniature finance system, a close agent that flags variances and drafts flux commentary, a human review queue, FastAPI + LangGraph orchestration, and an eval harness (score unpublished until answer keys are complete).
 
 **All data is synthetic.** Nothing here is real company financials.
+
+## Architecture
+
+```text
+Claude Desktop (MCP)  ──┐
+FastAPI / LangGraph   ──┼──► tools.py / policy.yaml / SQLite
+Streamlit review UI   ──┘         │
+                                  ▼
+                         review_queue + tool_call_log
+                                  │
+                         evals/cases.yaml (score when keys filled)
+```
+
+LangGraph stages: `extract → flag_and_draft → approval_gate → summary`  
+(`flag_and_draft` calls the same `run_close_pass` as the CLI agent — no second variance engine.)
 
 ## What’s included
 
@@ -14,6 +29,8 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 | SQLite database | `data/finance.db` |
 | MCP tools | `tools.py`, `mcp_server.py` |
 | Close agent pass | `agent/close_agent.py` |
+| LangGraph close workflow | `workflows/close_workflow.py` |
+| FastAPI surface | `api/main.py` |
 | Review UI (approve / edit / reject + tool audit log) | `ui/review_app.py` |
 | Eval harness (`cases.yaml` stubs + deterministic scorer) | `evals/` |
 | Static export | `exports/demo_bundle.json` |
@@ -43,6 +60,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python generate_data.py
 python verify_data.py
+```
+
+## Run FastAPI + LangGraph workflow
+
+```bash
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+- Docs: http://127.0.0.1:8000/docs
+- Ready: `GET /health/ready`
+- Close pass: `POST /finance/close-pass` with optional `{"entity":"ND-US"}`
+- Audit trail: `GET /finance/audit-trail`
+- Review queue: `GET /finance/review-queue`
+
+```bash
+python3 -m pytest tests/test_workflow_api.py -q
 ```
 
 ## Run the agent + review UI

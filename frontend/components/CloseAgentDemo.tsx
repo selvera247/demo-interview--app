@@ -137,8 +137,6 @@ export default function CloseAgentDemo() {
     }));
   }
 
-  const score = demo.eval_score;
-
   return (
     <div className="demo-shell">
       <div className="demo-toolbar">
@@ -151,10 +149,7 @@ export default function CloseAgentDemo() {
             {flagged.length} accounts flagged
           </div>
         </div>
-        <div className="score">
-          Eval score: {(score.accuracy * 100).toFixed(1)}% · {score.accurate}/
-          {score.cases} cases
-        </div>
+        <div className="score">Eval score: unpublished (answer keys pending)</div>
       </div>
 
       <div className="demo-grid">

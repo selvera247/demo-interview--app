@@ -7,7 +7,7 @@ Personal portfolio and interview demos for AI-native finance transformation work
 ## What’s here
 
 1. **Portfolio** — hero, headline metrics, project index  
-2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, review queue, eval score (`finance-close-agent/`)  
+2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, FastAPI/LangGraph workflow, review queue, eval harness (`finance-close-agent/`; score unpublished until answer keys complete)  
 3. **Deal Record** — spec intake, sourcing, and cost tracking on one project ID  
 
 All Close Agent figures are **synthetic demo data**.
@@ -36,11 +36,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python generate_data.py
 python agent/close_agent.py
-python evals/run_evals.py
+uvicorn api.main:app --reload --port 8000   # LangGraph workflow API
 streamlit run ui/review_app.py
+# Eval score stays unpublished until answer keys are complete:
+# python evals/run_evals.py
 ```
 
-See [`finance-close-agent/README.md`](finance-close-agent/README.md) for Claude Desktop MCP config.
+See [`finance-close-agent/README.md`](finance-close-agent/README.md) for Claude Desktop MCP config and API routes.
 
 ## Build
 

@@ -3,6 +3,13 @@
 ## Purpose
 Agent answers close questions and drafts flux commentary over synthetic ERP data, with human review and measurable accuracy.
 
+## Orchestration (merged product spine)
+- **Core spine (required):** SQLite + MCP tools + `config/policy.yaml` + Streamlit review + evals.
+- **Optional API/workflow layer:** FastAPI exposes the same close pass; LangGraph stages
+  (`extract → flag → draft → approval_gate → summary`) call existing agent/tools — they must
+  not invent a second variance engine or sample GL.
+- Real vendor product names remain forbidden (`ERP` / `Billing` / `HRIS` / `Expense Tool` only).
+
 ## Synthetic data (company: Northwind Digital)
 - GL trial balance: 24 months, ~40 accounts, 2 entities (`ND-US`, `ND-EU`)
 - Storage: **SQLite** (not DuckDB — see DECISIONS.md)
@@ -42,8 +49,10 @@ Agent answers close questions and drafts flux commentary over synthetic ERP data
 - Runs end to end from a fresh clone via documented commands
 - Tests pass, eval score published (only after hand-written cases), README with architecture diagram
 - Works in Claude Desktop via MCP
+- FastAPI + LangGraph close workflow returns the same flagged set as `agent/close_agent.py`
 
 ## Out of scope until DoD (slice 7 complete)
-- Portfolio landing page
+- Portfolio landing page (except unpublishing premature eval scores when SPEC requires it)
 - Deal Record demo
 - Removing or changing `react-router-dom` / frontend routing (frozen)
+- Sync/publish mirror to external `cjs-ops/agentic-finance-ops-demo` (deferred; no write access from this environment)

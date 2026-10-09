@@ -3,8 +3,6 @@ import CloseAgentDemo from "../components/CloseAgentDemo";
 import demo from "../data/closeAgentDemo.json";
 
 export default function CloseAgentCaseStudy() {
-  const score = demo.eval_score;
-
   return (
     <>
       <nav className="site-nav">
@@ -63,9 +61,12 @@ export default function CloseAgentCaseStudy() {
               tasks, and flux commentary drafting.
             </li>
             <li>
-              Review queue + tool-call audit log, plus a 19-case eval set scored on
-              citation and driver accuracy ({(score.accuracy * 100).toFixed(1)}% on the
-              heuristic agent).
+              Review queue + tool-call audit log, plus an eval harness (planted +
+              adversarial cases). Published score deferred until answer keys are complete.
+            </li>
+            <li>
+              FastAPI + LangGraph close workflow that orchestrates the same MCP tool spine
+              (extract → flag → draft → approval gate → summary).
             </li>
           </ul>
           <div id="demo">
@@ -100,9 +101,9 @@ export default function CloseAgentCaseStudy() {
           <h2>Outcome</h2>
           <ul>
             <li>
-              Eval pass rate <strong style={{ color: "var(--signal)" }}>{(score.pass_rate * 100).toFixed(0)}%</strong>{" "}
-              ({score.accurate}/{score.cases} cases) with mean accuracy{" "}
-              <strong style={{ color: "var(--signal)" }}>{(score.accuracy * 100).toFixed(1)}%</strong>.
+              Eval score <strong style={{ color: "var(--signal)" }}>unpublished</strong> until
+              hand-written answer keys are complete (SPEC) — harness lives under{" "}
+              <code style={{ color: "var(--signal)" }}>finance-close-agent/evals/</code>.
             </li>
             <li>
               Portfolio headline outcomes this work supports: <strong>$150K+/yr</strong> contract
@@ -123,6 +124,8 @@ export default function CloseAgentCaseStudy() {
               "Python",
               "SQLite",
               "MCP",
+              "FastAPI",
+              "LangGraph",
               "Streamlit",
               "React",
               "Vite",

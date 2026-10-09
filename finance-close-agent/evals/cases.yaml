@@ -1,6 +1,5 @@
 # Close-agent eval cases (synthetic Northwind Digital only).
-# must_cite pre-filled from finance.db. Answer key for planted cases filled.
-# N01–N10: adversarial stubs awaiting answer key (expected_flagged etc.).
+# Planted A/B/C + negative N01–N14 answer keys filled (owner-authorized).
 
 cases:
   # --- Planted anomalies (A1–A4, B1–B2, C1 + pairs) ---
@@ -152,142 +151,152 @@ cases:
     must_not_say: ["fully explained", "all supported"]
     notes: ""
 
-  # --- Negative / adversarial stubs (awaiting answer key) ---
-  # expected_flagged: set true/false when filling; most should be false (no flag).
+  # --- Negative / adversarial (full answer keys; expect no flux flag) ---
 
   - id: N01
     account: "4100"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 1471.98
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Usage Revenue MoM is immaterial (~0.4% / ~$1.5K), well under the dual
+      threshold. No flux flag; no citable subledger driver for a material story.
+    required_facts: ["No citable", "1,472|1472"]
     must_cite: []
-    must_not_say: []
-    notes: ""
+    must_not_say: ["duplicate", "reclass", "usage growth"]
+    notes: "Clean ND-EU revenue negative — false-positive guard."
 
   - id: N02
     account: "4200"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: -2274.53
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Services Revenue MoM is under both thresholds (~0.9% / ~$2.3K). No flag;
+      agent should not invent a services pipeline story.
+    required_facts: ["No citable", "2,275|2275|-2,275"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "new customer"]
     notes: ""
 
   - id: N03
     account: "5000"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 10049.64
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Cost of Subscription moved ~3.8% / ~$10K — under policy. No material
+      flux package item.
+    required_facts: ["No citable", "10,050|10050"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "vendor terminated"]
     notes: ""
 
   - id: N04
     account: "6000"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 13795.33
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Salaries & Wages MoM (~2.2% / ~$14K) is routine payroll noise under threshold.
+    required_facts: ["No citable", "13,795|13795"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "headcount reduction", "reclass"]
     notes: ""
 
   - id: N05
     account: "6010"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 4996.89
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Employee Benefits MoM (~3.8% / ~$5K) stays under dual threshold — no flag.
+    required_facts: ["No citable", "4,997|4997"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass"]
     notes: ""
 
   - id: N06
     account: "6400"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 1859.89
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Rent & Facilities MoM (~2.3% / ~$1.9K) is immaterial; no flux flag.
+    required_facts: ["No citable", "1,860|1860"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "new lease"]
     notes: ""
 
   - id: N07
     account: "6700"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 840.31
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Depreciation MoM (~1.8% / ~$840) is routine; under threshold; no flag.
+    required_facts: ["No citable", "840"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass"]
     notes: ""
 
   - id: N08
     account: "6800"
     entity: ND-EU
     period: "2026-01"
-    variance: null
+    variance: 383.24
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Training & Development MoM (~3.4% / ~$383) is noise under policy thresholds.
+    required_facts: ["No citable", "383"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass"]
     notes: ""
 
   - id: N09
     account: "4100"
     entity: ND-US
     period: "2026-01"
-    variance: null
+    variance: -2811.67
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      ND-US Usage Revenue MoM (~0.4% / ~$2.8K) is immaterial — false-positive guard.
+    required_facts: ["No citable", "2,812|2812|-2,812"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "usage growth"]
     notes: ""
 
   - id: N10
     account: "4200"
     entity: ND-US
     period: "2026-01"
-    variance: null
+    variance: -1724.08
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      ND-US Services Revenue MoM (~0.4% / ~$1.7K) under threshold; no flag.
+    required_facts: ["No citable", "1,724|1724|-1,724"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "new customer"]
     notes: ""
 
-  # --- Harder adversarial stubs (threshold edge / seasonal) ---
-  # N12 note: no true MoM with |pct|>10% AND |amt|<$50k exists in this DB
-  # outside planted breaches (which also exceed $50k). Closest stand-in used.
+  # --- Threshold-edge / seasonal negatives ---
 
   - id: N11
     account: "4000"
@@ -295,14 +304,15 @@ cases:
     period: "2024-11"
     variance: -71455.07
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Subscription Revenue moved ~$71K but only ~4% MoM — fails the AND rule
+      (>10% AND >$50K). Large dollars alone must not create a flux flag.
+    required_facts: ["No citable", "71,455|71455"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "timing"]
     notes: >
-      Dollars above $50k, percent below 10% (large Subscription Revenue MoM).
-      Expect no flag (AND threshold).
+      Dollars above $50k, percent below 10%. Expect no flag (AND threshold).
 
   - id: N12
     account: "6020"
@@ -310,14 +320,16 @@ cases:
     period: "2026-08"
     variance: -962.41
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
-    must_cite: []
-    must_not_say: []
+    expected_confidence: high
+    expected_explanation: >
+      Contractors MoM is ~8% on ~$1K after the sticky A2 reclass left a small
+      base — under both thresholds. Cite the reclass JE; do not treat as a new breach.
+    required_facts: ["Reclass", "962"]
+    must_cite:
+      - JE-RCL-6020-2026-08
+    must_not_say: ["duplicate", "cost savings", "headcount reduction"]
     notes: >
-      Closest available to high-pct/low-dollar: ~8% on ~$1k after sticky A2
-      left a small Contractors base. True >10%/<$50k does not exist unflagged.
+      Closest high-pct/low-dollar stand-in; true >10%/<$50k unflagged MoM absent.
 
   - id: N13
     account: "4000"
@@ -325,14 +337,15 @@ cases:
     period: "2025-03"
     variance: -50259.37
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Subscription Revenue ~$50.3K MoM (~2.6%) sits near the dollar cut but
+      percent is far under 10% — dual threshold not met; no flag.
+    required_facts: ["No citable", "50,259|50259"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "timing", "early recognition"]
     notes: >
-      Within ~5% of the $50k dollar threshold (|amt|≈$50.3k) but pct only ~2.6%.
-      Expect no flag.
+      Within ~5% of the $50k dollar threshold; pct only ~2.6%. Expect no flag.
 
   - id: N14
     account: "6200"
@@ -340,11 +353,12 @@ cases:
     period: "2025-01"
     variance: 6431.42
     expected_flagged: false
-    expected_explanation: ""
-    expected_confidence: ""
-    required_facts: []
+    expected_confidence: low
+    expected_explanation: >
+      Seasonal Jan marketing lift (~4.5% / ~$6.4K) looks busy but stays under
+      both thresholds — no flux flag.
+    required_facts: ["No citable", "6,431|6431"]
     must_cite: []
-    must_not_say: []
+    must_not_say: ["duplicate", "reclass", "conference"]
     notes: >
-      Seasonal Jan marketing lift (~+4.5%) that looks busy but stays under both
-      thresholds. Expect no flag.
+      Seasonal Jan marketing lift under both thresholds. Expect no flag.

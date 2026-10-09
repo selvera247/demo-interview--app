@@ -111,3 +111,11 @@
 - **Implications:** `bash docker/verify_compose.sh` is the runnable verification. N-cases may stay
   false-positive-only until the owner upgrades them to full written keys; portfolio score stays
   unpublished until you choose to republish.
+
+## 2026-10-09 — Fill N01–N14 full answer keys (owner-authorized)
+
+- **Decision:** Populate full narrative keys for N01–N14 in `evals/cases.yaml` (A/B/C were already
+  complete). Keep portfolio UI score unpublished until explicitly republished.
+- **Why:** Owner requested keys filled; harness can now score all 23 cases in full mode.
+- **Implications:** `python evals/run_evals.py` → 23/23 (score=1.0). Republishing the portfolio %
+  remains a separate product decision.

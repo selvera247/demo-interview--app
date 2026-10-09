@@ -77,6 +77,16 @@ select {
   font-size: 0.95rem;
 }
 
+.site-nav .nav-links .linkish {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.site-nav .nav-links .linkish:hover,
 .site-nav .nav-links a:hover {
   color: var(--white);
 }

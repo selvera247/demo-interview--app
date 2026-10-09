@@ -149,7 +149,22 @@ export default function CloseAgentCaseStudy() {
           <h2>Demo</h2>
           <ul>
             <li>
-              Interactive review UI on this page (synthetic export — no live ERP).
+              Interactive review UI on this page (synthetic export — no live ERP). Jump to{" "}
+              <a href="#demo" style={{ color: "var(--signal)" }}>
+                live demo
+              </a>
+              .
+            </li>
+            <li>
+              GitHub Pages (share this):{" "}
+              <a
+                href="https://selvera247.github.io/demo-interview--app/#/projects/close-agent"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--signal)" }}
+              >
+                selvera247.github.io/…/#/projects/close-agent
+              </a>
             </li>
             <li>
               Local MCP server + Streamlit queue:{" "}
@@ -167,7 +182,6 @@ export default function CloseAgentCaseStudy() {
                 selvera247/demo-interview--app
               </a>
             </li>
-            <li>Walkthrough video (60–90s): add link here after recording.</li>
           </ul>
         </section>
 

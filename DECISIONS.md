@@ -127,3 +127,11 @@
 - **Why:** Owner authorized republish after answer keys were filled (SPEC gate cleared).
 - **Implications:** Static `closeAgentDemo.json` `eval_score` mirrors the deterministic runner;
   re-run `python evals/run_evals.py` before claiming a different figure.
+
+## 2026-10-09 — GitHub Pages showcase path (not Cloudflare yet)
+
+- **Decision:** Use GitHub Pages as the public showcase for the static portfolio + Close Agent
+  in-browser demo. Fix HashRouter-safe section scrolling, add `.nojekyll`, document share URLs.
+  Defer Cloudflare Workers/Pages until explicitly requested.
+- **Why:** Pages already wired via Actions; hash routes work under `/demo-interview--app/`.
+- **Implications:** Merge to `main` deploys. Live Python/MCP/Docker remain local — not on Pages.

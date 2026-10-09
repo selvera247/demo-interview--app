@@ -2,7 +2,15 @@
 
 Personal portfolio and interview demos for AI-native finance transformation work.
 
-**Live (GitHub Pages):** https://selvera247.github.io/demo-interview--app/
+## Showcase (GitHub Pages)
+
+| Page | URL |
+| --- | --- |
+| Portfolio home | https://selvera247.github.io/demo-interview--app/ |
+| **Close Agent demo** (share this) | https://selvera247.github.io/demo-interview--app/#/projects/close-agent |
+| Deal Record | https://selvera247.github.io/demo-interview--app/#/projects/deal-record |
+
+Deploy: push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) (`GITHUB_PAGES=true` Vite build → Pages). Manual re-run: Actions → **Deploy GitHub Pages** → Run workflow.
 
 ## What’s here
 
@@ -10,7 +18,7 @@ Personal portfolio and interview demos for AI-native finance transformation work
 2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, FastAPI/LangGraph workflow, review queue, eval score 23/23 (`finance-close-agent/`)  
 3. **Deal Record** — spec intake, sourcing, and cost tracking on one project ID  
 
-All Close Agent figures are **synthetic demo data**.
+All Close Agent figures are **synthetic demo data**. The Pages site is the static portfolio + in-browser review demo (not the live Python/MCP server).
 
 ## Local (portfolio + demos)
 
@@ -50,8 +58,9 @@ docker compose up --build
 
 See [`finance-close-agent/README.md`](finance-close-agent/README.md) for Claude Desktop MCP config and API routes.
 
-## Build
+## Build (GitHub Pages artifact)
 
 ```bash
-npm run build
+GITHUB_PAGES=true npm run build
+# output: dist/  (base path /demo-interview--app/)
 ```

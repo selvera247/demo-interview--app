@@ -119,3 +119,11 @@
 - **Why:** Owner requested keys filled; harness can now score all 23 cases in full mode.
 - **Implications:** `python evals/run_evals.py` → 23/23 (score=1.0). Republishing the portfolio %
   remains a separate product decision.
+
+## 2026-10-09 — Republish portfolio eval score
+
+- **Decision:** Restore published accuracy / pass-rate in portfolio case study, interactive demo
+  chrome, and `finance-close-agent/README.md` from the completed harness: **23/23, score=1.0**.
+- **Why:** Owner authorized republish after answer keys were filled (SPEC gate cleared).
+- **Implications:** Static `closeAgentDemo.json` `eval_score` mirrors the deterministic runner;
+  re-run `python evals/run_evals.py` before claiming a different figure.

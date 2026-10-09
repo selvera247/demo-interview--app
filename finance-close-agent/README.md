@@ -1,6 +1,6 @@
 # Finance MCP Server + Close Agent
 
-Synthetic close demo for fictional company **Northwind Digital**: MCP tools over a miniature finance system, a close agent that flags variances and drafts flux commentary, a human review queue, FastAPI + LangGraph orchestration, and an eval harness (score unpublished until answer keys are complete).
+Synthetic close demo for fictional company **Northwind Digital**: MCP tools over a miniature finance system, a close agent that flags variances and drafts flux commentary, a human review queue, FastAPI + LangGraph orchestration, and a scored eval harness (**23/23**, score **1.0**).
 
 **All data is synthetic.** Nothing here is real company financials.
 
@@ -95,10 +95,21 @@ Smoke test:
 bash docker/verify_compose.sh
 ```
 
-## Eval answer keys
+## Eval score
 
-Author guide / copy-paste templates: [`evals/ANSWER_KEY_TEMPLATE.md`](evals/ANSWER_KEY_TEMPLATE.md).  
-N01–N14 currently score in **false-positive-only** mode; upgrade to a full written key before treating a published % as narrative-complete.
+Latest harness run (planted A/B/C + negative N01–N14, full answer keys):
+
+| Metric | Value |
+| --- | --- |
+| Cases scored | 23 |
+| Passed | 23 |
+| Score | **1.0** (100%) |
+
+```bash
+python3 evals/run_evals.py
+```
+
+Authoring notes / templates: [`evals/ANSWER_KEY_TEMPLATE.md`](evals/ANSWER_KEY_TEMPLATE.md).
 
 ## Run the agent + review UI
 
@@ -138,16 +149,12 @@ streamlit run ui/review_app.py
 
 ## Run evals
 
-`evals/cases.yaml` has stubs (must_cite pre-filled). Fill `expected_explanation`,
-`required_facts`, `must_not_say`, and `expected_confidence` before treating any
-score as valid. Incomplete answer keys exit non-zero and pytest fails until filled.
+`evals/cases.yaml` has full answer keys for planted and negative cases.
 
 ```bash
-python3 evals/run_evals.py
+python3 evals/run_evals.py          # expect 23/23
 python3 -m pytest tests/test_evals.py -q
 ```
-
-Do not publish a score in this README until the answer key is complete.
 
 ## Claude Desktop (MCP)
 
@@ -175,7 +182,7 @@ Example prompt:
 - Every tool call is appended to `tool_call_log` (UI log tab shows timestamp, tool, inputs, served item)
 - Review queue supports **approve / edit / reject** with a **required reviewer note**
 - Queue sorts low confidence first, then dollar size; each card shows citations + policy rule
-- Eval score is published only after hand-written cases exist
+- Eval score published after hand-written cases: **23/23 (1.0)**
 
 ### Known limitations
 

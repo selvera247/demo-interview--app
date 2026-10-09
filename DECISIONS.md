@@ -80,3 +80,58 @@
 - **Decision:** Allow `required_facts` alternatives separated by `|`; match numeric facts within `$500` (`evals/config.yaml`). Drop A1 `reverse` from required_facts and document “no remediation recommendation” as a known limitation in the README. Set N01–N10 `expected_flagged: false` (false-positive-only scoring). Add N11–N14 edge stubs from DB scan; note that a true unflagged `>10% AND <$50k` MoM does not exist in this synthetic set (N12 is the closest stand-in).
 - **Why:** Score finance-correct answers without false fails from date format / baseline drift / synonyms, while keeping harder threshold-edge negatives for the answer-key author.
 - **Implications:** Re-score after this change; if planted cases go to 9/9, treat that as measurement calibration — not a claim the agent got smarter. Agent/MCP/UI still untouched.
+
+## 2026-10-09 — Merge cjs-ops narrative onto MCP spine (LangGraph + FastAPI)
+
+- **Decision:** Keep `finance-close-agent/` as the single product spine. Add a thin FastAPI + LangGraph
+  orchestration layer that calls `run_close_pass` / existing tools. Unpublish portfolio eval score
+  claims until adversarial answer keys (N01–N14) are complete. Do not mirror-push to
+  `cjs-ops/agentic-finance-ops-demo` from this environment (no write access); publish in this monorepo.
+- **Why:** Two repos told the same hiring story with divergent stacks; the MCP demo has the substance,
+  the LangGraph repo had packaging language but a toy variance path and broken files.
+- **Implications:** Approved deps add `fastapi`, `uvicorn`, `langgraph`. Portfolio/Deal Record remain
+  frozen except score unpublish. Docker deferred to a later slice.
+
+## 2026-10-09 — Unpublish premature eval score in portfolio UI
+
+- **Decision:** Remove published accuracy / pass-rate figures from the Close Agent case study and
+  interactive demo chrome. Keep `eval_score` in the static JSON as `null` / deferred notes only.
+- **Why:** SPEC forbids publishing scores before hand-written cases are complete; adversarial stubs
+  are still blank, so a 91.7% claim is misleading.
+- **Implications:** Case study copy points to the harness and “score pending”; demo toolbar no longer
+  shows a percentage.
+
+## 2026-10-09 — Docker Compose for API + Streamlit; drop external-repo focus
+
+- **Decision:** Ship `Dockerfile` + `docker-compose.yml` under `finance-close-agent/` (API :8000,
+  Streamlit :8501, shared `finance-data` volume, entrypoint generates SQLite if missing). Add
+  `evals/ANSWER_KEY_TEMPLATE.md` for the owner to fill/upgrade N01–N14. Stop tracking
+  `cjs-ops/agentic-finance-ops-demo` as a publish target.
+- **Why:** Single-repo demo; Docker is the remaining packaging slice from the merge plan.
+- **Implications:** `bash docker/verify_compose.sh` is the runnable verification. N-cases may stay
+  false-positive-only until the owner upgrades them to full written keys; portfolio score stays
+  unpublished until you choose to republish.
+
+## 2026-10-09 — Fill N01–N14 full answer keys (owner-authorized)
+
+- **Decision:** Populate full narrative keys for N01–N14 in `evals/cases.yaml` (A/B/C were already
+  complete). Keep portfolio UI score unpublished until explicitly republished.
+- **Why:** Owner requested keys filled; harness can now score all 23 cases in full mode.
+- **Implications:** `python evals/run_evals.py` → 23/23 (score=1.0). Republishing the portfolio %
+  remains a separate product decision.
+
+## 2026-10-09 — Republish portfolio eval score
+
+- **Decision:** Restore published accuracy / pass-rate in portfolio case study, interactive demo
+  chrome, and `finance-close-agent/README.md` from the completed harness: **23/23, score=1.0**.
+- **Why:** Owner authorized republish after answer keys were filled (SPEC gate cleared).
+- **Implications:** Static `closeAgentDemo.json` `eval_score` mirrors the deterministic runner;
+  re-run `python evals/run_evals.py` before claiming a different figure.
+
+## 2026-10-09 — GitHub Pages showcase path (not Cloudflare yet)
+
+- **Decision:** Use GitHub Pages as the public showcase for the static portfolio + Close Agent
+  in-browser demo. Fix HashRouter-safe section scrolling, add `.nojekyll`, document share URLs.
+  Defer Cloudflare Workers/Pages until explicitly requested.
+- **Why:** Pages already wired via Actions; hash routes work under `/demo-interview--app/`.
+- **Implications:** Merge to `main` deploys. Live Python/MCP/Docker remain local — not on Pages.

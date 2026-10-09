@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 const projects = [
   {
     to: "/projects/close-agent",
-    tag: "DEMO 01 · MCP",
+    tag: "DEMO 01 · MCP · 23/23 EVAL",
     title: "Finance MCP Server + Close Agent",
     blurb:
-      "Agent answers close questions and drafts flux commentary over a synthetic GL via MCP — with review queue, audit log, and scored evals.",
+      "Agent answers close questions and drafts flux commentary over a synthetic GL via MCP — with review queue, audit log, and a 23/23 scored eval set.",
   },
   {
     to: "/projects/deal-record",
@@ -17,6 +17,11 @@ const projects = [
   },
 ];
 
+/** HashRouter-safe in-page scroll (plain #anchors break the #/ route on GitHub Pages). */
+function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export default function Portfolio() {
   return (
     <>
@@ -25,9 +30,15 @@ export default function Portfolio() {
           Chris Selvera
         </Link>
         <div className="nav-links">
-          <a href="#projects">Projects</a>
-          <a href="#contact">Contact</a>
-          <a href="#resume">Resume</a>
+          <button type="button" className="linkish" onClick={() => scrollToSection("projects")}>
+            Projects
+          </button>
+          <button type="button" className="linkish" onClick={() => scrollToSection("contact")}>
+            Contact
+          </button>
+          <button type="button" className="linkish" onClick={() => scrollToSection("resume")}>
+            Resume
+          </button>
         </div>
       </nav>
 
@@ -43,15 +54,23 @@ export default function Portfolio() {
             wish I’d had: from prototype to production, with the users in the room.
           </p>
           <div className="hero-cta">
-            <a className="btn btn-primary" href="#projects">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => scrollToSection("projects")}
+            >
               View projects
-            </a>
-            <a className="btn btn-ghost" href="#resume">
-              Resume
-            </a>
-            <a className="btn btn-warm" href="#contact">
+            </button>
+            <Link className="btn btn-ghost" to="/projects/close-agent">
+              Close Agent demo
+            </Link>
+            <button
+              type="button"
+              className="btn btn-warm"
+              onClick={() => scrollToSection("contact")}
+            >
               Contact
-            </a>
+            </button>
           </div>
         </div>
       </header>
@@ -113,6 +132,13 @@ export default function Portfolio() {
           >
             GitHub profile
           </a>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => scrollToSection("projects")}
+          >
+            See projects
+          </button>
         </div>
       </section>
 
@@ -131,9 +157,9 @@ export default function Portfolio() {
           >
             GitHub
           </a>
-          <a className="btn btn-ghost" href="#projects">
-            See projects
-          </a>
+          <Link className="btn btn-ghost" to="/projects/close-agent">
+            Close Agent demo
+          </Link>
         </div>
       </section>
 

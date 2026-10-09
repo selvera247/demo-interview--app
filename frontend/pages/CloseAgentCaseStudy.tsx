@@ -63,9 +63,13 @@ export default function CloseAgentCaseStudy() {
               tasks, and flux commentary drafting.
             </li>
             <li>
-              Review queue + tool-call audit log, plus a 19-case eval set scored on
-              citation and driver accuracy ({(score.accuracy * 100).toFixed(1)}% on the
-              heuristic agent).
+              Review queue + tool-call audit log, plus a 23-case eval set scored on
+              citation, confidence, and driver match (
+              {(score.accuracy * 100).toFixed(1)}% on the heuristic agent).
+            </li>
+            <li>
+              FastAPI + LangGraph close workflow that orchestrates the same MCP tool spine
+              (extract → flag → draft → approval gate → summary).
             </li>
           </ul>
           <div id="demo">
@@ -100,9 +104,15 @@ export default function CloseAgentCaseStudy() {
           <h2>Outcome</h2>
           <ul>
             <li>
-              Eval pass rate <strong style={{ color: "var(--signal)" }}>{(score.pass_rate * 100).toFixed(0)}%</strong>{" "}
+              Eval pass rate{" "}
+              <strong style={{ color: "var(--signal)" }}>
+                {(score.pass_rate * 100).toFixed(0)}%
+              </strong>{" "}
               ({score.accurate}/{score.cases} cases) with mean accuracy{" "}
-              <strong style={{ color: "var(--signal)" }}>{(score.accuracy * 100).toFixed(1)}%</strong>.
+              <strong style={{ color: "var(--signal)" }}>
+                {(score.accuracy * 100).toFixed(1)}%
+              </strong>
+              .
             </li>
             <li>
               Portfolio headline outcomes this work supports: <strong>$150K+/yr</strong> contract
@@ -123,6 +133,8 @@ export default function CloseAgentCaseStudy() {
               "Python",
               "SQLite",
               "MCP",
+              "FastAPI",
+              "LangGraph",
               "Streamlit",
               "React",
               "Vite",
@@ -137,7 +149,22 @@ export default function CloseAgentCaseStudy() {
           <h2>Demo</h2>
           <ul>
             <li>
-              Interactive review UI on this page (synthetic export — no live ERP).
+              Interactive review UI on this page (synthetic export — no live ERP). Jump to{" "}
+              <a href="#demo" style={{ color: "var(--signal)" }}>
+                live demo
+              </a>
+              .
+            </li>
+            <li>
+              GitHub Pages (share this):{" "}
+              <a
+                href="https://selvera247.github.io/demo-interview--app/#/projects/close-agent"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--signal)" }}
+              >
+                selvera247.github.io/…/#/projects/close-agent
+              </a>
             </li>
             <li>
               Local MCP server + Streamlit queue:{" "}
@@ -155,7 +182,6 @@ export default function CloseAgentCaseStudy() {
                 selvera247/demo-interview--app
               </a>
             </li>
-            <li>Walkthrough video (60–90s): add link here after recording.</li>
           </ul>
         </section>
 

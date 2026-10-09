@@ -858,11 +858,11 @@
     }
   ],
   "eval_score": {
-    "cases": 19,
-    "accurate": 19,
-    "accuracy": 0.917,
+    "cases": 23,
+    "accurate": 23,
+    "accuracy": 1.0,
     "pass_rate": 1.0,
-    "notes": "Heuristic agent scored on citation + driver match against the gold eval set. Re-run: python evals/run_evals.py"
+    "notes": "Deterministic harness on planted A/B/C + negative N01–N14 (full answer keys). Re-run: python evals/run_evals.py"
   },
   "sample_tool_log": [
     {

@@ -858,11 +858,11 @@
     }
   ],
   "eval_score": {
-    "cases": null,
-    "accurate": null,
-    "accuracy": null,
-    "pass_rate": null,
-    "notes": "Score unpublished until hand-written eval answer keys are complete (SPEC). Harness: finance-close-agent/evals/"
+    "cases": 23,
+    "accurate": 23,
+    "accuracy": 1.0,
+    "pass_rate": 1.0,
+    "notes": "Deterministic harness on planted A/B/C + negative N01–N14 (full answer keys). Re-run: python evals/run_evals.py"
   },
   "sample_tool_log": [
     {

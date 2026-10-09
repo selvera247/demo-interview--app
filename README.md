@@ -7,7 +7,7 @@ Personal portfolio and interview demos for AI-native finance transformation work
 ## What’s here
 
 1. **Portfolio** — hero, headline metrics, project index  
-2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, FastAPI/LangGraph workflow, review queue, eval harness (`finance-close-agent/`; score unpublished until answer keys complete)  
+2. **Finance MCP Server + Close Agent** — synthetic GL/AR, MCP tools, FastAPI/LangGraph workflow, review queue, eval score 23/23 (`finance-close-agent/`)  
 3. **Deal Record** — spec intake, sourcing, and cost tracking on one project ID  
 
 All Close Agent figures are **synthetic demo data**.
@@ -38,9 +38,7 @@ python generate_data.py
 python agent/close_agent.py
 uvicorn api.main:app --reload --port 8000   # LangGraph workflow API
 streamlit run ui/review_app.py
-# Eval score stays unpublished until you are happy with answer keys:
-# python evals/run_evals.py
-# See finance-close-agent/evals/ANSWER_KEY_TEMPLATE.md
+python evals/run_evals.py   # expect 23/23
 ```
 
 Or with Docker (API + Streamlit):

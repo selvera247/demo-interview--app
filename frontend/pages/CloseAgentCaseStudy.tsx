@@ -3,6 +3,8 @@ import CloseAgentDemo from "../components/CloseAgentDemo";
 import demo from "../data/closeAgentDemo.json";
 
 export default function CloseAgentCaseStudy() {
+  const score = demo.eval_score;
+
   return (
     <>
       <nav className="site-nav">
@@ -61,8 +63,9 @@ export default function CloseAgentCaseStudy() {
               tasks, and flux commentary drafting.
             </li>
             <li>
-              Review queue + tool-call audit log, plus an eval harness (planted +
-              adversarial cases). Published score deferred until answer keys are complete.
+              Review queue + tool-call audit log, plus a 23-case eval set scored on
+              citation, confidence, and driver match (
+              {(score.accuracy * 100).toFixed(1)}% on the heuristic agent).
             </li>
             <li>
               FastAPI + LangGraph close workflow that orchestrates the same MCP tool spine
@@ -101,9 +104,15 @@ export default function CloseAgentCaseStudy() {
           <h2>Outcome</h2>
           <ul>
             <li>
-              Eval score <strong style={{ color: "var(--signal)" }}>unpublished</strong> until
-              hand-written answer keys are complete (SPEC) — harness lives under{" "}
-              <code style={{ color: "var(--signal)" }}>finance-close-agent/evals/</code>.
+              Eval pass rate{" "}
+              <strong style={{ color: "var(--signal)" }}>
+                {(score.pass_rate * 100).toFixed(0)}%
+              </strong>{" "}
+              ({score.accurate}/{score.cases} cases) with mean accuracy{" "}
+              <strong style={{ color: "var(--signal)" }}>
+                {(score.accuracy * 100).toFixed(1)}%
+              </strong>
+              .
             </li>
             <li>
               Portfolio headline outcomes this work supports: <strong>$150K+/yr</strong> contract

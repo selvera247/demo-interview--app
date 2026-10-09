@@ -78,6 +78,28 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 python3 -m pytest tests/test_workflow_api.py -q
 ```
 
+## Docker (API + Streamlit)
+
+```bash
+cd finance-close-agent
+docker compose up --build
+```
+
+- API docs: http://127.0.0.1:8000/docs  
+- Review UI: http://127.0.0.1:8501  
+- Shared SQLite volume `finance-data` (auto-generated on first boot)
+
+Smoke test:
+
+```bash
+bash docker/verify_compose.sh
+```
+
+## Eval answer keys
+
+Author guide / copy-paste templates: [`evals/ANSWER_KEY_TEMPLATE.md`](evals/ANSWER_KEY_TEMPLATE.md).  
+N01–N14 currently score in **false-positive-only** mode; upgrade to a full written key before treating a published % as narrative-complete.
+
 ## Run the agent + review UI
 
 ### Demo checklist (slice 5)

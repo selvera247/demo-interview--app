@@ -38,8 +38,16 @@ python generate_data.py
 python agent/close_agent.py
 uvicorn api.main:app --reload --port 8000   # LangGraph workflow API
 streamlit run ui/review_app.py
-# Eval score stays unpublished until answer keys are complete:
+# Eval score stays unpublished until you are happy with answer keys:
 # python evals/run_evals.py
+# See finance-close-agent/evals/ANSWER_KEY_TEMPLATE.md
+```
+
+Or with Docker (API + Streamlit):
+
+```bash
+cd finance-close-agent
+docker compose up --build
 ```
 
 See [`finance-close-agent/README.md`](finance-close-agent/README.md) for Claude Desktop MCP config and API routes.

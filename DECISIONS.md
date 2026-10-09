@@ -100,3 +100,14 @@
   are still blank, so a 91.7% claim is misleading.
 - **Implications:** Case study copy points to the harness and “score pending”; demo toolbar no longer
   shows a percentage.
+
+## 2026-10-09 — Docker Compose for API + Streamlit; drop external-repo focus
+
+- **Decision:** Ship `Dockerfile` + `docker-compose.yml` under `finance-close-agent/` (API :8000,
+  Streamlit :8501, shared `finance-data` volume, entrypoint generates SQLite if missing). Add
+  `evals/ANSWER_KEY_TEMPLATE.md` for the owner to fill/upgrade N01–N14. Stop tracking
+  `cjs-ops/agentic-finance-ops-demo` as a publish target.
+- **Why:** Single-repo demo; Docker is the remaining packaging slice from the merge plan.
+- **Implications:** `bash docker/verify_compose.sh` is the runnable verification. N-cases may stay
+  false-positive-only until the owner upgrades them to full written keys; portfolio score stays
+  unpublished until you choose to republish.

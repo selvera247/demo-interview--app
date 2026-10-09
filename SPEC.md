@@ -55,4 +55,4 @@ Agent answers close questions and drafts flux commentary over synthetic ERP data
 - Portfolio landing page (except unpublishing premature eval scores when SPEC requires it)
 - Deal Record demo
 - Removing or changing `react-router-dom` / frontend routing (frozen)
-- Sync/publish mirror to external `cjs-ops/agentic-finance-ops-demo` (deferred; no write access from this environment)
+- External mirror repos (out of scope; this monorepo is the sole home)

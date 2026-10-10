@@ -105,7 +105,7 @@ export default function App() {
           <div>
             <div className="text-[15px] font-semibold tracking-tight">Deal Record</div>
             <div className="text-[12px] text-[#8B9099]">
-              Reconcile CRM deal amount to ERP PO before spend locks in
+              Opportunity → contract → sales order → PO on one project ID
             </div>
           </div>
         </div>

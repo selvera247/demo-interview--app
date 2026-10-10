@@ -154,3 +154,12 @@
   product names, so the same failure mode ships under CRM↔ERP.
 - **Implications:** Seed scrubbed of HubSpot/NetSuite strings; portfolio + case study copy updated.
   Legacy `index.html` / `intake_requests.csv` may still mention vendor names outside the React demo.
+
+## 2026-10-10 — Deal Record name + commercial object chain
+
+- **Decision:** Keep the product name **Deal Record**. Narrate the break across
+  **opportunity → contract → sales order → PO** (not rename the demo to “Opportunity” or
+  “Sales Order”). Case study and seed copy use those object names explicitly.
+- **Why:** Owner wants the portfolio title to stay Deal Record while making contract /
+  opportunity / sales order visible in the story.
+- **Implications:** Portfolio card title is “Deal Record”; kicker/stack show the chain.

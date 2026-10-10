@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import App from "../App";
 
-/** Deal Record demo framed as portfolio project #2 with case-study context. */
+/** Deal Record demo: CRM↔ERP PO discrepancy (generic system labels only). */
 export default function DealRecordPage() {
   return (
     <div>
@@ -30,56 +30,61 @@ export default function DealRecordPage() {
       </nav>
 
       <article className="case-layout">
-        <div className="kicker">Case study · Demo 02</div>
-        <h1>Deal Record</h1>
+        <div className="kicker">Case study · Demo 02 · CRM ↔ ERP</div>
+        <h1>Deal Record — PO discrepancy</h1>
         <p className="disclaimer">
-          Synthetic ops demo — one project ID from customer spec through sourcing and
-          live margin. Not a real customer system.
+          Synthetic ops demo: reconcile a Closed Won <strong>CRM</strong> deal amount to
+          the <strong>ERP</strong> purchase order before more spend locks in. No live
+          CRM/ERP credentials — Northwind-style demo data only.
         </p>
 
         <section className="case-block">
           <h2>Context</h2>
           <p>
-            Quote-to-cash handoffs broke down when engineering, sourcing, and finance
-            each kept their own version of the deal. Spec conflicts showed up late as
-            margin erosion and blocked POs.
+            Sales closed an 8 MW / $4.8M colo deal in the CRM. Procurement only sees a
+            Phase 1 ERP sales order and PO for 5 MW / $3.2M. Finance, FP&A, and the
+            customer each believe a different number.
           </p>
         </section>
 
         <section className="case-block">
           <h2>Problem</h2>
           <p>
-            No single system of record tied customer requirements to BOM/PO status and
-            committed cost. Teams re-derived the deal from email, so unresolved fields
-            and untagged POs stayed invisible until close.
+            <strong>$1.6M PO discrepancy</strong> between CRM closed-won amount and ERP
+            issued PO. Expansion MW lived as “committed” in CRM, never as a priced PO
+            line in ERP — so remaining buy is either overstated or blocked.
           </p>
         </section>
 
         <section className="case-block">
           <h2>User</h2>
           <p>
-            Forward-deployed operators and deal owners who need intake → spec → sourcing
-            → cost on one project code, with conflicts and open fields visible in the
-            room.
+            Deal owners, RevOps, and procurement leads who need one project ID that
+            surfaces CRM vs ERP conflicts before the next PO goes out.
           </p>
         </section>
 
         <section className="case-block">
           <h2>What I built</h2>
           <ul>
-            <li>Seeded multi-deal workspace with request basics, impact, and control fields.</li>
-            <li>Sourcing view with BOM lock, PO status, and project tagging.</li>
-            <li>Cost tracking with quoted vs committed vs actual and live margin.</li>
-            <li>Intake panel to add a new deal without leaving the demo.</li>
+            <li>
+              Featured deal <code style={{ color: "var(--signal)" }}>GE-2026-0422</code>{" "}
+              with conflicting load, site, dates, and revenue fields sourced CRM vs ERP.
+            </li>
+            <li>
+              Sourcing tab: ERP <code style={{ color: "var(--signal)" }}>PO-10491</code>{" "}
+              at $3.2M flagged against CRM $4.8M; expansion line blocked with no ERP PO.
+            </li>
+            <li>Spec / sourcing / cost on one project code with explicit conflict status.</li>
           </ul>
         </section>
 
         <section className="case-block">
           <h2>Guardrails</h2>
           <ul>
-            <li>Conflicting and TBD fields are explicit — not hidden as “confirmed.”</li>
-            <li>Sourcing stays blocked until the BOM is ready; cost activates with a quote.</li>
-            <li>All figures are synthetic demo data.</li>
+            <li>Conflicting CRM/ERP fields stay visible — never silently “confirmed.”</li>
+            <li>No further materials PO until deal amount and ERP PO amount match.</li>
+            <li>Synthetic Northwind-style customer data only; no live CRM/ERP credentials.</li>
           </ul>
         </section>
 
@@ -87,11 +92,11 @@ export default function DealRecordPage() {
           <h2>Outcome</h2>
           <ul>
             <li>
-              Operators see conflicts and margin pressure on one ID before PO spend
-              locks in.
+              Operators open the deal and immediately see the CRM↔ERP PO gap before
+              margin or supplier commit is wrong.
             </li>
             <li>
-              Live on GitHub Pages:{" "}
+              Live:{" "}
               <a
                 href="https://selvera247.github.io/demo-interview--app/#/projects/deal-record"
                 target="_blank"
@@ -107,7 +112,7 @@ export default function DealRecordPage() {
         <section className="case-block">
           <h2>Stack</h2>
           <div className="stack-list">
-            {["React", "Vite", "TypeScript", "domain model", "seeded demo state"].map(
+            {["React", "Vite", "TypeScript", "CRM↔ERP recon", "seeded PO flags"].map(
               (s) => (
                 <span key={s}>{s}</span>
               )

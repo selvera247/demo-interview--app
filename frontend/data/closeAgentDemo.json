@@ -241,7 +241,7 @@
       "party_id": "C-100",
       "memo": "Invoice Northwind Analytics \u2014 monthly services",
       "amount": 45350.72,
-      "source_system": "NetSuite"
+      "source_system": "ERP"
     },
     {
       "txn_id": "AR-2026-09-002",
@@ -252,7 +252,7 @@
       "party_id": "C-101",
       "memo": "Invoice Helios Retail Group \u2014 monthly services",
       "amount": 73059.43,
-      "source_system": "NetSuite"
+      "source_system": "ERP"
     },
     {
       "txn_id": "AR-2026-09-003",
@@ -263,7 +263,7 @@
       "party_id": "C-102",
       "memo": "Invoice Atlas Manufacturing \u2014 monthly services",
       "amount": 48840.38,
-      "source_system": "NetSuite"
+      "source_system": "ERP"
     },
     {
       "txn_id": "AR-2026-09-004",
@@ -274,7 +274,7 @@
       "party_id": "C-103",
       "memo": "Invoice Blue Harbor Logistics \u2014 monthly services",
       "amount": 100168.92,
-      "source_system": "NetSuite"
+      "source_system": "ERP"
     },
     {
       "txn_id": "JE-CLOUD-2026-09-01",
@@ -296,7 +296,7 @@
       "party_id": "C-104",
       "memo": "Invoice Cascade Health Systems \u2014 monthly services",
       "amount": 80902.81,
-      "source_system": "NetSuite"
+      "source_system": "ERP"
     },
     {
       "txn_id": "JE-ACC-4401",

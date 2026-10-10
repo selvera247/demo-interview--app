@@ -95,7 +95,33 @@ export function createSeedState(): AppState {
   const contracts = "u-contracts";
   const singh = "u-singh";
 
+  // Featured first: CRM↔ERP PO discrepancy (generic system labels only).
   const projects: Project[] = [
+    {
+      id: "p-0422",
+      projectCode: "GE-2026-0422",
+      customerId: "c-lakeside",
+      siteName: "Austin vs Round Rock, TX",
+      dealName: "Colo block — CRM vs ERP PO discrepancy",
+      stage: "sourcing",
+      status: "active",
+      quotedRevenue: 4_800_000,
+      currency: "USD",
+      customerRequestedDeliveryDate: "2026-12-15",
+      commercialOwnerId: cole,
+      opsOwnerId: eng,
+      quoteFrozenAt: null,
+      bomLocked: false,
+      requestorName: "R. Cole",
+      requestorTeam: "Sales — Enterprise",
+      problemStatement:
+        "Lakeside is Closed Won in CRM as 8 MW / $4.8M. ERP has a Phase 1 sales order + PO only for 5 MW / $3.2M. Procurement cannot size remaining buy until CRM deal amount and ERP PO amount are one number.",
+      expectedOutcome:
+        "Reconcile CRM opportunity to ERP SO-10491 / PO-10491, then freeze Phase 1 scope and clear the $1.6M PO discrepancy before more spend.",
+      tags: ["Revenue", "CRM", "ERP", "PO discrepancy"],
+      createdAt: "2026-08-28T12:00:00.000Z",
+      updatedAt: now,
+    },
     {
       id: "p-0417",
       projectCode: "GE-2026-0417",
@@ -167,31 +193,6 @@ export function createSeedState(): AppState {
       expectedOutcome: "Firm spec and delivery target established before this moves to engineering.",
       tags: ["Other"],
       createdAt: "2026-09-01T12:00:00.000Z",
-      updatedAt: now,
-    },
-    {
-      id: "p-0422",
-      projectCode: "GE-2026-0422",
-      customerId: "c-lakeside",
-      siteName: "Austin vs Round Rock, TX",
-      dealName: "Colo block — HubSpot vs NetSuite mismatch",
-      stage: "intake",
-      status: "active",
-      quotedRevenue: 4_800_000,
-      currency: "USD",
-      customerRequestedDeliveryDate: "2026-12-15",
-      commercialOwnerId: cole,
-      opsOwnerId: eng,
-      quoteFrozenAt: null,
-      bomLocked: false,
-      requestorName: "R. Cole",
-      requestorTeam: "Sales — Enterprise",
-      problemStatement:
-        "Lakeside is in HubSpot as an 8 MW / $4.8M closed-won colo deal. NetSuite has a 5 MW / $3.2M sales order for Phase 1 only. Engineering cannot freeze a BOM until CRM and ERP agree on load, price, site, and what “closed” means.",
-      expectedOutcome:
-        "One system of record: HubSpot opportunity and NetSuite SO-10491 reconciled, then spec freeze on the agreed Phase 1 scope.",
-      tags: ["Revenue", "HubSpot", "NetSuite"],
-      createdAt: "2026-08-28T12:00:00.000Z",
       updatedAt: now,
     },
   ];
@@ -277,80 +278,86 @@ export function createSeedState(): AppState {
       downstream_dependencies: { value: "None yet — too early in lifecycle", status: "unresolved", ownerId: null },
     }),
     ...fieldsFor("p-0422", {
-      voltage: confirmed("13.8 kV primary / 480V secondary", cole, "HubSpot + NetSuite (agree)"),
+      voltage: confirmed("13.8 kV primary / 480V secondary", cole, "CRM + ERP (agree)"),
       load: {
-        value: "HubSpot 8 MW vs NetSuite 5 MW — not reconciled",
+        value: "CRM 8 MW vs ERP 5 MW — not reconciled",
         status: "conflicting",
         ownerId: cole,
-        source: "HubSpot vs NetSuite",
+        source: "CRM vs ERP",
         conflict:
-          "HubSpot opportunity GE-0422: 8 MW critical IT, $4.8M amount. NetSuite sales order SO-10491: 5 MW Phase 1, $3.2M. Expansion MW was stored as committed load in CRM, not as an option on the SO.",
+          "CRM opportunity GE-0422: 8 MW critical IT, $4.8M deal amount. ERP sales order SO-10491 + PO-10491: 5 MW Phase 1, $3.2M. Expansion MW was stored as committed load in CRM, not as a priced PO line in ERP.",
       },
-      phase: confirmed("3-phase", cole, "HubSpot + NetSuite (agree)"),
+      phase: confirmed("3-phase", cole, "CRM + ERP (agree)"),
       coolingType: confirmed("Giga Box Air, liquid-ready", eng, "Engineering"),
       spaceConstraints: {
-        value: "HubSpot Austin Metro vs NetSuite ship-to Round Rock",
+        value: "CRM Austin Metro vs ERP ship-to Round Rock",
         status: "conflicting",
         ownerId: cole,
-        source: "HubSpot vs NetSuite",
+        source: "CRM vs ERP",
         conflict:
-          "HubSpot company/site = Austin Metro campus. NetSuite customer ship-to = Round Rock pad (Lakeside Inference Holdings LLC). Different legal entity and pad dimensions; enclosure BOM cannot be issued.",
+          "CRM company/site = Austin Metro campus. ERP customer ship-to = Round Rock pad (Lakeside Inference Holdings LLC). Different legal entity and pad dimensions; enclosure BOM cannot be issued.",
       },
       requestedDelivery: {
-        value: "HubSpot 15 Dec 2026 vs NetSuite 31 Mar 2027",
+        value: "CRM 15 Dec 2026 vs ERP 31 Mar 2027",
         status: "conflicting",
         ownerId: cole,
-        source: "HubSpot vs NetSuite",
+        source: "CRM vs ERP",
         conflict:
-          "HubSpot close date / customer requested delivery = 2026-12-15. NetSuite promised ship on SO-10491 = 2027-03-31. Transformer lead time was never pushed back in CRM.",
+          "CRM close date / customer requested delivery = 2026-12-15. ERP promised ship on SO-10491 = 2027-03-31. Transformer lead time was never pushed back in CRM.",
       },
       customerPowerReady: {
         value: "",
         status: "unresolved",
         ownerId: singh,
-        source: "NetSuite",
+        source: "ERP",
         conflict:
-          "NetSuite has no interconnect milestone. HubSpot custom field “Power ready” is blank. Neither system is source of truth.",
+          "ERP has no interconnect milestone. CRM custom field “Power ready” is blank. Neither system is source of truth.",
       },
       deliveryDefinition: {
-        value: "HubSpot closed-won ≠ NetSuite revenue event",
+        value: "CRM closed-won ≠ ERP PO / revenue event",
         status: "conflicting",
         ownerId: singh,
-        source: "HubSpot vs NetSuite",
+        source: "CRM vs ERP",
         conflict:
-          "HubSpot marks the deal Closed Won at contract signature. NetSuite recognizes revenue on item fulfill / invoice. FP&A is forecasting HubSpot $4.8M in Q4; backlog in NetSuite is $3.2M in Q1 2027.",
+          "CRM marks the deal Closed Won at contract signature. ERP books the PO/SO and recognizes revenue on fulfill / invoice. FP&A forecasts CRM $4.8M; ERP PO backlog is $3.2M — $1.6M PO discrepancy.",
       },
       revenue_impact: {
-        value: "$4.8M HubSpot vs $3.2M NetSuite SO — $1.6M unexplained",
+        value: "$4.8M CRM vs $3.2M ERP PO — $1.6M PO discrepancy",
         status: "conflicting",
         ownerId: singh,
-        source: "HubSpot vs NetSuite",
+        source: "CRM vs ERP",
         conflict:
-          "Pipeline and bookings do not match. Do not freeze quote or issue POs until amount and MW are one number.",
+          "Deal amount in CRM does not match issued ERP PO. Do not freeze quote or buy the remaining 3 MW until amount and MW are one number.",
       },
       audit_revrec_risk: confirmed(
-        "Elevated — CRM closed-won does not equal ERP booking. Dual amounts and dual dates will fail revenue cutoff testing.",
+        "Elevated — CRM closed-won does not equal ERP booking/PO. Dual amounts and dual dates will fail revenue cutoff and PO commitment testing.",
         singh,
-        "NetSuite / Audit"
+        "ERP / Audit"
       ),
       customer_impact: confirmed(
-        "Customer believes 8 MW is committed (HubSpot quote PDF). NetSuite SO they countersigned is 5 MW Phase 1 with an unpriced expansion rider.",
+        "Customer believes 8 MW is committed (CRM quote PDF). ERP SO/PO they countersigned is 5 MW Phase 1 with an unpriced expansion rider.",
         cole,
-        "HubSpot"
+        "CRM"
       ),
-      complexity: confirmed("Custom — not technical complexity; master-data conflict between CRM and ERP", singh),
-      cross_functional_effort: confirmed("High — Sales, RevOps, NetSuite admin, Contracts, FP&A, Audit", singh),
+      complexity: confirmed(
+        "Custom — not technical complexity; PO master-data conflict between CRM and ERP",
+        singh
+      ),
+      cross_functional_effort: confirmed(
+        "High — Sales, RevOps, ERP admin, Procurement, Contracts, FP&A, Audit",
+        singh
+      ),
       timeline_pressure: confirmed(
-        "High — HubSpot date is inside transformer lead time if 8 MW is real; NetSuite date is not",
+        "High — CRM date is inside transformer lead time if 8 MW is real; ERP PO date is not",
         cole
       ),
       control_impact: confirmed(
-        "HubSpot is not the revenue subledger. NetSuite SO is the booking record. Spec intake must stop treating CRM amount as confirmed commercial terms.",
+        "CRM is not the PO subledger. ERP SO/PO is the commitment record. Spec intake must stop treating CRM deal amount as issued PO authority.",
         singh,
         "Controls"
       ),
       downstream_dependencies: confirmed(
-        "FP&A (forecast uses HubSpot), Audit (cutoff), Procurement (MW sizes the transformer), Collections (AR will invoice NetSuite amount)",
+        "FP&A (forecast uses CRM), Audit (cutoff), Procurement (MW sizes the transformer PO), Collections (AR will invoice ERP amount)",
         singh,
         "Controls"
       ),
@@ -479,9 +486,47 @@ export function createSeedState(): AppState {
       uom: "ea",
       unitQuotedCost: 0,
     },
+    {
+      id: "bom-0422-phase1",
+      projectId: "p-0422",
+      specFieldId: "p-0422-voltage",
+      dependsOnFieldKey: "voltage",
+      sku: "XFMR-5MW-P1",
+      description: "Phase 1 transformer bank — ERP PO (5 MW)",
+      costCategory: "materials",
+      qty: 1,
+      uom: "ea",
+      unitQuotedCost: 3_200_000,
+    },
+    {
+      id: "bom-0422-expand",
+      projectId: "p-0422",
+      specFieldId: "p-0422-load",
+      dependsOnFieldKey: "load",
+      sku: "XFMR-3MW-OPT",
+      description: "Expansion transformer — CRM expects 3 MW more (no ERP PO)",
+      costCategory: "materials",
+      qty: 1,
+      uom: "ea",
+      unitQuotedCost: 1_600_000,
+    },
   ];
 
   const purchaseOrders: PurchaseOrder[] = [
+    {
+      id: "po-10491",
+      poNumber: "PO-10491",
+      projectId: "p-0422",
+      supplierId: "s-voltcore",
+      documentType: "po",
+      status: "confirmed",
+      issuedAt: "2026-09-02",
+      leadTimeDays: 210,
+      promisedShipDate: "2027-03-31",
+      totalAmount: 3_200_000,
+      notes:
+        "ERP Phase 1 only ($3.2M / 5 MW). CRM closed-won is $4.8M / 8 MW — $1.6M PO discrepancy.",
+    },
     {
       id: "po-88214",
       poNumber: "PO-88214",
@@ -589,6 +634,16 @@ export function createSeedState(): AppState {
   ];
 
   const poLines: PoLine[] = [
+    {
+      id: "pl-10491",
+      poId: "po-10491",
+      projectId: "p-0422",
+      bomItemId: "bom-0422-phase1",
+      description: "Phase 1 transformer — ERP PO",
+      qty: 1,
+      unitCost: 3_200_000,
+      costCategory: "materials",
+    },
     { id: "pl-88214", poId: "po-88214", projectId: "p-0417", bomItemId: "bom-0417-xfmr", description: "Primary transformer", qty: 1, unitCost: 1_400_000, costCategory: "materials" },
     { id: "pl-88231", poId: "po-88231", projectId: "p-0417", bomItemId: "bom-0417-swg", description: "Switchgear UL 891", qty: 1, unitCost: 250_000, costCategory: "materials" },
     { id: "pl-88240", poId: "po-88240", projectId: "p-0417", bomItemId: "bom-0417-enc", description: "Enclosures", qty: 1, unitCost: 0, costCategory: "materials" },

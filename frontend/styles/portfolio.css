@@ -310,6 +310,64 @@ select {
   letter-spacing: 0.04em;
 }
 
+.case-callout {
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--signal);
+  background: rgba(14, 36, 32, 0.55);
+}
+
+.case-callout-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--signal);
+  margin-bottom: 0.65rem;
+}
+
+.case-callout-body {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.case-callout-body ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.case-callout-body li {
+  margin: 0.35rem 0;
+}
+
+.case-callout-body strong {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.governance-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+  line-height: 1.65;
+  max-width: 62ch;
+}
+
+.governance-list li {
+  margin: 0.45rem 0;
+}
+
+.toolkit-row {
+  cursor: default;
+}
+
+.toolkit-row:hover {
+  padding-left: 0;
+  background: none;
+}
+
 .case-layout {
   width: min(860px, calc(100% - 2.5rem));
   margin: 0 auto;

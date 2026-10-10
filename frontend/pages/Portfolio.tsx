@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 const projects = [
   {
     to: "/projects/close-agent",
-    tag: "DEMO 01 · MCP · 23/23 EVAL",
+    tag: "DEMO 01 · FLAGSHIP · 23/23 EVAL",
     title: "Finance MCP Server + Close Agent",
     blurb:
-      "Agent answers close questions and drafts flux commentary over a synthetic GL via MCP — with review queue, audit log, and a 23/23 scored eval set.",
+      "Governed close agent over synthetic GL via MCP — review queue, citations, tool-call audit log, and a 23/23 eval set.",
   },
   {
     to: "/projects/deal-record",
@@ -14,6 +14,21 @@ const projects = [
     title: "Deal Record",
     blurb:
       "One project ID across opportunity → contract → sales order → PO when CRM Closed Won and ERP PO amounts don’t match ($1.6M gap).",
+  },
+];
+
+const toolkit = [
+  {
+    tag: "COLLECTIONS",
+    title: "Collections Workbench",
+    blurb:
+      "Prioritized collector queues and exception handling for O2C — built beside collectors, not as a slideware bot.",
+  },
+  {
+    tag: "REVENUE",
+    title: "Revenue reconciliation",
+    blurb:
+      "Commercial integrity patterns: bookings vs ERP, cutoff risk, and dual-system amounts that fail audit if left unchecked.",
   },
 ];
 
@@ -33,11 +48,11 @@ export default function Portfolio() {
           <button type="button" className="linkish" onClick={() => scrollToSection("projects")}>
             Projects
           </button>
+          <button type="button" className="linkish" onClick={() => scrollToSection("governance")}>
+            Governance
+          </button>
           <button type="button" className="linkish" onClick={() => scrollToSection("contact")}>
             Contact
-          </button>
-          <button type="button" className="linkish" onClick={() => scrollToSection("resume")}>
-            Resume
           </button>
         </div>
       </nav>
@@ -47,11 +62,14 @@ export default function Portfolio() {
         <div className="hero-inner">
           <h1 className="hero-brand">Chris Selvera</h1>
           <p className="hero-headline">
-            Finance Transformation Manager building AI-native tools for finance teams.
+            Forward-deployed finance engineer. I sit with controllers and collectors,
+            then build the governed agents and workflows I wish I’d had when I ran close,
+            collections, and O2C.
           </p>
           <p className="hero-support">
-            I’ve run the close, collections, and O2C myself, so I build the automation I
-            wish I’d had: from prototype to production, with the users in the room.
+            Prototypes with users in the room — evidence, auditability, and a human gate
+            before anything consequential ships. Demos below use{" "}
+            <strong style={{ color: "var(--white)" }}>synthetic data</strong> only.
           </p>
           <div className="hero-cta">
             <button
@@ -64,13 +82,9 @@ export default function Portfolio() {
             <Link className="btn btn-ghost" to="/projects/close-agent">
               Close Agent demo
             </Link>
-            <button
-              type="button"
-              className="btn btn-warm"
-              onClick={() => scrollToSection("contact")}
-            >
-              Contact
-            </button>
+            <Link className="btn btn-warm" to="/projects/deal-record">
+              Deal Record
+            </Link>
           </div>
         </div>
       </header>
@@ -99,8 +113,9 @@ export default function Portfolio() {
       <section className="section" id="projects">
         <h2>Projects</h2>
         <p className="lede">
-          Each case study covers context, problem, users, what I built, adoption,
-          guardrails, outcomes, and a synthetic-data demo.
+          Case studies use the same structure: context → problem → user → build → adoption
+          → guardrails → outcome → trade-offs → stack → demo. All figures are synthetic
+          unless noted as portfolio outcomes.
         </p>
         <div className="project-list">
           {projects.map((p) => (
@@ -116,46 +131,67 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="section" id="resume">
-        <h2>Resume</h2>
+      <section className="section" id="toolkit" aria-label="Related work">
+        <h2>Also in the toolkit</h2>
         <p className="lede">
-          Prefer the case studies for depth; resume PDF can drop into{" "}
-          <code style={{ color: "var(--signal)" }}>frontend/public/</code> when you’re
-          ready to ship a downloadable file.
+          Lighter surfaces from the same forward-deployed practice — not full interactive
+          demos on this site yet.
         </p>
-        <div className="hero-cta">
-          <a
-            className="btn btn-ghost"
-            href="https://github.com/selvera247"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub profile
-          </a>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => scrollToSection("projects")}
-          >
-            See projects
-          </button>
+        <div className="project-list">
+          {toolkit.map((p) => (
+            <div key={p.title} className="project-row toolkit-row">
+              <div>
+                <div className="tag">{p.tag}</div>
+                <h3>{p.title}</h3>
+              </div>
+              <p>{p.blurb}</p>
+              <span className="btn btn-ghost" style={{ opacity: 0.55, pointerEvents: "none" }}>
+                Context
+              </span>
+            </div>
+          ))}
         </div>
+      </section>
+
+      <section className="section" id="governance">
+        <h2>Governance pattern</h2>
+        <p className="lede">
+          Reusable across close, commercial chain, and collections work — the part that
+          makes controllers trust the system.
+        </p>
+        <ul className="governance-list">
+          <li>Tool-call audit logging (who called what, with which inputs)</li>
+          <li>Mandatory human gate for consequential actions (approve / edit / reject)</li>
+          <li>Citations back to source JEs, subledger lines, or commercial objects</li>
+          <li>Low-confidence items forced into review — no silent guessing</li>
+          <li>Eval harness with planted anomalies before wider rollout</li>
+        </ul>
+      </section>
+
+      <section className="section" id="prototype">
+        <h2>Prototype → production</h2>
+        <p className="lede">
+          Partnered with Engineering on a path from vibe-coded demos to production: start
+          from the user’s real policy, keep evidence and gates, eliminate rework loops.
+          Result on the floor: <strong style={{ color: "var(--white)" }}>three
+          solutions in six months</strong> — not a graveyard of prototypes.
+        </p>
       </section>
 
       <section className="section" id="contact">
         <h2>Contact</h2>
         <p className="lede">
-          Open to forward-deployed / AI-native finance roles where builders sit with
-          controllers, not just slide decks.
+          Open to forward-deployed finance engineering roles where builders sit with
+          controllers and collectors — not just slide decks.
         </p>
         <div className="hero-cta">
           <a
             className="btn btn-primary"
-            href="https://github.com/selvera247"
+            href="https://github.com/selvera247/demo-interview--app"
             target="_blank"
             rel="noreferrer"
           >
-            GitHub
+            GitHub repo
           </a>
           <a
             className="btn btn-ghost"
@@ -172,10 +208,10 @@ export default function Portfolio() {
       </section>
 
       <footer className="site-footer">
-        <span>Chris Selvera · Finance transformation · AI-native tools</span>
+        <span>Chris Selvera · Forward-deployed finance engineering</span>
         <span>
-          Live demos:{" "}
-          <a href="https://selvera247.github.io/demo-interview--app/">
+          Synthetic demos:{" "}
+          <a href="https://selvera247.github.io/demo-interview--app/#/">
             GitHub Pages
           </a>
         </span>

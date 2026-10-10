@@ -163,3 +163,14 @@
 - **Why:** Owner wants the portfolio title to stay Deal Record while making contract /
   opportunity / sales order visible in the story.
 - **Implications:** Portfolio card title is “Deal Record”; kicker/stack show the chain.
+
+## 2026-10-10 — Forward-deployed portfolio elevation
+
+- **Decision:** Elevate Pages case studies to a fixed 10-section structure (context → …
+  demo), strengthen Close Agent architecture/eval/adoption/guardrails/trade-offs, align
+  Deal Record, and update home headline to forward-deployed finance engineer positioning.
+  Add governance + prototype→production sections; lighter “toolkit” cards for Collections /
+  revenue recon (no invented interactive demos).
+- **Why:** Owner SPEC for hiring-manager scannability and forward-deployed signal without
+  inventing metrics or claiming live ERP access.
+- **Implications:** Interactive demos preserved; all demo figures remain synthetic.

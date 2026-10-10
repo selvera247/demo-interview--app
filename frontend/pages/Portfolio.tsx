@@ -10,10 +10,10 @@ const projects = [
   },
   {
     to: "/projects/deal-record",
-    tag: "DEMO 02 · OPS",
-    title: "Deal Record",
+    tag: "DEMO 02 · CRM ↔ ERP PO",
+    title: "Deal Record — PO discrepancy",
     blurb:
-      "Spec intake, sourcing, and cost tracking on one project ID — built for forward-deployed iteration with operators in the room.",
+      "Surface a $1.6M CRM closed-won vs ERP PO mismatch on one project ID — stop the next buy until systems agree.",
   },
 ];
 

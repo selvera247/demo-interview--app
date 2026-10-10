@@ -66,7 +66,7 @@ export default function App() {
   const [state, setState] = useState(() => createSeedState());
   const deals = useMemo(() => toDealViews(state), [state]);
   const [selectedId, setSelectedId] = useState(deals[0]?.id);
-  const [view, setView] = useState<"spec" | "sourcing" | "cost">("spec");
+  const [view, setView] = useState<"spec" | "sourcing" | "cost">("sourcing");
   const [intakeOpen, setIntakeOpen] = useState(false);
   const selected = deals.find((d) => d.id === selectedId);
 
@@ -104,7 +104,9 @@ export default function App() {
           </div>
           <div>
             <div className="text-[15px] font-semibold tracking-tight">Deal Record</div>
-            <div className="text-[12px] text-[#8B9099]">One system of record, from customer spec through cost and margin</div>
+            <div className="text-[12px] text-[#8B9099]">
+              Reconcile CRM deal amount to ERP PO before spend locks in
+            </div>
           </div>
         </div>
         <div className="flex gap-1 bg-[#212327] border border-[#33363c] rounded-md p-1">

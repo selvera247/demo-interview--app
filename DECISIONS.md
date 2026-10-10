@@ -144,3 +144,13 @@
 - **Why:** Owner wants all demos completed for the public portfolio.
 - **Implications:** Claude Desktop still requires local stdio config; Pages hosts static demos only.
   Optional: add reverse link from `finance-portfolio.selveracj.workers.dev` to Pages URLs.
+
+## 2026-10-10 — Deal Record = CRM↔ERP PO discrepancy (generic labels)
+
+- **Decision:** Reframe Deal Record around a featured deal (`GE-2026-0422`) with a **$1.6M PO
+  discrepancy**: CRM closed-won $4.8M / 8 MW vs ERP PO-10491 $3.2M / 5 MW. Use generic
+  **CRM** / **ERP** labels only (not HubSpot/Oracle/NetSuite) per SPEC. Open demo on Sourcing tab.
+- **Why:** Owner asked for PO discrepancy between HubSpot and Oracle; SPEC forbids real vendor
+  product names, so the same failure mode ships under CRM↔ERP.
+- **Implications:** Seed scrubbed of HubSpot/NetSuite strings; portfolio + case study copy updated.
+  Legacy `index.html` / `intake_requests.csv` may still mention vendor names outside the React demo.

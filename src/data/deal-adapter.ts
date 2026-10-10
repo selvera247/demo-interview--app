@@ -192,10 +192,10 @@ export function toDealView(state: AppState, project: Project): DealView {
       let flag: string | null = null;
       if (project.id === "p-0422" && po?.poNumber === "PO-10491") {
         flag =
-          "CRM↔ERP PO discrepancy: CRM closed-won $4.8M / 8 MW vs ERP PO-10491 $3.2M / 5 MW ($1.6M gap). Hold further buy until systems match.";
+          "Opportunity OPP-0422 Closed Won $4.8M / 8 MW (contract signed) vs ERP SO-10491 + PO-10491 $3.2M / 5 MW — $1.6M gap. Hold further buy until opportunity, sales order, and PO match.";
       } else if (project.id === "p-0422" && blocked) {
         flag =
-          "CRM expects this expansion line ($1.6M / 3 MW) but ERP has no matching PO. Blocked until CRM deal amount and ERP PO amount reconcile.";
+          "Opportunity/contract expect this expansion ($1.6M / 3 MW) but ERP has no matching sales order or PO line. Blocked until the commercial chain reconciles.";
       } else if (blocked && depends) {
         flag = `Cannot issue PO — BOM line depends on unresolved spec (${depends.label}). Blocked until that field is confirmed.`;
       } else if (po && leadTimeThreat({ project, po })) {

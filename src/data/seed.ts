@@ -102,7 +102,7 @@ export function createSeedState(): AppState {
       projectCode: "GE-2026-0422",
       customerId: "c-lakeside",
       siteName: "Austin vs Round Rock, TX",
-      dealName: "Colo block — CRM vs ERP PO discrepancy",
+      dealName: "Colo block — opportunity / SO / PO mismatch",
       stage: "sourcing",
       status: "active",
       quotedRevenue: 4_800_000,
@@ -115,10 +115,10 @@ export function createSeedState(): AppState {
       requestorName: "R. Cole",
       requestorTeam: "Sales — Enterprise",
       problemStatement:
-        "Lakeside is Closed Won in CRM as 8 MW / $4.8M. ERP has a Phase 1 sales order + PO only for 5 MW / $3.2M. Procurement cannot size remaining buy until CRM deal amount and ERP PO amount are one number.",
+        "CRM opportunity OPP-0422 is Closed Won at 8 MW / $4.8M (contract signed). ERP sales order SO-10491 and purchase order PO-10491 only cover Phase 1 at 5 MW / $3.2M. Expansion is still “committed” on the opportunity with no matching SO/PO line.",
       expectedOutcome:
-        "Reconcile CRM opportunity to ERP SO-10491 / PO-10491, then freeze Phase 1 scope and clear the $1.6M PO discrepancy before more spend.",
-      tags: ["Revenue", "CRM", "ERP", "PO discrepancy"],
+        "One Deal Record: reconcile opportunity + contract to SO-10491 / PO-10491, freeze Phase 1, clear the $1.6M gap before more spend.",
+      tags: ["Revenue", "Opportunity", "Contract", "Sales order", "PO"],
       createdAt: "2026-08-28T12:00:00.000Z",
       updatedAt: now,
     },
@@ -285,7 +285,7 @@ export function createSeedState(): AppState {
         ownerId: cole,
         source: "CRM vs ERP",
         conflict:
-          "CRM opportunity GE-0422: 8 MW critical IT, $4.8M deal amount. ERP sales order SO-10491 + PO-10491: 5 MW Phase 1, $3.2M. Expansion MW was stored as committed load in CRM, not as a priced PO line in ERP.",
+          "CRM opportunity OPP-0422: 8 MW critical IT, $4.8M (Closed Won + signed contract). ERP sales order SO-10491 + PO-10491: 5 MW Phase 1, $3.2M. Expansion MW stayed on the opportunity/contract rider, never as a priced SO/PO line.",
       },
       phase: confirmed("3-phase", cole, "CRM + ERP (agree)"),
       coolingType: confirmed("Giga Box Air, liquid-ready", eng, "Engineering"),
@@ -314,33 +314,33 @@ export function createSeedState(): AppState {
           "ERP has no interconnect milestone. CRM custom field “Power ready” is blank. Neither system is source of truth.",
       },
       deliveryDefinition: {
-        value: "CRM closed-won ≠ ERP PO / revenue event",
+        value: "Opportunity Closed Won ≠ ERP SO / PO / revenue event",
         status: "conflicting",
         ownerId: singh,
         source: "CRM vs ERP",
         conflict:
-          "CRM marks the deal Closed Won at contract signature. ERP books the PO/SO and recognizes revenue on fulfill / invoice. FP&A forecasts CRM $4.8M; ERP PO backlog is $3.2M — $1.6M PO discrepancy.",
+          "CRM opportunity Closed Won at contract signature. ERP books sales order SO-10491 and PO-10491; revenue on fulfill / invoice. FP&A forecasts opportunity $4.8M; ERP SO/PO backlog is $3.2M — $1.6M gap across the chain.",
       },
       revenue_impact: {
-        value: "$4.8M CRM vs $3.2M ERP PO — $1.6M PO discrepancy",
+        value: "$4.8M opportunity vs $3.2M SO/PO — $1.6M discrepancy",
         status: "conflicting",
         ownerId: singh,
         source: "CRM vs ERP",
         conflict:
-          "Deal amount in CRM does not match issued ERP PO. Do not freeze quote or buy the remaining 3 MW until amount and MW are one number.",
+          "Opportunity + contract amount does not match ERP sales order / PO. Do not freeze quote or buy the remaining 3 MW until opportunity, SO, and PO are one number.",
       },
       audit_revrec_risk: confirmed(
-        "Elevated — CRM closed-won does not equal ERP booking/PO. Dual amounts and dual dates will fail revenue cutoff and PO commitment testing.",
+        "Elevated — opportunity Closed Won ≠ ERP sales order/PO booking. Dual amounts and dates fail revenue cutoff and commitment testing.",
         singh,
         "ERP / Audit"
       ),
       customer_impact: confirmed(
-        "Customer believes 8 MW is committed (CRM quote PDF). ERP SO/PO they countersigned is 5 MW Phase 1 with an unpriced expansion rider.",
+        "Customer believes 8 MW is committed (opportunity quote + contract PDF). ERP SO/PO they countersigned is 5 MW Phase 1 with an unpriced expansion rider.",
         cole,
         "CRM"
       ),
       complexity: confirmed(
-        "Custom — not technical complexity; PO master-data conflict between CRM and ERP",
+        "Custom — not technical complexity; opportunity / contract / SO / PO master-data conflict",
         singh
       ),
       cross_functional_effort: confirmed(
@@ -348,16 +348,16 @@ export function createSeedState(): AppState {
         singh
       ),
       timeline_pressure: confirmed(
-        "High — CRM date is inside transformer lead time if 8 MW is real; ERP PO date is not",
+        "High — opportunity delivery date is inside transformer lead time if 8 MW is real; ERP SO/PO date is not",
         cole
       ),
       control_impact: confirmed(
-        "CRM is not the PO subledger. ERP SO/PO is the commitment record. Spec intake must stop treating CRM deal amount as issued PO authority.",
+        "Opportunity Closed Won is not PO authority. ERP sales order + PO are the commitment record. Deal Record must stop treating CRM amount as issued buy authority.",
         singh,
         "Controls"
       ),
       downstream_dependencies: confirmed(
-        "FP&A (forecast uses CRM), Audit (cutoff), Procurement (MW sizes the transformer PO), Collections (AR will invoice ERP amount)",
+        "FP&A (forecast uses opportunity), Audit (cutoff), Procurement (MW sizes transformer PO), Collections (AR invoices ERP SO amount)",
         singh,
         "Controls"
       ),
@@ -525,7 +525,7 @@ export function createSeedState(): AppState {
       promisedShipDate: "2027-03-31",
       totalAmount: 3_200_000,
       notes:
-        "ERP Phase 1 only ($3.2M / 5 MW). CRM closed-won is $4.8M / 8 MW — $1.6M PO discrepancy.",
+        "ERP SO-10491 / PO-10491 Phase 1 only ($3.2M / 5 MW). CRM opportunity OPP-0422 Closed Won + contract is $4.8M / 8 MW — $1.6M chain discrepancy.",
     },
     {
       id: "po-88214",

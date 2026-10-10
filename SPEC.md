@@ -48,11 +48,12 @@ Agent answers close questions and drafts flux commentary over synthetic ERP data
 ## Definition of done
 - Runs end to end from a fresh clone via documented commands
 - Tests pass, eval score published (only after hand-written cases), README with architecture diagram
-- Works in Claude Desktop via MCP
+- Works in Claude Desktop via MCP (`verify_mcp.py` smoke + documented stdio config)
 - FastAPI + LangGraph close workflow returns the same flagged set as `agent/close_agent.py`
+- GitHub Pages portfolio hosts Close Agent + Deal Record demos
 
-## Out of scope until DoD (slice 7 complete)
-- Portfolio landing page (except unpublishing premature eval scores when SPEC requires it)
-- Deal Record demo
-- Removing or changing `react-router-dom` / frontend routing (frozen)
-- External mirror repos (out of scope; this monorepo is the sole home)
+## Portfolio packaging (post–close-agent DoD)
+- Portfolio landing and Deal Record case framing may be polished for showcase
+- Prefer HashRouter; do not swap routing libraries without an explicit decision
+- External mirror repos remain out of scope (this monorepo is the sole home)
+- Personal hub `finance-portfolio.selveracj.workers.dev` may deep-link here; not required to host Python

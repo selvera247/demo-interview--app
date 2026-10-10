@@ -6,6 +6,33 @@ Synthetic close demo for fictional company **Northwind Digital**: MCP tools over
 
 ## Architecture
 
+```mermaid
+flowchart LR
+  subgraph clients [Clients]
+    CD[Claude Desktop MCP]
+    API[FastAPI / LangGraph]
+    UI[Streamlit review UI]
+    WEB[GitHub Pages portfolio]
+  end
+
+  subgraph spine [Close spine]
+    T[tools.py]
+    P[policy.yaml]
+    DB[(SQLite finance.db)]
+    Q[review_queue + tool_call_log]
+    E[evals/cases.yaml]
+  end
+
+  CD --> T
+  API --> T
+  UI --> Q
+  WEB -.->|static demo export| WEB
+  T --> P
+  T --> DB
+  T --> Q
+  E --> T
+```
+
 ```text
 Claude Desktop (MCP)  ──┐
 FastAPI / LangGraph   ──┼──► tools.py / policy.yaml / SQLite
@@ -13,11 +40,17 @@ Streamlit review UI   ──┘         │
                                   ▼
                          review_queue + tool_call_log
                                   │
-                         evals/cases.yaml (score when keys filled)
+                         evals/cases.yaml (23/23 scored)
 ```
 
 LangGraph stages: `extract → flag_and_draft → approval_gate → summary`  
 (`flag_and_draft` calls the same `run_close_pass` as the CLI agent — no second variance engine.)
+
+MCP smoke (no Claude Desktop required):
+
+```bash
+python3 verify_mcp.py
+```
 
 ## What’s included
 

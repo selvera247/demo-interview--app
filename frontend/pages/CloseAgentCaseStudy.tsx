@@ -14,7 +14,15 @@ export default function CloseAgentCaseStudy() {
         <div className="nav-links">
           <Link to="/">Home</Link>
           <Link to="/projects/deal-record">Deal Record</Link>
-          <a href="#demo">Live demo</a>
+          <button
+            type="button"
+            className="linkish"
+            onClick={() =>
+              document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Live demo
+          </button>
         </div>
       </nav>
 

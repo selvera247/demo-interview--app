@@ -135,3 +135,12 @@
   Defer Cloudflare Workers/Pages until explicitly requested.
 - **Why:** Pages already wired via Actions; hash routes work under `/demo-interview--app/`.
 - **Implications:** Merge to `main` deploys. Live Python/MCP/Docker remain local — not on Pages.
+
+## 2026-10-10 — Portfolio DoD packaging complete
+
+- **Decision:** Treat close-agent DoD as met for portfolio purposes: mermaid architecture diagram,
+  `verify_mcp.py` smoke, Deal Record case-study framing, Pages showcase links, personal-hub
+  deep-link target. Unfreeze portfolio/Deal Record packaging polish only (no router library swap).
+- **Why:** Owner wants all demos completed for the public portfolio.
+- **Implications:** Claude Desktop still requires local stdio config; Pages hosts static demos only.
+  Optional: add reverse link from `finance-portfolio.selveracj.workers.dev` to Pages URLs.

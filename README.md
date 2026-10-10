@@ -9,8 +9,17 @@ Personal portfolio and interview demos for AI-native finance transformation work
 | Portfolio home | https://selvera247.github.io/demo-interview--app/ |
 | **Close Agent demo** (share this) | https://selvera247.github.io/demo-interview--app/#/projects/close-agent |
 | Deal Record | https://selvera247.github.io/demo-interview--app/#/projects/deal-record |
+| Personal hub (deep-link target) | https://finance-portfolio.selveracj.workers.dev |
 
 Deploy: push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) (`GITHUB_PAGES=true` Vite build → Pages). Manual re-run: Actions → **Deploy GitHub Pages** → Run workflow.
+
+```mermaid
+flowchart TB
+  Hub[Personal hub / resume] --> Pages[GitHub Pages portfolio]
+  Pages --> CA[Close Agent case study + review demo]
+  Pages --> DR[Deal Record case study + app]
+  CA -.->|local / Docker| Spine[MCP + FastAPI + Streamlit + SQLite]
+```
 
 ## What’s here
 

@@ -157,7 +157,15 @@ export default function Portfolio() {
           >
             GitHub
           </a>
-          <Link className="btn btn-ghost" to="/projects/close-agent">
+          <a
+            className="btn btn-ghost"
+            href="https://finance-portfolio.selveracj.workers.dev"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Personal site
+          </a>
+          <Link className="btn btn-warm" to="/projects/close-agent">
             Close Agent demo
           </Link>
         </div>
@@ -165,7 +173,12 @@ export default function Portfolio() {
 
       <footer className="site-footer">
         <span>Chris Selvera · Finance transformation · AI-native tools</span>
-        <span>Demos use synthetic data unless noted</span>
+        <span>
+          Live demos:{" "}
+          <a href="https://selvera247.github.io/demo-interview--app/">
+            GitHub Pages
+          </a>
+        </span>
       </footer>
     </>
   );

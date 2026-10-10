@@ -1,6 +1,7 @@
 # Chris Selvera — portfolio demos
 
-Personal portfolio and interview demos for AI-native finance transformation work.
+Forward-deployed finance engineering portfolio: sit with controllers/collectors, build
+governed agents and workflows, move prototypes toward production with evidence.
 
 ## Showcase (GitHub Pages)
 

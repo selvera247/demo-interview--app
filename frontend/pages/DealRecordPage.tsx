@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
+import CaseCallout from "../components/CaseCallout";
 import App from "../App";
 
-/** Deal Record: one ID across opportunity → contract → sales order → PO. */
+/** Deal Record: opportunity → contract → sales order → PO on one ID. */
 export default function DealRecordPage() {
   return (
     <div>
@@ -33,59 +34,36 @@ export default function DealRecordPage() {
         <div className="kicker">Case study · Demo 02</div>
         <h1>Deal Record</h1>
         <p className="disclaimer">
-          Synthetic ops demo — one project ID that ties the commercial chain together
-          when CRM and ERP disagree. Northwind-style data only; generic{" "}
-          <strong>CRM</strong> / <strong>ERP</strong> labels.
+          Synthetic ops demo — one project ID across the commercial chain when CRM and
+          ERP disagree. Generic <strong>CRM</strong> / <strong>ERP</strong> labels;
+          Northwind-style data only.
         </p>
-
-        <section className="case-block">
-          <h2>Commercial chain</h2>
-          <p className="lede" style={{ marginBottom: "1rem" }}>
-            The product is still <strong>Deal Record</strong>. The breakage sits between
-            these objects:
-          </p>
-          <div className="stack-list" aria-label="Commercial object chain">
-            {[
-              "CRM Opportunity",
-              "Contract",
-              "ERP Sales Order",
-              "Purchase Order",
-            ].map((s) => (
-              <span key={s}>{s}</span>
-            ))}
-          </div>
-          <p style={{ marginTop: "1rem", color: "var(--muted)" }}>
-            Featured deal: CRM opportunity Closed Won at <strong>$4.8M / 8 MW</strong> →
-            contract signed → ERP sales order <code style={{ color: "var(--signal)" }}>SO-10491</code>{" "}
-            and PO <code style={{ color: "var(--signal)" }}>PO-10491</code> only for{" "}
-            <strong>$3.2M / 5 MW</strong> Phase 1 → <strong>$1.6M</strong> still “committed”
-            in CRM with no matching sales order or PO line.
-          </p>
-        </section>
 
         <section className="case-block">
           <h2>Context</h2>
           <p>
-            Sales, RevOps, procurement, and FP&A each read a different object: the
-            opportunity amount, the contract PDF, the ERP sales order, or the issued PO.
-            Without one Deal Record, nobody notices the gap until the next buy or forecast.
+            Sales, RevOps, procurement, and FP&A each read a different object: the CRM
+            opportunity, the signed contract, the ERP sales order, or the issued PO.
+            Without one Deal Record, drift shows up late as margin miss or a blocked buy.
           </p>
         </section>
 
         <section className="case-block">
           <h2>Problem</h2>
           <p>
-            Opportunity and contract imply 8 MW / $4.8M. The ERP sales order and PO only
-            cover Phase 1 at 5 MW / $3.2M. Expansion lived as “committed” on the
-            opportunity, never as a priced SO/PO line — a classic CRM↔ERP discrepancy.
+            Opportunity and contract imply <strong>8 MW / $4.8M</strong>. ERP sales order
+            SO-10491 and PO-10491 only cover Phase 1 at <strong>5 MW / $3.2M</strong>. The
+            remaining <strong>$1.6M / 3 MW</strong> stayed “committed” on the opportunity,
+            never as a priced SO/PO line — a CRM↔ERP commercial integrity gap.
           </p>
         </section>
 
         <section className="case-block">
           <h2>User</h2>
           <p>
-            Deal owners, RevOps, and procurement who need opportunity / contract / sales
-            order / PO conflicts on one project code before the next PO goes out.
+            Deal owners, RevOps, and procurement leads who need opportunity / contract /
+            sales order / PO conflicts visible on one project code before the next PO
+            goes out.
           </p>
         </section>
 
@@ -93,24 +71,65 @@ export default function DealRecordPage() {
           <h2>What I built</h2>
           <ul>
             <li>
-              Featured Deal Record <code style={{ color: "var(--signal)" }}>GE-2026-0422</code>{" "}
+              Deal Record for <code style={{ color: "var(--signal)" }}>GE-2026-0422</code>{" "}
               with CRM vs ERP conflicts on load, site, dates, and revenue.
             </li>
             <li>
-              Sourcing: ERP PO-10491 ($3.2M) flagged against CRM opportunity $4.8M; expansion
-              line blocked (no matching sales order / PO).
+              Spec → sourcing → cost on one ID so contract scope and PO commit stay linked.
             </li>
-            <li>Spec → sourcing → cost on one ID so contract scope and PO commit stay linked.</li>
+            <li>
+              Sourcing flags: ERP PO-10491 ($3.2M) vs CRM opportunity ($4.8M); expansion
+              line blocked with no matching SO/PO.
+            </li>
           </ul>
+
+          <CaseCallout title="Commercial chain">
+            <div className="stack-list" style={{ marginBottom: "0.75rem" }}>
+              {[
+                "CRM Opportunity",
+                "Contract",
+                "ERP Sales Order",
+                "Purchase Order",
+              ].map((s) => (
+                <span key={s}>{s}</span>
+              ))}
+            </div>
+            <p style={{ margin: 0, color: "var(--muted)" }}>
+              Closed Won opportunity + signed contract ≠ authority to buy until the ERP
+              sales order and PO match amount and MW.
+            </p>
+          </CaseCallout>
         </section>
 
         <section className="case-block">
-          <h2>Guardrails</h2>
+          <h2>How I got it adopted</h2>
+          <p>
+            Sat with deal owners and RevOps on a live mismatch: started from the objects
+            they already argued about (opportunity vs SO vs PO), kept conflicting fields
+            visible instead of “fixing” CRM, and walked the $1.6M gap in a working
+            session before any further materials buy.
+          </p>
+        </section>
+
+        <section className="case-block">
+          <h2>Guardrails &amp; Evidence</h2>
           <ul>
-            <li>Opportunity Closed Won ≠ authority to buy until the ERP sales order/PO matches.</li>
-            <li>Conflicting CRM/ERP fields stay visible — never silently confirmed.</li>
-            <li>Synthetic demo data only; no live CRM/ERP credentials.</li>
+            <li>
+              Opportunity Closed Won ≠ authority to buy until ERP sales order / PO matches
+            </li>
+            <li>Conflicting CRM/ERP fields stay visible — never silently confirmed</li>
+            <li>
+              Expansion BOM blocked when CRM expects spend with no matching ERP PO line
+            </li>
+            <li>Synthetic demo only — no live CRM/ERP credentials</li>
           </ul>
+          <CaseCallout title="What this pattern enables">
+            <p style={{ margin: 0 }}>
+              Same discipline as revenue recognition / commercial integrity work: one
+              system of record across opportunity, contract, sales order, and PO so FP&A
+              forecast, procurement commit, and customer expectation can’t diverge quietly.
+            </p>
+          </CaseCallout>
         </section>
 
         <section className="case-block">
@@ -121,17 +140,20 @@ export default function DealRecordPage() {
               or supplier commit is wrong.
             </li>
             <li>
-              Live:{" "}
-              <a
-                href="https://selvera247.github.io/demo-interview--app/#/projects/deal-record"
-                target="_blank"
-                rel="noreferrer"
-                style={{ color: "var(--signal)" }}
-              >
-                /#/projects/deal-record
-              </a>
+              Featured gap is impossible to miss: <strong>$1.6M / 3 MW</strong> expansion
+              not in ERP.
             </li>
           </ul>
+        </section>
+
+        <section className="case-block">
+          <h2>What broke / Trade-offs</h2>
+          <p>
+            Treating CRM Closed Won as “done” hid the ERP gap until procurement sized the
+            wrong transformer. The trade-off: slower “green” status on the opportunity in
+            exchange for an honest Deal Record. Spec conflicts are noisy on purpose —
+            silent confirmation was the failure mode.
+          </p>
         </section>
 
         <section className="case-block">
@@ -150,10 +172,56 @@ export default function DealRecordPage() {
             ))}
           </div>
         </section>
+
+        <section className="case-block">
+          <h2>Demo / Links</h2>
+          <ul>
+            <li>
+              Interactive Deal Record app below (opens on Sourcing for the featured gap).
+            </li>
+            <li>
+              Share:{" "}
+              <a
+                href="https://selvera247.github.io/demo-interview--app/#/projects/deal-record"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--signal)" }}
+              >
+                GitHub Pages · Deal Record
+              </a>
+            </li>
+            <li>
+              Repo:{" "}
+              <a
+                href="https://github.com/selvera247/demo-interview--app"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--signal)" }}
+              >
+                selvera247/demo-interview--app
+              </a>
+            </li>
+          </ul>
+        </section>
       </article>
 
       <div id="live-app">
         <App />
+      </div>
+
+      <div
+        className="hero-cta"
+        style={{
+          width: "min(860px, calc(100% - 2.5rem))",
+          margin: "0 auto 3rem",
+        }}
+      >
+        <Link className="btn btn-primary" to="/">
+          Back home
+        </Link>
+        <Link className="btn btn-ghost" to="/projects/close-agent">
+          Close Agent
+        </Link>
       </div>
     </div>
   );

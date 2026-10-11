@@ -218,3 +218,14 @@
   managers should see a generic finance path on GitHub Pages.
 - **Implications:** Backend origin stays configurable via `VITE_FINDATAGRAPH_DEMO_URL`;
   swap to `https://findatagraph.onrender.com` when Render is live for a durable host.
+
+## 2026-10-11 — FinDataGraph demo offline fallback + tunnel refresh
+
+- **Decision:** Refresh the default Cloudflare quick-tunnel origin in
+  `findatagraphDemo.ts`, and make `/projects/findatagraph/demo` probe `/health` before
+  mounting the iframe. If the origin is down, show an explicit offline card (retry /
+  open origin / case study) instead of a blank black frame.
+- **Why:** Hiring managers hitting Launch demo saw credentials + empty pane when the
+  prior tunnel (`women-contract-…`) expired with the agent VM.
+- **Implications:** Quick tunnels remain ephemeral; durable fix is still Render
+  (`deploy-render.md` in `selvera247/agent`). Offline UX prevents silent blank demos.

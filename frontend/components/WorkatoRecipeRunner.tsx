@@ -205,11 +205,26 @@ export default function WorkatoRecipeRunner() {
 
       {done && (
         <div
-          className={`recipe-outcome recipe-outcome--${
+          className={`recipe-outcome recipe-outcome--sticky recipe-outcome--${
             outcome.status === "exception_opened" ? "exception" : "queue"
           }`}
+          role="status"
+          aria-live="polite"
         >
-          <div className="recipe-outcome-title">Outcome</div>
+          <div className="recipe-outcome-bar">
+            <div className="recipe-outcome-title">Outcome · sticky</div>
+            <button
+              type="button"
+              className="recipe-outcome-jump"
+              onClick={() =>
+                document
+                  .getElementById("live-app")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              Open in Deal app →
+            </button>
+          </div>
           <p>{outcome.summary}</p>
           <ul>
             <li>

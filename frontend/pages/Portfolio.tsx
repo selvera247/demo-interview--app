@@ -68,7 +68,10 @@ export default function Portfolio() {
           </p>
           <p className="hero-support">
             Prototypes with users in the room — evidence, auditability, and a human gate
-            before anything consequential ships. Demos below use{" "}
+            before anything consequential ships. Same operating model across close,
+            commercial chain, and collections: start from the user’s real policy, keep
+            evidence and gates, measure with planted anomalies, then generalize the
+            reusable pieces. Demos below use{" "}
             <strong style={{ color: "var(--white)" }}>synthetic data</strong> only.
           </p>
           <div className="hero-cta">
@@ -156,8 +159,9 @@ export default function Portfolio() {
       <section className="section" id="governance">
         <h2>Governance pattern</h2>
         <p className="lede">
-          Reusable across close, commercial chain, and collections work — the part that
-          makes controllers trust the system.
+          Player-coach shape: stay hands-on in one domain (Close Agent as flagship) while
+          setting the pattern others plug into — the part that makes controllers trust
+          the system.
         </p>
         <ul className="governance-list">
           <li>Tool-call audit logging (who called what, with which inputs)</li>

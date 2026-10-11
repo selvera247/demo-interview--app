@@ -333,13 +333,18 @@ select {
   line-height: 1.55;
 }
 
-.case-callout-body ul {
+.case-callout-body ul,
+.case-callout-body ol.seq-list {
   margin: 0;
   padding-left: 1.1rem;
 }
 
 .case-callout-body li {
   margin: 0.35rem 0;
+}
+
+.case-callout-body ol.seq-list {
+  list-style: decimal;
 }
 
 .case-callout-body strong {

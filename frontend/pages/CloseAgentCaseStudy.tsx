@@ -134,7 +134,43 @@ export default function CloseAgentCaseStudy() {
             (&gt;10% <em>and</em> &gt;$50K), walked three planted exception types in a
             working session, kept the review queue in their language (approve / edit /
             reject), and fed every miss back into the eval set before widening rollout.
+            Partnered directly with the close lead as the primary stakeholder; the review
+            queue and citation requirement were shaped by their feedback in working
+            sessions rather than handed over after the fact.
           </p>
+        </section>
+
+        <section className="case-block">
+          <h2>From controller priority to sequenced delivery</h2>
+          <p>
+            Intake started from the close lead’s existing threshold policy and language,
+            not a blank feature list. Prioritization followed planted exceptions that
+            actually show up in close (duplicate accrual, reclass, revenue timing). Change
+            management was the structured review queue and mandatory approve / edit /
+            reject — controllers rejected pure chat. Adoption measurement was the eval
+            harness itself: citation accuracy, driver match, and confidence calibration
+            were scored before widening beyond the first entity.
+          </p>
+          <CaseCallout title="Sequencing">
+            <ol className="seq-list">
+              <li>
+                <strong>Policy first</strong> — capture real thresholds and exception
+                types the close lead already uses.
+              </li>
+              <li>
+                <strong>Review + citations</strong> — queue in controller language; every
+                draft cites source txns.
+              </li>
+              <li>
+                <strong>Lock the eval</strong> — planted anomalies scored before treating
+                a result as publishable.
+              </li>
+              <li>
+                <strong>Then broaden</strong> — feed misses back before wider entity /
+                use-case rollout.
+              </li>
+            </ol>
+          </CaseCallout>
         </section>
 
         <section className="case-block">
@@ -164,6 +200,16 @@ export default function CloseAgentCaseStudy() {
             <li>
               Controllers get transaction-cited drafts and an audit trail instead of
               opaque chat answers.
+            </li>
+            <li>
+              Designed so finance users stay in control: low-confidence routes to review;
+              approve / edit / reject is mandatory — a finance-engineer pattern where the
+              team can inspect, edit, and trust the draft.
+            </li>
+            <li>
+              Eval harness and tool-call audit log treated as reusable primitives so the
+              same governance pattern can extend to reconciliations or approval copilots
+              without rewriting the spine.
             </li>
             <li>
               Eval:{" "}

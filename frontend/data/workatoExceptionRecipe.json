@@ -1,0 +1,121 @@
+{
+  "disclaimer": "SYNTHETIC DATA — Northwind Digital portfolio demo only. Workato-shaped orchestration pattern; not a live Workato workspace or licensed connector.",
+  "label": "Workato-shaped",
+  "product_note": "Illustrates an iPaaS-style exception recipe. No Workato SDK, tenant, or customer credentials.",
+  "recipe": {
+    "id": "RCP-NW-CRM-ERP-GAP-001",
+    "name": "CRM Closed Won → ERP commercial integrity exception",
+    "version": "1.0",
+    "project_id": "GE-2026-0422",
+    "company": "Northwind Digital",
+    "trigger": {
+      "type": "event",
+      "source": "CRM",
+      "event": "opportunity.closed_won",
+      "description": "Fires when opportunity stage moves to Closed Won, or on nightly CRM↔ERP amount reconcile for open commits."
+    },
+    "policy": {
+      "gap_amount_threshold_usd": 0,
+      "require_so_po_match_before_buy": true,
+      "silent_crm_overwrite": false,
+      "on_connector_failure": "human_queue"
+    },
+    "sample_payload": {
+      "opportunity_id": "OPP-GE-2026-0422",
+      "project_id": "GE-2026-0422",
+      "crm_amount_usd": 4800000,
+      "crm_mw": 8,
+      "contract_amount_usd": 4800000,
+      "erp_sales_order_id": "SO-10491",
+      "erp_po_id": "PO-10491",
+      "erp_amount_usd": 3200000,
+      "erp_mw": 5
+    },
+    "steps": [
+      {
+        "id": "extract_crm",
+        "name": "Extract CRM opportunity + contract",
+        "system": "CRM",
+        "action": "read",
+        "detail": "Read Closed Won opportunity OPP-GE-2026-0422 and signed contract: 8 MW / $4.8M.",
+        "duration_ms": 180
+      },
+      {
+        "id": "fetch_erp",
+        "name": "Fetch ERP sales order + PO",
+        "system": "ERP",
+        "action": "read",
+        "detail": "Pull SO-10491 and PO-10491 for project GE-2026-0422: 5 MW / $3.2M (Phase 1 only).",
+        "duration_ms": 220
+      },
+      {
+        "id": "compute_gap",
+        "name": "Compute commercial gap",
+        "system": "Recipe",
+        "action": "transform",
+        "detail": "Gap = CRM $4.8M − ERP $3.2M → $1.6M / 3 MW expansion not on SO/PO.",
+        "duration_ms": 40
+      },
+      {
+        "id": "evaluate_policy",
+        "name": "Evaluate integrity policy",
+        "system": "Recipe",
+        "action": "decide",
+        "detail": "|gap| > $0 and require_so_po_match_before_buy → open exception; do not auto-issue buy.",
+        "duration_ms": 35
+      },
+      {
+        "id": "upsert_deal_record",
+        "name": "Upsert Deal Record exception",
+        "system": "Deal Record",
+        "action": "write",
+        "detail": "Create/update exception on GE-2026-0422: CRM↔ERP amount + MW conflict; expansion line blocked.",
+        "duration_ms": 160
+      },
+      {
+        "id": "notify_owners",
+        "name": "Notify RevOps + procurement",
+        "system": "Notify",
+        "action": "notify",
+        "detail": "Alert deal owner and procurement: Closed Won ≠ authority to buy until SO/PO match.",
+        "duration_ms": 90
+      },
+      {
+        "id": "audit_log",
+        "name": "Write recipe audit log",
+        "system": "Audit",
+        "action": "write",
+        "detail": "Log recipe_id, run_id, inputs (opp/SO/PO ids), gap amounts, and outcome — same audit discipline as Close Agent tool calls.",
+        "duration_ms": 50
+      }
+    ],
+    "outcome": {
+      "status": "exception_opened",
+      "gap_amount_usd": 1600000,
+      "gap_mw": 3,
+      "deal_record_exception": true,
+      "auto_po_blocked": true,
+      "notified": ["RevOps", "Procurement"],
+      "summary": "Recipe completed: $1.6M / 3 MW gap opened on Deal Record; further PO blocked until ERP catches up."
+    }
+  },
+  "failure_scenario": {
+    "id": "RCP-NW-CRM-ERP-GAP-001-FAIL",
+    "name": "Same recipe — ERP connector failure path",
+    "description": "When ERP read fails, the recipe does not invent a match. It dead-letters to a human queue with the audit trail intact.",
+    "fail_at_step_id": "fetch_erp",
+    "outcome": {
+      "status": "human_queue",
+      "gap_amount_usd": null,
+      "gap_mw": null,
+      "deal_record_exception": false,
+      "auto_po_blocked": true,
+      "notified": ["Integration ops"],
+      "summary": "ERP fetch failed — run sent to human queue; no silent CRM overwrite; buy remains blocked until reconcile."
+    }
+  },
+  "close_agent_parallel": {
+    "pattern": "Same integration spine: extract → transform → policy decide → write exception/audit → human gate on failure.",
+    "close_use": "Trial balance and subledger land via Workato-shaped load/sync before the Close Agent drafts flux; sync failures never invent drivers."
+  }
+}

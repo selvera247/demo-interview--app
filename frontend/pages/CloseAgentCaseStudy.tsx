@@ -99,6 +99,27 @@ export default function CloseAgentCaseStudy() {
             </ul>
           </CaseCallout>
 
+          <CaseCallout title="Integration spine (Workato-shaped)">
+            <ul>
+              <li>
+                Trial balance and subledger <strong>load/sync</strong> via the same
+                Workato-shaped integration pattern used on the commercial chain — extract →
+                transform → policy decide → write + audit.
+              </li>
+              <li>
+                The Close Agent only drafts after a successful sync; connector failures do
+                not invent drivers.
+              </li>
+              <li>
+                Commercial-chain example (CRM Closed Won vs ERP SO/PO gap): see{" "}
+                <Link to="/projects/deal-record" style={{ color: "var(--signal)" }}>
+                  Deal Record · exception recipe
+                </Link>
+                .
+              </li>
+            </ul>
+          </CaseCallout>
+
           <CaseCallout title="Eval (23/23)">
             <ul>
               <li>

@@ -198,3 +198,14 @@
 - **Implications:** Case study copy uses synthetic **Meridian Retail** (from the ready
   pack; not Northwind Digital). Demo remains login-gated and externally hosted; tunnel
   URL may need updating after Render deploy.
+
+## 2026-10-11 — Refresh FinDataGraph Launch demo tunnel URL
+
+- **Decision:** Replace the dead `joyce-dealt-laden-cuts.trycloudflare.com` default with
+  a live Cloudflare quick tunnel backed by FinDataGraph on the agent VM (URL refreshed
+  when the prior tunnel expired; current default in `FinDataGraphCaseStudy.tsx`). Prefer
+  Render (`findatagraph.onrender.com`) when that blueprint is live.
+- **Why:** DEMO 03 Launch demo was NXDOMAIN; hiring-manager click path must open a
+  login-gated app. GitHub Pages only updates after this lands on `main`.
+- **Implications:** Quick tunnels are ephemeral with the agent VM — durable host remains
+  the Render one-click in `selvera247/agent` `deploy-render.md`.

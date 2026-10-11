@@ -3,12 +3,12 @@ import CaseCallout from "../components/CaseCallout";
 
 /**
  * Public hosted FinDataGraph demo (API + web).
- * Currently a Cloudflare quick-tunnel preview. After Render blueprint deploy,
+ * Cloudflare quick-tunnel preview (agent VM). After Render blueprint deploy,
  * replace with https://findatagraph.onrender.com (see agent repo deploy-render.md).
  */
 export const FINDATAGRAPH_DEMO_URL =
   import.meta.env.VITE_FINDATAGRAPH_DEMO_URL ||
-  "https://joyce-dealt-laden-cuts.trycloudflare.com";
+  "https://corporation-assessed-teaches-alleged.trycloudflare.com";
 
 export default function FinDataGraphCaseStudy() {
   return (

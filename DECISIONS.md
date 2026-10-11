@@ -174,3 +174,15 @@
 - **Why:** Owner SPEC for hiring-manager scannability and forward-deployed signal without
   inventing metrics or claiming live ERP access.
 - **Implications:** Interactive demos preserved; all demo figures remain synthetic.
+
+## 2026-10-11 — Workato-shaped exception recipe on Deal Record
+
+- **Decision:** Add a **Workato-shaped** (not live Workato) commercial integrity exception
+  recipe to the Deal Record case study: synthetic JSON + interactive step runner (gap path
+  and ERP connector-failure → human queue). Close Agent gets a short **Integration spine**
+  callout that TB/subledger load/sync uses the same pattern, with a link to Deal Record.
+- **Why:** Show iPaaS / integration orchestration beside the AI agent without claiming a
+  Workato tenant, SDK, or vendor ownership — Deal Record’s $1.6M CRM↔ERP gap is the natural
+  recipe story.
+- **Implications:** `frontend/data/workatoExceptionRecipe.json` + `WorkatoRecipeRunner`;
+  verified by `frontend/scripts/verify_workato_recipe.mjs`. Disclaimer required on UI.

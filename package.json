@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build"
+    "build": "tsc --noEmit && vite build",
+    "verify:workato-recipe": "node frontend/scripts/verify_workato_recipe.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.544.0",

@@ -13,7 +13,7 @@ const projects = [
     tag: "DEMO 02 · DEAL RECORD",
     title: "Deal Record",
     blurb:
-      "One project ID across opportunity → contract → sales order → PO when CRM Closed Won and ERP PO amounts don’t match ($1.6M gap).",
+      "One project ID across opportunity → contract → sales order → PO when CRM Closed Won and ERP PO amounts don’t match ($1.6M gap) — plus a Workato-shaped exception recipe.",
   },
 ];
 
@@ -169,6 +169,10 @@ export default function Portfolio() {
           <li>Citations back to source JEs, subledger lines, or commercial objects</li>
           <li>Low-confidence items forced into review — no silent guessing</li>
           <li>Eval harness with planted anomalies before wider rollout</li>
+          <li>
+            Workato-shaped integration recipes with the same audit trail and human queue on
+            connector failure
+          </li>
         </ul>
       </section>
 

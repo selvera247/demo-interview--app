@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
+import WorkatoRecipeRunner from "../components/WorkatoRecipeRunner";
 import App from "../App";
 
 /** Deal Record: opportunity → contract → sales order → PO on one ID. */
@@ -16,6 +17,17 @@ export default function DealRecordPage() {
         <div className="nav-links">
           <Link to="/">Home</Link>
           <Link to="/projects/close-agent">Close Agent</Link>
+          <button
+            type="button"
+            className="linkish"
+            onClick={() =>
+              document
+                .getElementById("recipe-runner")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Exception recipe
+          </button>
           <button
             type="button"
             className="linkish"
@@ -102,6 +114,33 @@ export default function DealRecordPage() {
         </section>
 
         <section className="case-block">
+          <h2>Exception recipe (Workato-shaped)</h2>
+          <p>
+            When CRM hits Closed Won, a Workato-shaped exception recipe compares
+            opportunity / contract amounts to ERP sales order and PO. If they diverge —
+            here <strong>$1.6M / 3 MW</strong> — it opens a Deal Record exception, notifies
+            RevOps and procurement, and blocks further auto-PO until the systems match.
+            Same audit + human-gate discipline as Close Agent; not a live Workato tenant.
+          </p>
+          <CaseCallout title="Recipe guardrails">
+            <ul>
+              <li>Trigger: CRM opportunity.closed_won (or nightly CRM↔ERP reconcile)</li>
+              <li>
+                Never silently overwrite CRM — conflicting fields stay visible on the Deal
+                Record
+              </li>
+              <li>
+                Connector failure → human queue with recipe audit log (no invented “match”)
+              </li>
+              <li>
+                Closed Won ≠ authority to buy until SO/PO amounts and MW align
+              </li>
+            </ul>
+          </CaseCallout>
+          <WorkatoRecipeRunner />
+        </section>
+
+        <section className="case-block">
           <h2>How I got it adopted</h2>
           <p>
             Sat with deal owners and RevOps on a live mismatch: started from the objects
@@ -121,7 +160,11 @@ export default function DealRecordPage() {
             <li>
               Expansion BOM blocked when CRM expects spend with no matching ERP PO line
             </li>
-            <li>Synthetic demo only — no live CRM/ERP credentials</li>
+            <li>
+              Exception recipe audited (recipe id, inputs, gap, outcome); failures route to
+              humans — not silent success
+            </li>
+            <li>Synthetic demo only — no live CRM/ERP/Workato credentials</li>
           </ul>
           <CaseCallout title="What this pattern enables">
             <p style={{ margin: 0 }}>
@@ -143,6 +186,10 @@ export default function DealRecordPage() {
               Featured gap is impossible to miss: <strong>$1.6M / 3 MW</strong> expansion
               not in ERP.
             </li>
+            <li>
+              Workato-shaped recipe makes the detect → exception → notify → block-buy loop
+              runnable in the case study (gap path and ERP failure path).
+            </li>
           </ul>
         </section>
 
@@ -163,6 +210,7 @@ export default function DealRecordPage() {
               "React",
               "Vite",
               "TypeScript",
+              "Workato-shaped recipe",
               "Opportunity",
               "Contract",
               "Sales order",
@@ -176,6 +224,9 @@ export default function DealRecordPage() {
         <section className="case-block">
           <h2>Demo / Links</h2>
           <ul>
+            <li>
+              Exception recipe runner above (synthetic Workato-shaped steps — Run recipe).
+            </li>
             <li>
               Interactive Deal Record app below (opens on Sourcing for the featured gap).
             </li>

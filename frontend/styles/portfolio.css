@@ -940,6 +940,129 @@ select {
   }
 }
 
+/* FinDataGraph in-portfolio demo shell (finance-named Pages path) */
+.fdg-demo-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg, #0b1410);
+}
+
+.fdg-demo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 16, 12, 0.92);
+}
+
+.fdg-demo-bar-left,
+.fdg-demo-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.fdg-demo-sep {
+  color: var(--muted, #7a8a80);
+  opacity: 0.7;
+}
+
+.fdg-demo-crumb {
+  color: var(--muted, #9aab9f);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.fdg-demo-crumb.current {
+  color: var(--signal, #8dff9a);
+}
+
+.fdg-demo-creds {
+  font-size: 0.78rem;
+  color: var(--signal, #8dff9a);
+}
+
+.fdg-demo-frame {
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 6.5rem);
+  border: 0;
+  background: #0a100c;
+}
+
+.fdg-demo-fallback {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem 2.5rem;
+  min-height: calc(100vh - 6.5rem);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(141, 255, 154, 0.08), transparent 55%),
+    #0a100c;
+}
+
+.fdg-demo-fallback-card {
+  width: min(36rem, 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.4rem 1.35rem 1.5rem;
+  background: rgba(12, 22, 16, 0.92);
+}
+
+.fdg-demo-fallback-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal, #8dff9a);
+  margin-bottom: 0.45rem;
+}
+
+.fdg-demo-fallback-card h1 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--white);
+  margin: 0 0 0.65rem;
+  letter-spacing: -0.02em;
+}
+
+.fdg-demo-fallback-card p {
+  margin: 0 0 0.75rem;
+  color: var(--muted, #9aab9f);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.fdg-demo-fallback-card code {
+  color: var(--signal, #8dff9a);
+  word-break: break-all;
+}
+
+.fdg-demo-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+.fdg-demo-footnote {
+  margin: 0;
+  padding: 0.45rem 1.25rem 0.7rem;
+  font-size: 0.75rem;
+  color: var(--muted, #7a8a80);
+  border-top: 1px solid var(--line);
+}
+
+.fdg-demo-footnote code {
+  color: var(--signal, #8dff9a);
+}
+
 @media (max-width: 860px) {
   .metrics,
   .project-row,

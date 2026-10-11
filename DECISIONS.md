@@ -186,3 +186,46 @@
   recipe story.
 - **Implications:** `frontend/data/workatoExceptionRecipe.json` + `WorkatoRecipeRunner`;
   verified by `frontend/scripts/verify_workato_recipe.mjs`. Disclaimer required on UI.
+
+## 2026-10-11 — Wire FinDataGraph as portfolio DEMO 03
+
+- **Decision:** Add HashRouter case study `/projects/findatagraph` and a DEMO 03 card on
+  the portfolio home, copied from `selvera247/agent@cursor/findatagraph-mvp-a395`
+  `portfolio-integration/ready/`. Live demo URL defaults to the Cloudflare quick tunnel
+  in that pack (`VITE_FINDATAGRAPH_DEMO_URL` override supported).
+- **Why:** Owner asked to surface the hosted FinDataGraph continuous-close control plane
+  beside Close Agent and Deal Record on GitHub Pages.
+- **Implications:** Case study copy uses synthetic **Meridian Retail** (from the ready
+  pack; not Northwind Digital). Demo remains login-gated and externally hosted; tunnel
+  URL may need updating after Render deploy.
+
+## 2026-10-11 — Refresh FinDataGraph Launch demo tunnel URL
+
+- **Decision:** Replace the dead `joyce-dealt-laden-cuts.trycloudflare.com` default with
+  a live Cloudflare quick tunnel backed by FinDataGraph on the agent VM (URL refreshed
+  when the prior tunnel expired; current default in `findatagraphDemo.ts`). Prefer
+  Render (`findatagraph.onrender.com`) when that blueprint is live.
+- **Why:** DEMO 03 Launch demo was NXDOMAIN; hiring-manager click path must open a
+  login-gated app. GitHub Pages only updates after this lands on `main`.
+- **Implications:** Quick tunnels are ephemeral with the agent VM — durable host remains
+  the Render one-click in `selvera247/agent` `deploy-render.md`.
+
+## 2026-10-11 — FinDataGraph Launch demo uses finance-named Pages path
+
+- **Decision:** Launch demo navigates to `/#/projects/findatagraph/demo` (iframe shell)
+  instead of opening the raw Cloudflare quick-tunnel hostname in a new tab.
+- **Why:** Quick-tunnel words are random and non-finance (`women-contract-…`); hiring
+  managers should see a generic finance path on GitHub Pages.
+- **Implications:** Backend origin stays configurable via `VITE_FINDATAGRAPH_DEMO_URL`;
+  swap to `https://findatagraph.onrender.com` when Render is live for a durable host.
+
+## 2026-10-11 — FinDataGraph demo offline fallback + tunnel refresh
+
+- **Decision:** Refresh the default Cloudflare quick-tunnel origin in
+  `findatagraphDemo.ts`, and make `/projects/findatagraph/demo` probe `/health` before
+  mounting the iframe. If the origin is down, show an explicit offline card (retry /
+  open origin / case study) instead of a blank black frame.
+- **Why:** Hiring managers hitting Launch demo saw credentials + empty pane when the
+  prior tunnel (`women-contract-…`) expired with the agent VM.
+- **Implications:** Quick tunnels remain ephemeral; durable fix is still Render
+  (`deploy-render.md` in `selvera247/agent`). Offline UX prevents silent blank demos.

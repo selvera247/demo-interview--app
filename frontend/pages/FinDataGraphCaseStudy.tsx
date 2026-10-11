@@ -1,14 +1,9 @@
 import { Link } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
-
-/**
- * Public hosted FinDataGraph demo (API + web).
- * Cloudflare quick-tunnel preview (agent VM). After Render blueprint deploy,
- * replace with https://findatagraph.onrender.com (see agent repo deploy-render.md).
- */
-export const FINDATAGRAPH_DEMO_URL =
-  import.meta.env.VITE_FINDATAGRAPH_DEMO_URL ||
-  "https://women-contract-sin-gzip.trycloudflare.com";
+import {
+  FINDATAGRAPH_DEMO_ROUTE,
+  FINDATAGRAPH_DEMO_URL,
+} from "../data/findatagraphDemo";
 
 export default function FinDataGraphCaseStudy() {
   return (
@@ -20,14 +15,9 @@ export default function FinDataGraphCaseStudy() {
         <div className="nav-links">
           <Link to="/">Home</Link>
           <Link to="/projects/close-agent">Close Agent</Link>
-          <a
-            className="linkish"
-            href={FINDATAGRAPH_DEMO_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link className="linkish" to={FINDATAGRAPH_DEMO_ROUTE}>
             Launch demo
-          </a>
+          </Link>
         </div>
       </nav>
 
@@ -40,14 +30,9 @@ export default function FinDataGraphCaseStudy() {
         </p>
 
         <div className="hero-cta" style={{ margin: "1.25rem 0 2rem" }}>
-          <a
-            className="btn btn-primary"
-            href={FINDATAGRAPH_DEMO_URL}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Link className="btn btn-primary" to={FINDATAGRAPH_DEMO_ROUTE}>
             Launch demo
-          </a>
+          </Link>
           <Link className="btn btn-ghost" to="/projects/close-agent">
             Close Agent
           </Link>
@@ -150,17 +135,13 @@ export default function FinDataGraphCaseStudy() {
         <section className="case-block" id="demo">
           <h2>Demo / Links</h2>
           <p className="disclaimer" style={{ marginBottom: "1rem" }}>
-            Live hosted app (API + UI). Synthetic data. Password-gated login.
+            Live hosted app (API + UI). Synthetic data. Password-gated login. Launch opens
+            the finance-named portfolio path (not a random tunnel hostname).
           </p>
           <div className="hero-cta">
-            <a
-              className="btn btn-primary"
-              href={FINDATAGRAPH_DEMO_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <Link className="btn btn-primary" to={FINDATAGRAPH_DEMO_ROUTE}>
               Launch demo
-            </a>
+            </Link>
           </div>
           <ul style={{ marginTop: "1.5rem" }}>
             <li>
@@ -170,18 +151,24 @@ export default function FinDataGraphCaseStudy() {
               </code>
             </li>
             <li>
-              Portfolio route:{" "}
-              <a
-                href="https://selvera247.github.io/demo-interview--app/#/projects/findatagraph"
-                target="_blank"
-                rel="noreferrer"
+              Portfolio demo:{" "}
+              <Link
+                to={FINDATAGRAPH_DEMO_ROUTE}
                 style={{ color: "var(--signal)" }}
               >
-                /#/projects/findatagraph
-              </a>
+                /#/projects/findatagraph/demo
+              </Link>
             </li>
             <li>
-              Source: private{" "}
+              Backend origin (override with{" "}
+              <code style={{ color: "var(--signal)" }}>VITE_FINDATAGRAPH_DEMO_URL</code>
+              ):{" "}
+              <code style={{ color: "var(--signal)", wordBreak: "break-all" }}>
+                {FINDATAGRAPH_DEMO_URL}
+              </code>
+            </li>
+            <li>
+              Source:{" "}
               <code style={{ color: "var(--signal)" }}>selvera247/agent</code>{" "}
               (FinDataGraph MVP)
             </li>

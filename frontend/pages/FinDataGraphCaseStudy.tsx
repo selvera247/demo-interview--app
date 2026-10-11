@@ -8,7 +8,7 @@ import CaseCallout from "../components/CaseCallout";
  */
 export const FINDATAGRAPH_DEMO_URL =
   import.meta.env.VITE_FINDATAGRAPH_DEMO_URL ||
-  "https://corporation-assessed-teaches-alleged.trycloudflare.com";
+  "https://women-contract-sin-gzip.trycloudflare.com";
 
 export default function FinDataGraphCaseStudy() {
   return (

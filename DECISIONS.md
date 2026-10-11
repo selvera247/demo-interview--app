@@ -202,10 +202,10 @@
 ## 2026-10-11 — Refresh FinDataGraph Launch demo tunnel URL
 
 - **Decision:** Replace the dead `joyce-dealt-laden-cuts.trycloudflare.com` default with
-  a new quick tunnel (`corporation-assessed-teaches-alleged.trycloudflare.com`) backed by
-  FinDataGraph `start` on the agent VM (`selvera247/agent` MVP seed). Prefer Render
-  (`findatagraph.onrender.com`) when that blueprint is live.
+  a live Cloudflare quick tunnel backed by FinDataGraph on the agent VM (URL refreshed
+  when the prior tunnel expired; current default in `FinDataGraphCaseStudy.tsx`). Prefer
+  Render (`findatagraph.onrender.com`) when that blueprint is live.
 - **Why:** DEMO 03 Launch demo was NXDOMAIN; hiring-manager click path must open a
-  login-gated app.
+  login-gated app. GitHub Pages only updates after this lands on `main`.
 - **Implications:** Quick tunnels are ephemeral with the agent VM — durable host remains
   the Render one-click in `selvera247/agent` `deploy-render.md`.

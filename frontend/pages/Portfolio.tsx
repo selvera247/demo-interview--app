@@ -15,6 +15,13 @@ const projects = [
     blurb:
       "One project ID across opportunity → contract → sales order → PO when CRM Closed Won and ERP PO amounts don’t match ($1.6M gap) — plus a Workato-shaped exception recipe.",
   },
+  {
+    to: "/projects/findatagraph",
+    tag: "DEMO 03 · FINANCIAL DATA GRAPH",
+    title: "FinDataGraph",
+    blurb:
+      "Hosted continuous close control plane — CRM↔GL matching, exception lifecycle, dual-control corrections, and an audit log over a financial data graph.",
+  },
 ];
 
 const toolkit = [
@@ -87,6 +94,9 @@ export default function Portfolio() {
             </Link>
             <Link className="btn btn-warm" to="/projects/deal-record">
               Deal Record
+            </Link>
+            <Link className="btn btn-ghost" to="/projects/findatagraph">
+              FinDataGraph
             </Link>
           </div>
         </div>

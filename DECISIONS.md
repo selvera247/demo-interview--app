@@ -186,3 +186,15 @@
   recipe story.
 - **Implications:** `frontend/data/workatoExceptionRecipe.json` + `WorkatoRecipeRunner`;
   verified by `frontend/scripts/verify_workato_recipe.mjs`. Disclaimer required on UI.
+
+## 2026-10-11 — Wire FinDataGraph as portfolio DEMO 03
+
+- **Decision:** Add HashRouter case study `/projects/findatagraph` and a DEMO 03 card on
+  the portfolio home, copied from `selvera247/agent@cursor/findatagraph-mvp-a395`
+  `portfolio-integration/ready/`. Live demo URL defaults to the Cloudflare quick tunnel
+  in that pack (`VITE_FINDATAGRAPH_DEMO_URL` override supported).
+- **Why:** Owner asked to surface the hosted FinDataGraph continuous-close control plane
+  beside Close Agent and Deal Record on GitHub Pages.
+- **Implications:** Case study copy uses synthetic **Meridian Retail** (from the ready
+  pack; not Northwind Digital). Demo remains login-gated and externally hosted; tunnel
+  URL may need updating after Render deploy.

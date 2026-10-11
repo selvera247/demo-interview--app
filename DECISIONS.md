@@ -203,9 +203,18 @@
 
 - **Decision:** Replace the dead `joyce-dealt-laden-cuts.trycloudflare.com` default with
   a live Cloudflare quick tunnel backed by FinDataGraph on the agent VM (URL refreshed
-  when the prior tunnel expired; current default in `FinDataGraphCaseStudy.tsx`). Prefer
+  when the prior tunnel expired; current default in `findatagraphDemo.ts`). Prefer
   Render (`findatagraph.onrender.com`) when that blueprint is live.
 - **Why:** DEMO 03 Launch demo was NXDOMAIN; hiring-manager click path must open a
   login-gated app. GitHub Pages only updates after this lands on `main`.
 - **Implications:** Quick tunnels are ephemeral with the agent VM — durable host remains
   the Render one-click in `selvera247/agent` `deploy-render.md`.
+
+## 2026-10-11 — FinDataGraph Launch demo uses finance-named Pages path
+
+- **Decision:** Launch demo navigates to `/#/projects/findatagraph/demo` (iframe shell)
+  instead of opening the raw Cloudflare quick-tunnel hostname in a new tab.
+- **Why:** Quick-tunnel words are random and non-finance (`women-contract-…`); hiring
+  managers should see a generic finance path on GitHub Pages.
+- **Implications:** Backend origin stays configurable via `VITE_FINDATAGRAPH_DEMO_URL`;
+  swap to `https://findatagraph.onrender.com` when Render is live for a durable host.

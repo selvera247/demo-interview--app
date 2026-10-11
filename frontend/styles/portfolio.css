@@ -869,6 +869,73 @@ select {
   }
 }
 
+/* FinDataGraph in-portfolio demo shell (finance-named Pages path) */
+.fdg-demo-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg, #0b1410);
+}
+
+.fdg-demo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(8, 16, 12, 0.92);
+}
+
+.fdg-demo-bar-left,
+.fdg-demo-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.fdg-demo-sep {
+  color: var(--muted, #7a8a80);
+  opacity: 0.7;
+}
+
+.fdg-demo-crumb {
+  color: var(--muted, #9aab9f);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.fdg-demo-crumb.current {
+  color: var(--signal, #8dff9a);
+}
+
+.fdg-demo-creds {
+  font-size: 0.78rem;
+  color: var(--signal, #8dff9a);
+}
+
+.fdg-demo-frame {
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 6.5rem);
+  border: 0;
+  background: #0a100c;
+}
+
+.fdg-demo-footnote {
+  margin: 0;
+  padding: 0.45rem 1.25rem 0.7rem;
+  font-size: 0.75rem;
+  color: var(--muted, #7a8a80);
+  border-top: 1px solid var(--line);
+}
+
+.fdg-demo-footnote code {
+  color: var(--signal, #8dff9a);
+}
+
 @media (max-width: 860px) {
   .metrics,
   .project-row,

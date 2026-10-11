@@ -25,8 +25,9 @@ export default function DealRecordPage() {
                 .getElementById("recipe-runner")
                 ?.scrollIntoView({ behavior: "smooth" })
             }
+            title="Workato-shaped exception recipe (case study)"
           >
-            Exception recipe
+            Recipe demo
           </button>
           <button
             type="button"
@@ -36,8 +37,9 @@ export default function DealRecordPage() {
                 .getElementById("live-app")
                 ?.scrollIntoView({ behavior: "smooth" })
             }
+            title="Interactive Deal Record app (Spec / Sourcing / Cost)"
           >
-            Live demo
+            Deal app
           </button>
         </div>
       </nav>
@@ -256,7 +258,14 @@ export default function DealRecordPage() {
         </section>
       </article>
 
-      <div id="live-app">
+      <div id="live-app" className="deal-app-anchor">
+        <div className="deal-app-label">
+          <span className="deal-app-label-kicker">Interactive</span>
+          <span className="deal-app-label-title">Deal Record app</span>
+          <span className="deal-app-label-hint">
+            Spec · Sourcing · Cost — not the recipe runner above
+          </span>
+        </div>
         <App />
       </div>
 

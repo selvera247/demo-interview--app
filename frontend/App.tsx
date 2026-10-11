@@ -11,11 +11,42 @@ import {
   Unlock,
   Zap,
 } from "lucide-react";
-import { toDealViews, type DealView } from "../src/data/deal-adapter";
+import {
+  toDealViews,
+  type DealSourcingItem,
+  type DealView,
+} from "../src/data/deal-adapter";
 import { addDealFromIntake, type NewDealIntake } from "../src/data/create-deal";
 import { formatProjectCode } from "../src/domain/ids";
 import { createSeedState } from "../src/data/seed";
 import NewDealPanel from "./NewDealPanel";
+
+/** Featured CRM↔ERP commercial gap for banner + drill-down (GE-2026-0422 and similar). */
+function getCommercialGap(deal: DealView): {
+  title: string;
+  summary: string;
+  flagCount: number;
+} | null {
+  const flagged = deal.sourcing.items.filter((i) => i.flag);
+  const gapFlag = flagged.find(
+    (i) =>
+      /\$1\.6M|gap|Closed Won|no matching/i.test(i.flag || "") ||
+      i.poStatus === "blocked",
+  );
+  const revenueGap =
+    /\$1\.6M|discrepancy|gap/i.test(deal.meta.revenueImpact || "") ||
+    /\$1\.6M|gap/i.test(deal.meta.expectedOutcome || "");
+  if (!gapFlag && !revenueGap && flagged.length === 0) return null;
+  if (!gapFlag && !revenueGap) return null;
+  return {
+    title: "Commercial integrity gap · $1.6M / 3 MW",
+    summary:
+      gapFlag?.flag ||
+      deal.meta.revenueImpact ||
+      "CRM opportunity / contract amounts do not match ERP sales order + PO.",
+    flagCount: flagged.length || 1,
+  };
+}
 
 const categoryLabels = {
   materials: "Materials",
@@ -109,31 +140,43 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="flex gap-1 bg-[#212327] border border-[#33363c] rounded-md p-1">
-          <button
-            onClick={() => setView("spec")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-medium transition-colors ${
-              view === "spec" ? "bg-[#33363c] text-[#E8E6E1]" : "text-[#8B9099] hover:text-[#E8E6E1]"
-            }`}
-          >
-            <FileText size={13} /> Spec
-          </button>
-          <button
-            onClick={() => setView("sourcing")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-medium transition-colors ${
-              view === "sourcing" ? "bg-[#33363c] text-[#E8E6E1]" : "text-[#8B9099] hover:text-[#E8E6E1]"
-            }`}
-          >
-            <Package size={13} /> Sourcing
-          </button>
-          <button
-            onClick={() => setView("cost")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-medium transition-colors ${
-              view === "cost" ? "bg-[#33363c] text-[#E8E6E1]" : "text-[#8B9099] hover:text-[#E8E6E1]"
-            }`}
-          >
-            <LayoutGrid size={13} /> Cost tracking
-          </button>
+        <div
+          className="flex gap-1 bg-[#212327] border border-[#33363c] rounded-md p-1"
+          role="tablist"
+          aria-label="Deal Record views"
+        >
+          {(
+            [
+              ["spec", "Spec", FileText],
+              ["sourcing", "Sourcing", Package],
+              ["cost", "Cost tracking", LayoutGrid],
+            ] as const
+          ).map(([id, label, Icon]) => {
+            const active = view === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setView(id)}
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-medium transition-colors ${
+                  active
+                    ? "bg-[#C9762E]/20 text-[#E8E6E1] shadow-[inset_0_0_0_1px_rgba(201,118,46,0.55)]"
+                    : "text-[#8B9099] hover:text-[#E8E6E1] hover:bg-[#2a2d33]/60"
+                }`}
+              >
+                <Icon size={13} className={active ? "text-[#C9762E]" : undefined} />
+                {label}
+                {active && (
+                  <span
+                    className="absolute left-2 right-2 -bottom-[3px] h-0.5 rounded-full bg-[#C9762E]"
+                    aria-hidden
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -198,9 +241,13 @@ export default function App() {
           </div>
         </div>
 
-        {selected && view === "spec" && <SpecView deal={selected} />}
+        {selected && view === "spec" && (
+          <SpecView deal={selected} onGoToSourcing={() => setView("sourcing")} />
+        )}
         {selected && view === "sourcing" && <SourcingView deal={selected} />}
-        {selected && view === "cost" && <CostView deal={selected} />}
+        {selected && view === "cost" && (
+          <CostView deal={selected} onGoToSourcing={() => setView("sourcing")} />
+        )}
       </div>
 
       {intakeOpen && (
@@ -210,7 +257,48 @@ export default function App() {
   );
 }
 
-function SpecView({ deal }: { deal: DealView }) {
+function CommercialGapBanner({
+  deal,
+  onGoToSourcing,
+}: {
+  deal: DealView;
+  onGoToSourcing: () => void;
+}) {
+  const gap = getCommercialGap(deal);
+  if (!gap) return null;
+  return (
+    <div className="mb-5 rounded-md border border-amber-500/40 bg-amber-500/[0.08] px-4 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex items-start gap-2.5">
+          <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <div className="text-[13px] font-semibold text-amber-300 tracking-tight">
+              {gap.title}
+            </div>
+            <p className="text-[12px] text-amber-100/75 mt-1 leading-snug max-w-[52ch]">
+              {gap.summary}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onGoToSourcing}
+          className="shrink-0 text-[12px] font-medium px-3 py-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25 transition-colors"
+        >
+          View on Sourcing →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SpecView({
+  deal,
+  onGoToSourcing,
+}: {
+  deal: DealView;
+  onGoToSourcing: () => void;
+}) {
   return (
     <div className="flex-1 px-8 py-6 max-w-[760px] overflow-y-auto">
       <div className="mb-6">
@@ -220,6 +308,8 @@ function SpecView({ deal }: { deal: DealView }) {
         <h1 className="text-[22px] font-semibold tracking-tight mb-1">{deal.customer}</h1>
         <div className="text-[13px] text-[#8B9099]">{deal.site}</div>
       </div>
+
+      <CommercialGapBanner deal={deal} onGoToSourcing={onGoToSourcing} />
 
       <SpecSection number="1" title="Request Basics">
         <MetaRow label="Requestor" value={`${deal.meta.requestor} · ${deal.meta.requestorTeam}`} />
@@ -362,6 +452,8 @@ const poStatusMeta: Record<string, { label: string; color: string; bg: string }>
 };
 
 function SourcingView({ deal }: { deal: DealView }) {
+  const [detailItem, setDetailItem] = useState<DealSourcingItem | null>(null);
+
   if (!deal.sourcing.items.length) {
     return (
       <div className="flex-1 px-8 py-6 max-w-[760px]">
@@ -379,79 +471,207 @@ function SourcingView({ deal }: { deal: DealView }) {
   const flaggedItems = deal.sourcing.items.filter((i) => i.flag);
 
   return (
-    <div className="flex-1 px-8 py-6 max-w-[800px] overflow-y-auto">
-      <div className="mb-6 flex items-start justify-between">
-        <DealHeader deal={deal} />
-        <div
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[12px] ${
-            deal.sourcing.bomLocked
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-              : "border-amber-500/30 bg-amber-500/10 text-amber-400"
-          }`}
-        >
-          {deal.sourcing.bomLocked ? <Lock size={13} /> : <Unlock size={13} />}
-          BOM {deal.sourcing.bomLocked ? "locked" : "open"}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="rounded-md border border-[#2a2d33] bg-[#212327] px-4 py-3">
-          <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Committed via POs</div>
-          <div className="text-[18px] font-semibold">{fmt(totalCommitted)}</div>
-        </div>
-        <div className="rounded-md border border-[#2a2d33] bg-[#212327] px-4 py-3">
-          <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Project-tagged POs</div>
-          <div className="text-[18px] font-semibold">
-            {taggedCount} / {deal.sourcing.items.length}
+    <div className="flex-1 flex min-h-0 relative">
+      <div className="flex-1 px-8 py-6 max-w-[800px] overflow-y-auto">
+        <div className="mb-6 flex items-start justify-between">
+          <DealHeader deal={deal} />
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[12px] ${
+              deal.sourcing.bomLocked
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+            }`}
+          >
+            {deal.sourcing.bomLocked ? <Lock size={13} /> : <Unlock size={13} />}
+            BOM {deal.sourcing.bomLocked ? "locked" : "open"}
           </div>
         </div>
-        <div className={`rounded-md border px-4 py-3 ${flaggedItems.length ? "border-amber-500/30 bg-amber-500/[0.05]" : "border-[#2a2d33] bg-[#212327]"}`}>
-          <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Flags</div>
-          <div className={`text-[18px] font-semibold ${flaggedItems.length ? "text-amber-500" : ""}`}>{flaggedItems.length}</div>
+
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="rounded-md border border-[#2a2d33] bg-[#212327] px-4 py-3">
+            <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Committed via POs</div>
+            <div className="text-[18px] font-semibold">{fmt(totalCommitted)}</div>
+          </div>
+          <div className="rounded-md border border-[#2a2d33] bg-[#212327] px-4 py-3">
+            <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Project-tagged POs</div>
+            <div className="text-[18px] font-semibold">
+              {taggedCount} / {deal.sourcing.items.length}
+            </div>
+          </div>
+          <div className={`rounded-md border px-4 py-3 ${flaggedItems.length ? "border-amber-500/30 bg-amber-500/[0.05]" : "border-[#2a2d33] bg-[#212327]"}`}>
+            <div className="text-[11px] text-[#8B9099] mb-1 uppercase tracking-wide">Flags</div>
+            <div className={`text-[18px] font-semibold ${flaggedItems.length ? "text-amber-500" : ""}`}>{flaggedItems.length}</div>
+          </div>
+        </div>
+
+        {flaggedItems.length > 0 && (
+          <p className="text-[12px] text-[#8B9099] mb-3">
+            Flagged lines are clickable — open details, history, and hold-buy guidance.
+          </p>
+        )}
+
+        <div className="space-y-2.5">
+          {deal.sourcing.items.map((item) => {
+            const status = poStatusMeta[item.poStatus] ?? poStatusMeta.ordered;
+            const interactive = Boolean(item.flag);
+            const selected = detailItem?.item === item.item;
+            return (
+              <div
+                key={item.item}
+                role={interactive ? "button" : undefined}
+                tabIndex={interactive ? 0 : undefined}
+                onClick={() => interactive && setDetailItem(item)}
+                onKeyDown={(e) => {
+                  if (interactive && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    setDetailItem(item);
+                  }
+                }}
+                className={`rounded-md border px-4 py-3 text-left transition-colors ${
+                  item.flag
+                    ? `border-amber-500/30 bg-amber-500/[0.04] cursor-pointer hover:bg-amber-500/[0.09] ${
+                        selected ? "ring-1 ring-amber-500/50" : ""
+                      }`
+                    : "border-[#2a2d33] bg-[#212327]"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-medium mb-0.5">{item.item}</div>
+                    <div className="text-[12px] text-[#8B9099]">{item.supplier}</div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {interactive && (
+                      <span className="text-[10px] uppercase tracking-wide text-amber-400/90">
+                        Details
+                      </span>
+                    )}
+                    <span className={`text-[11px] px-2 py-0.5 rounded border ${status.bg} ${status.color}`}>
+                      {status.label}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-5 text-[12px] text-[#8B9099] flex-wrap">
+                  {item.poNumber && <span style={{ fontFamily: "JetBrains Mono, monospace" }}>{item.poNumber}</span>}
+                  {item.committedAmount > 0 && <span>{fmt(item.committedAmount)}</span>}
+                  {item.leadTimeWeeks && <span>{item.leadTimeWeeks} wk lead time</span>}
+                  {item.projectedArrival && <span>Arrival: {item.projectedArrival}</span>}
+                  <span className={`flex items-center gap-1 ${item.tagged ? "text-emerald-500" : "text-amber-500"}`}>
+                    {item.tagged ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
+                    {item.tagged ? "Tagged to project" : "Untagged"}
+                  </span>
+                </div>
+                {item.flag && (
+                  <div className="text-[12px] text-amber-400/90 mt-2 leading-snug flex items-start gap-1.5">
+                    <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+                    {item.flag}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-[#2a2d33] text-[12px] text-[#8B9099] leading-relaxed">
+          Every PO tagged to this project ID flows straight into committed cost on the Cost tracking tab, the moment
+          it's issued — not when the supplier invoice arrives.
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        {deal.sourcing.items.map((item) => {
-          const status = poStatusMeta[item.poStatus] ?? poStatusMeta.ordered;
-          return (
-            <div
-              key={item.item}
-              className={`rounded-md border px-4 py-3 ${item.flag ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-[#2a2d33] bg-[#212327]"}`}
-            >
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <div className="min-w-0">
-                  <div className="text-[13px] font-medium mb-0.5">{item.item}</div>
-                  <div className="text-[12px] text-[#8B9099]">{item.supplier}</div>
-                </div>
-                <span className={`shrink-0 text-[11px] px-2 py-0.5 rounded border ${status.bg} ${status.color}`}>{status.label}</span>
-              </div>
-              <div className="flex items-center gap-5 text-[12px] text-[#8B9099] flex-wrap">
-                {item.poNumber && <span style={{ fontFamily: "JetBrains Mono, monospace" }}>{item.poNumber}</span>}
-                {item.committedAmount > 0 && <span>{fmt(item.committedAmount)}</span>}
-                {item.leadTimeWeeks && <span>{item.leadTimeWeeks} wk lead time</span>}
-                {item.projectedArrival && <span>Arrival: {item.projectedArrival}</span>}
-                <span className={`flex items-center gap-1 ${item.tagged ? "text-emerald-500" : "text-amber-500"}`}>
-                  {item.tagged ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
-                  {item.tagged ? "Tagged to project" : "Untagged"}
-                </span>
-              </div>
-              {item.flag && (
-                <div className="text-[12px] text-amber-400/90 mt-2 leading-snug flex items-start gap-1.5">
-                  <AlertTriangle size={12} className="mt-0.5 shrink-0" />
-                  {item.flag}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-6 pt-5 border-t border-[#2a2d33] text-[12px] text-[#8B9099] leading-relaxed">
-        Every PO tagged to this project ID flows straight into committed cost on the Cost tracking tab, the moment
-        it's issued — not when the supplier invoice arrives.
-      </div>
+      {detailItem && (
+        <FlagDetailPanel
+          dealId={deal.id}
+          item={detailItem}
+          onClose={() => setDetailItem(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function FlagDetailPanel({
+  dealId,
+  item,
+  onClose,
+}: {
+  dealId: string;
+  item: DealSourcingItem;
+  onClose: () => void;
+}) {
+  const status = poStatusMeta[item.poStatus] ?? poStatusMeta.ordered;
+  return (
+    <aside
+      className="w-[320px] shrink-0 border-l border-[#33363c] bg-[#212327] flex flex-col"
+      aria-label="Flagged line details"
+    >
+      <div className="px-4 py-3 border-b border-[#33363c] flex items-center justify-between gap-2">
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-amber-500 mb-0.5">
+            Exception detail
+          </div>
+          <div className="text-[13px] font-semibold text-[#E8E6E1] leading-snug">
+            {item.item}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-[12px] text-[#8B9099] hover:text-[#E8E6E1] px-2 py-1 rounded border border-[#33363c]"
+        >
+          Close
+        </button>
+      </div>
+      <div className="px-4 py-4 space-y-4 overflow-y-auto text-[12px]">
+        <div>
+          <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1">Project</div>
+          <div style={{ fontFamily: "JetBrains Mono, monospace" }}>{dealId}</div>
+        </div>
+        <div>
+          <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1">Supplier</div>
+          <div>{item.supplier}</div>
+        </div>
+        <div className="flex gap-4">
+          <div>
+            <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1">PO</div>
+            <div style={{ fontFamily: "JetBrains Mono, monospace" }}>
+              {item.poNumber || "—"}
+            </div>
+          </div>
+          <div>
+            <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1">Status</div>
+            <span className={`text-[11px] px-2 py-0.5 rounded border ${status.bg} ${status.color}`}>
+              {status.label}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1">Committed</div>
+          <div>{item.committedAmount > 0 ? fmt(item.committedAmount) : "—"}</div>
+        </div>
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/[0.06] px-3 py-2.5">
+          <div className="text-amber-400 uppercase tracking-wide text-[10px] mb-1 flex items-center gap-1">
+            <AlertTriangle size={11} /> Flag
+          </div>
+          <p className="text-amber-100/80 leading-snug">{item.flag}</p>
+        </div>
+        <div>
+          <div className="text-[#8B9099] uppercase tracking-wide text-[10px] mb-1.5">
+            Suggested next actions
+          </div>
+          <ul className="space-y-1.5 text-[#c7cce0] list-disc pl-4 leading-snug">
+            <li>Hold further buy until CRM opportunity / contract matches ERP SO + PO.</li>
+            <li>Confirm with RevOps whether expansion ($1.6M / 3 MW) needs a new SO line.</li>
+            <li>
+              Trace the Workato-shaped exception recipe above for detect → notify →
+              block-buy audit.
+            </li>
+          </ul>
+        </div>
+        <div className="text-[#6b7077] leading-snug border-t border-[#33363c] pt-3">
+          Synthetic demo — detail panel illustrates exception drill-down; no live ERP write-back.
+        </div>
+      </div>
+    </aside>
   );
 }
 
@@ -467,7 +687,13 @@ function DealHeader({ deal }: { deal: DealView }) {
   );
 }
 
-function CostView({ deal }: { deal: DealView }) {
+function CostView({
+  deal,
+  onGoToSourcing,
+}: {
+  deal: DealView;
+  onGoToSourcing: () => void;
+}) {
   const quotedTotal = sumCost(deal.cost.quoted);
   const committedTotal = sumCost(deal.cost.committed);
   const actualTotal = sumCost(deal.cost.actual);
@@ -480,6 +706,7 @@ function CostView({ deal }: { deal: DealView }) {
     return (
       <div className="flex-1 px-8 py-6 max-w-[720px]">
         <DealHeader deal={deal} />
+        <CommercialGapBanner deal={deal} onGoToSourcing={onGoToSourcing} />
         <div className="rounded-md border border-[#3a3d44] bg-[#24262b] px-4 py-5 text-[13px] text-[#8B9099]">
           No quote issued yet. Cost tracking activates once the spec is confirmed and a baseline quote is committed
           to the customer.
@@ -491,6 +718,7 @@ function CostView({ deal }: { deal: DealView }) {
   return (
     <div className="flex-1 px-8 py-6 max-w-[760px] overflow-y-auto">
       <DealHeader deal={deal} />
+      <CommercialGapBanner deal={deal} onGoToSourcing={onGoToSourcing} />
       <div className={`rounded-md border px-5 py-4 mb-5 ${isWarning ? "border-amber-500/40 bg-amber-500/[0.05]" : "border-[#2a2d33] bg-[#212327]"}`}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-[12px] text-[#8B9099] uppercase tracking-wide">Live margin</span>

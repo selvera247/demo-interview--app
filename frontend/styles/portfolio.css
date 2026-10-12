@@ -1350,6 +1350,21 @@ select {
   background: var(--bg, #0b1410);
 }
 
+.fdg-demo-shell-embedded {
+  background: #0b1410;
+}
+
+.fdg-demo-shell-embedded .fdg-root {
+  flex: 1;
+  min-height: 0;
+}
+
+.fdg-demo-shell-embedded .fdg-login-page,
+.fdg-demo-shell-embedded .fdg-app-shell,
+.fdg-demo-shell-embedded .fdg-boot {
+  min-height: calc(100vh - 7.5rem);
+}
+
 .fdg-demo-bar {
   display: flex;
   align-items: center;

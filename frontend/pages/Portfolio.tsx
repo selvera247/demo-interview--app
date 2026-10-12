@@ -262,7 +262,7 @@ export default function Portfolio() {
         <p className="lede">
           Hosted financial data graph for CRM invoice ↔ GL revenue matching — exception
           lifecycle, dual-control corrections, and an append-only audit log. Synthetic
-          Meridian Retail tenant; login-gated live demo.
+          Meridian Retail tenant; login-gated demo on GitHub Pages (always online).
         </p>
 
         <div className="deal-story">

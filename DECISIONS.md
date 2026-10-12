@@ -316,3 +316,19 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
   Case study only. Share URL constant = Pages href.
 - **Why:** Hiring managers should stay on `selvera247.github.io/.../findatagraph/demo`.
 - **Implications:** Tunnel URL remains an implementation detail for the iframe `src`.
+
+## 2026-10-12 — FinDataGraph demo is Pages-native (no tunnel)
+
+- **Decision:** Stop iframing ephemeral `*.trycloudflare.com` hosts for the public
+  portfolio path. Ship an in-browser FinDataGraph control plane (login, dashboard,
+  exceptions, runs, audit) backed by synthetic fixtures + session mock API under
+  `/#/projects/findatagraph/demo/*`, same durability pattern as Close Agent / Deal
+  Record. Optional `VITE_FINDATAGRAPH_DEMO_URL` retained only for local pairing with
+  `selvera247/agent`.
+- **Why:** Quick tunnels die when the Cursor agent VM stops; Pages kept showing
+  “Demo offline / Retry.” Render one-click remains available in the agent repo but
+  requires a human Render login this agent cannot complete. Hiring managers need a
+  link that works without our VM staying up.
+- **Implications:** Public demo no longer proves the live Express/SQLite process;
+  it proves the product UX + governance flows on synthetic Meridian Retail data.
+  Durable Node host (Render) is still the path if we want a true remote API later.

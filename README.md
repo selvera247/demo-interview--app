@@ -10,6 +10,7 @@ governed agents and workflows, move prototypes toward production with evidence.
 | Portfolio home | https://selvera247.github.io/demo-interview--app/ |
 | **Close Agent demo** (share this) | https://selvera247.github.io/demo-interview--app/#/projects/close-agent |
 | Deal Record | https://selvera247.github.io/demo-interview--app/#/projects/deal-record |
+| **FinDataGraph demo** | https://selvera247.github.io/demo-interview--app/#/projects/findatagraph/demo |
 | Personal hub (deep-link target) | https://finance-portfolio.selveracj.workers.dev |
 
 Deploy: push to `main` runs [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) (`GITHUB_PAGES=true` Vite build → Pages). Manual re-run: Actions → **Deploy GitHub Pages** → Run workflow.

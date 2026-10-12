@@ -1,0 +1,279 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "email": "admin@findatagraph.demo",
+      "name": "Avery Admin",
+      "role": "admin",
+      "entity_ids": []
+    },
+    {
+      "id": "usr_controller",
+      "email": "controller@findatagraph.demo",
+      "name": "Casey Controller",
+      "role": "controller",
+      "entity_ids": []
+    },
+    {
+      "id": "usr_accountant",
+      "email": "accountant@findatagraph.demo",
+      "name": "Riley Accountant",
+      "role": "accountant",
+      "entity_ids": [
+        "ent_us_east",
+        "ent_us_west"
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "id": "ent_eu",
+      "code": "EU-CORE",
+      "name": "EU Core",
+      "currency": "EUR"
+    },
+    {
+      "id": "ent_us_east",
+      "code": "US-EAST",
+      "name": "US East Retail",
+      "currency": "USD"
+    },
+    {
+      "id": "ent_us_west",
+      "code": "US-WEST",
+      "name": "US West Retail",
+      "currency": "USD"
+    }
+  ],
+  "summary": {
+    "open_exceptions": 4,
+    "open_variance_abs": 24450.5,
+    "resolved_last_7_days": 0,
+    "by_type": [
+      {
+        "exception_type": "missing_in_gl",
+        "count": 1
+      },
+      {
+        "exception_type": "missing_in_crm",
+        "count": 1
+      },
+      {
+        "exception_type": "entity_mismatch",
+        "count": 1
+      },
+      {
+        "exception_type": "amount_mismatch",
+        "count": 1
+      }
+    ],
+    "by_entity": [
+      {
+        "entity_code": "US-WEST",
+        "entity_name": "US West Retail",
+        "count": 2,
+        "variance_abs": 24200
+      },
+      {
+        "entity_code": "US-EAST",
+        "entity_name": "US East Retail",
+        "count": 1,
+        "variance_abs": 250.5
+      },
+      {
+        "entity_code": "EU-CORE",
+        "entity_name": "EU Core",
+        "count": 1,
+        "variance_abs": 0
+      }
+    ],
+    "last_run": {
+      "id": "run_a9d810e3de654e84995e",
+      "org_id": "org_fdg_demo",
+      "definition_id": "rec_crm_gl_revenue",
+      "status": "completed",
+      "started_at": "2026-10-11T23:50:12.463Z",
+      "completed_at": "2026-10-11T23:50:12.467Z",
+      "triggered_by": "usr_controller",
+      "matched_count": 4,
+      "exception_count": 4,
+      "error_message": null,
+      "definition_name": "CRM invoices \u2194 GL revenue"
+    }
+  },
+  "exceptions": [
+    {
+      "id": "exc_00a1d24b069d47d78681",
+      "org_id": "org_fdg_demo",
+      "run_id": "run_a9d810e3de654e84995e",
+      "definition_id": "rec_crm_gl_revenue",
+      "entity_id": "ent_us_west",
+      "exception_type": "missing_in_gl",
+      "status": "open",
+      "reference": "INV-1007",
+      "left_amount": 18800,
+      "right_amount": null,
+      "variance": 18800,
+      "currency": "USD",
+      "title": "CRM invoice INV-1007 missing in GL",
+      "details": {
+        "customer": "Tailspin Toys",
+        "invoice_date": "2026-09-20"
+      },
+      "assignee_id": null,
+      "resolved_by": null,
+      "resolution_note": null,
+      "created_at": "2026-10-11 23:50:12",
+      "updated_at": "2026-10-11 23:50:12",
+      "entity_code": "US-WEST",
+      "entity_name": "US West Retail",
+      "assignee_name": null
+    },
+    {
+      "id": "exc_1d9226f8843745f4a578",
+      "org_id": "org_fdg_demo",
+      "run_id": "run_a9d810e3de654e84995e",
+      "definition_id": "rec_crm_gl_revenue",
+      "entity_id": "ent_us_west",
+      "exception_type": "missing_in_crm",
+      "status": "open",
+      "reference": "INV-1099",
+      "left_amount": null,
+      "right_amount": 5400,
+      "variance": -5400,
+      "currency": "USD",
+      "title": "GL line INV-1099 missing in CRM",
+      "details": {
+        "account_code": "4000",
+        "posting_date": "2026-09-22"
+      },
+      "assignee_id": null,
+      "resolved_by": null,
+      "resolution_note": null,
+      "created_at": "2026-10-11 23:50:12",
+      "updated_at": "2026-10-11 23:50:12",
+      "entity_code": "US-WEST",
+      "entity_name": "US West Retail",
+      "assignee_name": null
+    },
+    {
+      "id": "exc_33821da797624e1f91a3",
+      "org_id": "org_fdg_demo",
+      "run_id": "run_a9d810e3de654e84995e",
+      "definition_id": "rec_crm_gl_revenue",
+      "entity_id": "ent_us_east",
+      "exception_type": "amount_mismatch",
+      "status": "open",
+      "reference": "INV-1002",
+      "left_amount": 48250.5,
+      "right_amount": 48000,
+      "variance": 250.5,
+      "currency": "USD",
+      "title": "Amount mismatch INV-1002",
+      "details": {
+        "customer": "Northwind"
+      },
+      "assignee_id": null,
+      "resolved_by": null,
+      "resolution_note": null,
+      "created_at": "2026-10-11 23:50:12",
+      "updated_at": "2026-10-11 23:50:12",
+      "entity_code": "US-EAST",
+      "entity_name": "US East Retail",
+      "assignee_name": null
+    },
+    {
+      "id": "exc_a26cb41e8c5d4eb5bc17",
+      "org_id": "org_fdg_demo",
+      "run_id": "run_a9d810e3de654e84995e",
+      "definition_id": "rec_crm_gl_revenue",
+      "entity_id": "ent_eu",
+      "exception_type": "entity_mismatch",
+      "status": "open",
+      "reference": "INV-1005",
+      "left_amount": 72000,
+      "right_amount": 72000,
+      "variance": 0,
+      "currency": "USD",
+      "title": "Entity mismatch for INV-1005",
+      "details": {
+        "crm_entity": "ent_eu",
+        "gl_entity": "ent_us_east"
+      },
+      "assignee_id": null,
+      "resolved_by": null,
+      "resolution_note": null,
+      "created_at": "2026-10-11 23:50:12",
+      "updated_at": "2026-10-11 23:50:12",
+      "entity_code": "EU-CORE",
+      "entity_name": "EU Core",
+      "assignee_name": null
+    }
+  ],
+  "reconciliations": [
+    {
+      "id": "rec_crm_gl_revenue",
+      "org_id": "org_fdg_demo",
+      "code": "CRM_GL_REV",
+      "name": "CRM invoices \u2194 GL revenue",
+      "description": "Match CRM invoice numbers to GL revenue references for the period.",
+      "left_system": "crm",
+      "right_system": "gl",
+      "tolerance_abs": 0.01,
+      "materiality_abs": 10000,
+      "active": 1
+    }
+  ],
+  "runs": [
+    {
+      "id": "run_a9d810e3de654e84995e",
+      "org_id": "org_fdg_demo",
+      "definition_id": "rec_crm_gl_revenue",
+      "status": "completed",
+      "started_at": "2026-10-11T23:50:12.463Z",
+      "completed_at": "2026-10-11T23:50:12.467Z",
+      "triggered_by": "usr_controller",
+      "matched_count": 4,
+      "exception_count": 4,
+      "error_message": null,
+      "definition_name": "CRM invoices \u2194 GL revenue",
+      "definition_code": "CRM_GL_REV"
+    }
+  ],
+  "audit": [
+    {
+      "id": "aud_59efc0ea06384cb5a470",
+      "org_id": "org_fdg_demo",
+      "actor_id": "usr_controller",
+      "action": "run_started",
+      "resource_type": "reconciliation_run",
+      "resource_id": "run_a9d810e3de654e84995e",
+      "payload": {
+        "definition_id": "rec_crm_gl_revenue"
+      },
+      "created_at": "2026-10-11 23:50:12",
+      "actor_name": "Casey Controller",
+      "actor_email": "controller@findatagraph.demo"
+    },
+    {
+      "id": "aud_0611bb3a94304492903f",
+      "org_id": "org_fdg_demo",
+      "actor_id": "usr_controller",
+      "action": "run_completed",
+      "resource_type": "reconciliation_run",
+      "resource_id": "run_a9d810e3de654e84995e",
+      "payload": {
+        "matched": 4,
+        "exception_count": 4
+      },
+      "created_at": "2026-10-11 23:50:12",
+      "actor_name": "Casey Controller",
+      "actor_email": "controller@findatagraph.demo"
+    }
+  ],
+  "passwords": {
+    "controller@findatagraph.demo": "password123",
+    "accountant@findatagraph.demo": "password123",
+    "admin@findatagraph.demo": "password123"
+  }
+}

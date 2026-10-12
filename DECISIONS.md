@@ -229,3 +229,18 @@
   prior tunnel (`women-contract-…`) expired with the agent VM.
 - **Implications:** Quick tunnels remain ephemeral; durable fix is still Render
   (`deploy-render.md` in `selvera247/agent`). Offline UX prevents silent blank demos.
+
+## 2026-10-12 — Portfolio single-page: Finance Transformation, AI-native
+
+- **Decision:** Rebuild the GitHub Pages landing as one scrollable page titled
+  **Finance Transformation, AI-native**, framed on fictional **Northwind Labs**
+  (portfolio narrative). Close-agent SQLite seed remains **Northwind Digital** per SPEC.
+  Structure: hero (synthetic badge + Run Close Agent / Open Deal Record) → Close Agent
+  walkthrough → Deal Record → governance diagram → “What I’d measure” → 30/60/90
+  playbook → about. FinDataGraph kept as a tertiary link (option B). Remove outcome-claim
+  metrics; footer: “Built independently with synthetic data. No employer information.”
+  Scrub employer-adjacent styling cues from legacy root `index.html` (comment + accent).
+- **Why:** Owner brief for a clean, employer-safe showcase with metric thinking instead of
+  “saved X days” claims.
+- **Implications:** Case-study routes (`/projects/close-agent`, deal-record, findatagraph)
+  unchanged; landing copy no longer leads with personal floor metrics.

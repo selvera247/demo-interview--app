@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
 import {
   FINDATAGRAPH_DEMO_ROUTE,
-  FINDATAGRAPH_DEMO_URL,
+  FINDATAGRAPH_PUBLIC_DEMO_HREF,
 } from "../data/findatagraphDemo";
 
 export default function FinDataGraphCaseStudy() {
@@ -151,7 +151,7 @@ export default function FinDataGraphCaseStudy() {
               </code>
             </li>
             <li>
-              Portfolio demo:{" "}
+              Public demo (stay on GitHub Pages):{" "}
               <Link
                 to={FINDATAGRAPH_DEMO_ROUTE}
                 style={{ color: "var(--signal)" }}
@@ -160,17 +160,19 @@ export default function FinDataGraphCaseStudy() {
               </Link>
             </li>
             <li>
-              Backend origin (override with{" "}
-              <code style={{ color: "var(--signal)" }}>VITE_FINDATAGRAPH_DEMO_URL</code>
-              ):{" "}
-              <code style={{ color: "var(--signal)", wordBreak: "break-all" }}>
-                {FINDATAGRAPH_DEMO_URL}
+              Share link:{" "}
+              <code
+                className="fdg-no-autolink"
+                style={{ color: "var(--signal)", wordBreak: "break-all" }}
+              >
+                {FINDATAGRAPH_PUBLIC_DEMO_HREF}
               </code>
             </li>
             <li>
               Source:{" "}
               <code style={{ color: "var(--signal)" }}>selvera247/agent</code>{" "}
-              (FinDataGraph MVP)
+              (FinDataGraph MVP). Backend loads inside the Pages shell — not as a
+              separate Cloudflare hostname in the address bar.
             </li>
           </ul>
         </section>

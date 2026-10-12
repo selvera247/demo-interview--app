@@ -306,3 +306,13 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
 - **Why:** Prior quick-tunnel hostname expired; Pages showed Demo offline.
 - **Implications:** Route unchanged (`FINDATAGRAPH_DEMO_ROUTE`); only the backend
   origin refreshes. Durable fix remains Render.
+
+## 2026-10-12 — Keep FinDataGraph visitors on GitHub Pages path
+
+- **Decision:** Public CTAs only navigate to `/#/projects/findatagraph/demo`. Do not
+  surface the raw trycloudflare hostname as a link or primary button (mobile
+  auto-linkify + “Open backend origin” were sending people off Pages). Iframe the
+  backend with sandbox that blocks top-level navigation; offline card is Retry /
+  Case study only. Share URL constant = Pages href.
+- **Why:** Hiring managers should stay on `selvera247.github.io/.../findatagraph/demo`.
+- **Implications:** Tunnel URL remains an implementation detail for the iframe `src`.

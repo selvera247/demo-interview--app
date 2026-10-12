@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   FINDATAGRAPH_DEMO_ROUTE,
   FINDATAGRAPH_DEMO_URL,
+  FINDATAGRAPH_PUBLIC_DEMO_HREF,
   probeFinDataGraphHealth,
 } from "../data/findatagraphDemo";
 
@@ -11,6 +12,7 @@ type FrameState = "checking" | "online" | "offline";
 /**
  * Hosted demo shell: visitors stay on the GitHub Pages finance path
  * (`/#/projects/findatagraph/demo`) while the live app loads in-frame.
+ * Never send the browser chrome to the raw Cloudflare hostname.
  */
 export default function FinDataGraphDemo() {
   const [state, setState] = useState<FrameState>("checking");
@@ -28,6 +30,15 @@ export default function FinDataGraphDemo() {
       cancelled = true;
     };
   }, []);
+
+  function recheck() {
+    setState("checking");
+    setDetail("Rechecking demo backend…");
+    void probeFinDataGraphHealth().then((result) => {
+      setDetail(result.detail);
+      setState(result.ok ? "online" : "offline");
+    });
+  }
 
   return (
     <div className="fdg-demo-shell">
@@ -63,6 +74,9 @@ export default function FinDataGraphDemo() {
           title="FinDataGraph continuous close demo"
           src={FINDATAGRAPH_DEMO_URL}
           allow="clipboard-read; clipboard-write"
+          referrerPolicy="no-referrer"
+          // Block top-level navigation out of the Pages shell; keep auth/storage working.
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         />
       ) : (
         <div className="fdg-demo-fallback" role="status" aria-live="polite">
@@ -79,42 +93,22 @@ export default function FinDataGraphDemo() {
             {state === "offline" && (
               <>
                 <p>
-                  Quick Cloudflare tunnels expire when the host VM stops. Prefer a durable
-                  Render deploy (
-                  <code>findatagraph.onrender.com</code>) or refresh{" "}
-                  <code>VITE_FINDATAGRAPH_DEMO_URL</code> /{" "}
-                  <code>findatagraphDemo.ts</code> with a live origin.
+                  Stay on this finance path — the public demo link is always{" "}
+                  <code className="fdg-no-autolink">{FINDATAGRAPH_PUBLIC_DEMO_HREF}</code>
+                  . The backend is an ephemeral tunnel loaded inside this page; it is not
+                  a separate site you should open in the address bar.
                 </p>
                 <p>
                   Login when back online:{" "}
                   <code>controller@findatagraph.demo / password123</code>
                 </p>
                 <div className="fdg-demo-fallback-actions">
-                  <a
-                    className="btn btn-primary"
-                    href={FINDATAGRAPH_DEMO_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open backend origin
-                  </a>
+                  <button type="button" className="btn btn-primary" onClick={recheck}>
+                    Retry
+                  </button>
                   <Link className="btn btn-ghost" to="/projects/findatagraph">
                     Back to case study
                   </Link>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => {
-                      setState("checking");
-                      setDetail("Rechecking demo backend…");
-                      void probeFinDataGraphHealth().then((result) => {
-                        setDetail(result.detail);
-                        setState(result.ok ? "online" : "offline");
-                      });
-                    }}
-                  >
-                    Retry
-                  </button>
                 </div>
               </>
             )}
@@ -124,7 +118,8 @@ export default function FinDataGraphDemo() {
 
       <p className="fdg-demo-footnote">
         Viewing <code>{FINDATAGRAPH_DEMO_ROUTE}</code> on GitHub Pages — synthetic
-        Meridian Retail data only.
+        Meridian Retail data only. Address bar should stay on{" "}
+        <code className="fdg-no-autolink">selvera247.github.io</code>.
       </p>
     </div>
   );

@@ -1465,6 +1465,14 @@ select {
   color: var(--signal, #8dff9a);
 }
 
+/* Discourage mobile auto-linkify of share URLs (keep visitors on Pages). */
+.fdg-no-autolink {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+  user-select: text;
+  word-break: break-all;
+}
+
 @media (max-width: 960px) {
   .demo-triptych,
   .deal-story,

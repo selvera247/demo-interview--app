@@ -5,7 +5,11 @@
  */
 export const FINDATAGRAPH_DEMO_URL =
   import.meta.env.VITE_FINDATAGRAPH_DEMO_URL ||
-  "https://numerous-cabinet-named-counties.trycloudflare.com";
+  "https://relief-alternate-val-toronto.trycloudflare.com";
+
+/** Public demo URL visitors should use (GitHub Pages HashRouter path). */
+export const FINDATAGRAPH_PUBLIC_DEMO_HREF =
+  "https://selvera247.github.io/demo-interview--app/#/projects/findatagraph/demo";
 
 /** In-portfolio launch path — keeps the address bar on a finance-named Pages route. */
 export const FINDATAGRAPH_DEMO_ROUTE = "/projects/findatagraph/demo";

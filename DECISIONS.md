@@ -93,6 +93,38 @@
 - **Why:** The calibrated 9/9 on the original set is not enough for credibility; hold-out and hard variants show whether detection generalizes.
 - **Implications:** Report original / hold-out / hard scores separately. Hold-out answer key still author-owned.
 
+## 2026-10-06 — Generic retrieval (no planted-ID hooks)
+
+- **Decision:** Move flux evidence gathering into `retrieval.retrieve_flux_evidence`: all current-period subledger rows for account/entity/period, all prior-period rows for the same account/entity, and counterpart accounts discovered by opposite-signed amounts (within $1) or 4-digit account refs in memos. Rewrite `assess_flux` to score structural signals only (unsupported JE, identical/near-identical same-party amounts, magnitude coverage, counterpart pairs). Add `tests/test_no_seed_ids.py` that greps agent/tools/retrieval for seed-42 identifiers derived from the DB.
+- **Why:** Hold-out failures that said “no citable” while rows existed were caused by planted-ID / vendor / memo hooks in the old assess path — not missing data.
+- **Implications:** Detection quality on remapped seeds depends on structure, not demo strings. MCP tool names/signatures unchanged.
+
+## 2026-10-06 — Multi-provider LLM drafting layer
+
+- **Decision:** Add `llm/` with `generate(system, user, json_schema) -> dict`. Adapters: OpenAI-compatible (configurable `base_url` for OpenAI / xAI / DeepSeek / Ollama), Anthropic native, and **heuristic** (wraps structural `assess_flux` as the no-LLM baseline). Config in `config/llm.yaml` (provider, model, base_url, api_key_env, temperature default 0, timeout); keys only via env (`.env.example`, gitignore `.env`). Provider selectable via config, `LLM_PROVIDER`, or `--provider`. Drafting contract JSON: `{commentary, cited_ids, explained_amount, residual_amount}`. Retrieval, confidence, unsupported_je, and low→review stay in code. Hallucinated cites → low + logged; invalid JSON → one retry then heuristic fallback (logged in `draft_meta`). Deps: `openai`, `anthropic`, `python-dotenv` only.
+- **Why:** Controllers need model-swappable commentary without letting the LLM own policy gates; heuristic remains the honest baseline.
+- **Implications:** Real API calls are opt-in via env keys; tests mock providers only. No README score publish.
+
+## 2026-10-06 — Provider eval suites + sealed seed 44
+
+- **Decision:** `run_evals.py` accepts `--provider` and `--suite` (`planted` | `holdout` | `hard` | `sealed` | `all`). Writes `exports/{provider}_{model}_{suite}.json` with provider/model/date, per-case pass/fail, citation-error count, fallback count, latency, and token usage when available. `evals/compare_evals.py` builds a markdown comparison table from `exports/`. Add `--profile sealed` (seed **44**) with the same anomaly types in accounts/entities/periods unused by seeds 42/43; stubs only in `evals/sealed_cases.yaml`. The harness **refuses** sealed without `--confirm-sealed`.
+- **Why:** Cross-provider comparison needs a stable export schema; sealed stays author-gated so scores are not run against an empty key by accident.
+- **Implications:** Do not run sealed until the author fills the key and confirms. `all` excludes sealed.
+
+## 2026-10-06 — Residual accounting + confidence / duplicate / timing rules
+
+General rules from the first honest heuristic run (planted 5/9, holdout 7/9, hard 4/5) — not case-specific patches:
+
+1. **Residual in code:** For each flagged item, `residual = variance − sum(supported amounts)`. Supported = contract/PO match, reclass pair, true-duplicate excess (n−1), timing/reversal JE, or planned labeled spend. **Stop ranking by dollar size** (no magnitude-coverage confidence).
+2. **Unmatched/unsupported always cited:** Every unmatched or unsupported row is cited and labeled unexplained with its amount.
+3. **Confidence from residual:** `high` only if `|residual| ≤ confidence.residual_tolerance_amt` (policy.yaml, default $15k from MoM noise on the honest run) and no unmatched rows; `med` if some support exists but a residual/unmatched remains; `low` if nothing is supported or `unsupported_je` fires. Coverage % must not raise confidence.
+4. **Duplicate detection:** Same party, same amount, **and** same reference or identical memo. Same party/amount with different memos describing planned split spend (conference/hiring/etc.) is **not** a duplicate.
+5. **Timing/reversal priority:** Cite timing and reversal JEs (memo referencing contract start dates or reversals) before routine billing rows.
+6. **LLM cannot alter residual:** Drafting receives code-computed `explained_amount` / `residual_amount` and the full evidence set; overlays may change prose only. Structural residual, confidence, and required citations stay locked in code.
+
+- **Why:** Honest-run failures were drafting/assess omissions (timing JE skipped, residual skipped, false duplicate on split invoices, high confidence on partial C1) — fix the rules, not the cases.
+- **Implications:** `policy.yaml` gains `confidence.residual_tolerance_amt`. MCP signatures unchanged. Cases untouched.
+
 ## 2026-10-09 — Merge cjs-ops narrative onto MCP spine (LangGraph + FastAPI)
 
 - **Decision:** Keep `finance-close-agent/` as the single product spine. Add a thin FastAPI + LangGraph

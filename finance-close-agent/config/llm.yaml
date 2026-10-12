@@ -1,0 +1,37 @@
+# LLM drafting configuration. Select provider via:
+#   - default_provider below
+#   - env LLM_PROVIDER
+#   - CLI --provider
+# API keys come from environment variables named in api_key_env (never commit keys).
+
+default_provider: heuristic
+temperature: 0
+timeout: 60
+
+providers:
+  heuristic: {}
+    # No model / key — wraps structural assess_flux.
+
+  openai:
+    model: gpt-4o-mini
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+
+  anthropic:
+    model: claude-sonnet-4-20250514
+    api_key_env: ANTHROPIC_API_KEY
+
+  xai:
+    model: grok-2-latest
+    base_url: https://api.x.ai/v1
+    api_key_env: XAI_API_KEY
+
+  deepseek:
+    model: deepseek-chat
+    base_url: https://api.deepseek.com/v1
+    api_key_env: DEEPSEEK_API_KEY
+
+  ollama:
+    model: llama3.2
+    base_url: http://localhost:11434/v1
+    api_key_env: OLLAMA_API_KEY  # optional; adapter tolerates empty for ollama

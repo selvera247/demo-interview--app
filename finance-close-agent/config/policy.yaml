@@ -11,11 +11,15 @@ variance:
 account_overrides: {}
 
 confidence:
-  # Map internal evidence_score in [0, 1] → high / med / low.
+  # Map internal evidence_score in [0, 1] → high / med / low (legacy cutoffs;
+  # flux confidence is assigned from residual accounting — see residual_tolerance_amt).
   high_min: 0.80
   med_min: 0.55
   # low is anything below med_min
   low_routes_to_human_review: true
+  # |residual| at or below this ⇒ high; else med if any support exists.
+  # Calibrated from first honest eval MoM noise (~$12k on revenue timing).
+  residual_tolerance_amt: 15000
 
 # Manual / unsupported journal entries — always surface, never auto-approve.
 unsupported_je:

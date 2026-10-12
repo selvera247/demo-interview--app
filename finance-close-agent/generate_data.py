@@ -21,9 +21,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "data" / "finance.db"
 HOLDOUT_DB_PATH = ROOT / "data" / "finance_holdout.db"
+SEALED_DB_PATH = ROOT / "data" / "finance_sealed.db"
 EXPORT_DIR = ROOT / "exports"
 DEFAULT_SEED = 42
 HOLDOUT_SEED = 43
+SEALED_SEED = 44
 SEED = DEFAULT_SEED  # mutated by generate() for deterministic sub-seeds
 COMPANY = "Northwind Digital"
 ENTITIES = ["ND-US", "ND-EU"]
@@ -1100,8 +1102,8 @@ def generate(
     profile: str = "demo",
 ) -> dict:
     global SEED
-    if profile not in {"demo", "holdout"}:
-        raise ValueError(f"unknown profile {profile!r}; use demo|holdout")
+    if profile not in {"demo", "holdout", "sealed"}:
+        raise ValueError(f"unknown profile {profile!r}; use demo|holdout|sealed")
     SEED = seed
     random.seed(SEED)
     db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1145,12 +1147,16 @@ def generate(
     from anomaly_extra import (
         override_hard_and_edge,
         override_holdout,
+        override_sealed,
         plant_hard_and_edge,
         plant_holdout,
+        plant_sealed,
     )
 
     if profile == "holdout":
         anomaly_records = plant_holdout(balances, periods)
+    elif profile == "sealed":
+        anomaly_records = plant_sealed(balances, periods)
     else:
         anomaly_records = plant_anomalies(balances, periods)
         anomaly_records.extend(plant_hard_and_edge(balances, periods))
@@ -1196,6 +1202,8 @@ def generate(
 
     if profile == "holdout":
         sub_rows = override_holdout(sub_rows, balances, periods, SEED)
+    elif profile == "sealed":
+        sub_rows = override_sealed(sub_rows, balances, periods, SEED)
     else:
         sub_rows = override_subledger_for_anomalies(sub_rows, balances, periods)
         sub_rows = override_hard_and_edge(sub_rows, balances, periods, SEED)
@@ -1243,7 +1251,12 @@ def generate(
     conn.commit()
 
     export = export_demo_bundle(conn, periods, anomaly_records)
-    export_name = "demo_bundle_holdout.json" if profile == "holdout" else "demo_bundle.json"
+    if profile == "holdout":
+        export_name = "demo_bundle_holdout.json"
+    elif profile == "sealed":
+        export_name = "demo_bundle_sealed.json"
+    else:
+        export_name = "demo_bundle.json"
     export_path = EXPORT_DIR / export_name
     export_path.write_text(json.dumps(export, indent=2), encoding="utf-8")
 
@@ -1368,20 +1381,31 @@ def main() -> None:
         "--seed",
         type=int,
         default=None,
-        help="RNG seed (default 42 demo / 43 holdout)",
+        help="RNG seed (default 42 demo / 43 holdout / 44 sealed)",
     )
     parser.add_argument(
         "--profile",
-        choices=("demo", "holdout"),
+        choices=("demo", "holdout", "sealed"),
         default="demo",
-        help="demo=A1–C1+hard/S1; holdout=same types remapped (seed 43)",
+        help="demo=A1–C1+hard/S1; holdout=remapped (43); sealed=remapped (44)",
     )
     args = parser.parse_args()
     profile = args.profile
-    seed = args.seed if args.seed is not None else (
-        HOLDOUT_SEED if profile == "holdout" else DEFAULT_SEED
-    )
-    db_path = args.db or (HOLDOUT_DB_PATH if profile == "holdout" else DB_PATH)
+    if args.seed is not None:
+        seed = args.seed
+    elif profile == "holdout":
+        seed = HOLDOUT_SEED
+    elif profile == "sealed":
+        seed = SEALED_SEED
+    else:
+        seed = DEFAULT_SEED
+    if profile == "holdout":
+        default_db = HOLDOUT_DB_PATH
+    elif profile == "sealed":
+        default_db = SEALED_DB_PATH
+    else:
+        default_db = DB_PATH
+    db_path = args.db or default_db
     result = generate(db_path=db_path, seed=seed, profile=profile)
     print(json.dumps(result, indent=2))
 

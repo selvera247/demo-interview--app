@@ -15,7 +15,12 @@ ConfidenceLabel = Literal["high", "med", "low"]
 
 REQUIRED_TOP_KEYS = ("variance", "account_overrides", "confidence", "unsupported_je")
 REQUIRED_VARIANCE_KEYS = ("threshold_pct", "threshold_amt", "require_both")
-REQUIRED_CONFIDENCE_KEYS = ("high_min", "med_min", "low_routes_to_human_review")
+REQUIRED_CONFIDENCE_KEYS = (
+    "high_min",
+    "med_min",
+    "low_routes_to_human_review",
+    "residual_tolerance_amt",
+)
 REQUIRED_UNSUPPORTED_KEYS = (
     "always_flag",
     "always_route_to_human_review",
@@ -41,6 +46,7 @@ class ConfidencePolicy:
     high_min: float
     med_min: float
     low_routes_to_human_review: bool
+    residual_tolerance_amt: float
 
     def label_for_score(self, score: float) -> ConfidenceLabel:
         if score >= self.high_min:
@@ -48,6 +54,19 @@ class ConfidencePolicy:
         if score >= self.med_min:
             return "med"
         return "low"
+
+    def label_for_residual(
+        self,
+        residual: float,
+        has_support: bool,
+        unsupported_je: bool,
+    ) -> ConfidenceLabel:
+        """Residual-based confidence (coverage % must not raise confidence)."""
+        if unsupported_je or not has_support:
+            return "low"
+        if abs(residual) <= self.residual_tolerance_amt:
+            return "high"
+        return "med"
 
 
 @dataclass(frozen=True)
@@ -177,6 +196,10 @@ def load_policy(path: Path | str | None = None) -> Policy:
         low_routes_to_human_review=_as_bool(
             conf_raw["low_routes_to_human_review"],
             "confidence.low_routes_to_human_review",
+        ),
+        residual_tolerance_amt=_as_float(
+            conf_raw["residual_tolerance_amt"],
+            "confidence.residual_tolerance_amt",
         ),
     )
 

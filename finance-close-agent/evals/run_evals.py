@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score the close agent against evals/cases.yaml (deterministic, no LLM judge).
+"""Score the close agent against eval suites (deterministic, no LLM judge).
 
 Per case checks (when the answer key is filled):
   (a) confidence matches expected_confidence
@@ -15,6 +15,10 @@ including against the sum of amounts mentioned in the commentary.
 False-positive-only stubs (expected_flagged: false, blank explanation/facts)
 are scored on the flagged check alone.
 
+Suites: planted | holdout | hard | sealed | all
+Providers: from config/llm.yaml (default heuristic). Sealed refuses without
+``--confirm-sealed``.
+
 Does not write a score into the README. Do not edit answer keys to force passes.
 """
 
@@ -24,6 +28,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -32,12 +37,41 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools import draft_flux_commentary, reset_policy_cache  # noqa: E402
+from tools import draft_flux_commentary, reset_policy_cache, set_llm_provider  # noqa: E402
 import db as db_mod  # noqa: E402
+from llm import load_llm_config  # noqa: E402
 
-CASES_PATH = Path(__file__).resolve().parent / "cases.yaml"
-CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
-REPORT_PATH = ROOT / "exports" / "eval_report.json"
+EVALS_DIR = Path(__file__).resolve().parent
+CASES_PATH = EVALS_DIR / "cases.yaml"
+CONFIG_PATH = EVALS_DIR / "config.yaml"
+EXPORT_DIR = ROOT / "exports"
+REPORT_PATH = EXPORT_DIR / "eval_report.json"
+
+PLANTED_IDS = {"A1", "A2", "A2B", "A3", "A3B", "A4", "B1", "B2", "C1"}
+
+SUITE_SPECS: dict[str, dict] = {
+    "planted": {
+        "cases": EVALS_DIR / "cases.yaml",
+        "db": ROOT / "data" / "finance.db",
+        "case_ids": PLANTED_IDS,
+    },
+    "holdout": {
+        "cases": EVALS_DIR / "holdout_cases.yaml",
+        "db": ROOT / "data" / "finance_holdout.db",
+        "case_ids": None,
+    },
+    "hard": {
+        "cases": EVALS_DIR / "hard_cases.yaml",
+        "db": ROOT / "data" / "finance.db",
+        "case_ids": None,
+    },
+    "sealed": {
+        "cases": EVALS_DIR / "sealed_cases.yaml",
+        "db": ROOT / "data" / "finance_sealed.db",
+        "case_ids": None,
+        "requires_confirm": True,
+    },
+}
 
 DEFAULT_NUMERIC_TOLERANCE = 500.0
 AMOUNT_RE = re.compile(
@@ -206,6 +240,7 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
     over_threshold = bool(draft.get("over_threshold"))
     unsupported = bool(draft.get("unsupported_je"))
     got_flagged = over_threshold or unsupported
+    draft_meta = draft.get("draft_meta") or {}
 
     reasons: list[str] = []
     checks: dict[str, bool] = {}
@@ -255,6 +290,11 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
             "citations": citations,
             "commentary": commentary,
             "mode": mode,
+            "citation_errors": list(draft_meta.get("citation_errors") or []),
+            "fallback": bool(draft_meta.get("fallback")),
+            "latency_ms": draft_meta.get("latency_ms"),
+            "usage": draft_meta.get("usage"),
+            "provider": draft_meta.get("provider"),
         }
 
     # (a) confidence
@@ -320,20 +360,57 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
         "citations": citations,
         "commentary": commentary,
         "mode": "full",
+        "citation_errors": list(draft_meta.get("citation_errors") or []),
+        "fallback": bool(draft_meta.get("fallback")),
+        "latency_ms": draft_meta.get("latency_ms"),
+        "usage": draft_meta.get("usage"),
+        "provider": draft_meta.get("provider"),
     }
 
 
-def run(
-    cases_path: Path = CASES_PATH,
-    db_path: Path | None = None,
-    report_path: Path | None = None,
-) -> dict:
-    out_path = report_path or REPORT_PATH
-    # Point tools at the requested DB without changing agent logic.
-    if db_path is not None:
-        db_mod.DB_PATH = Path(db_path)
+def _model_slug(provider_name: str) -> str:
+    cfg = load_llm_config()
+    block = (cfg.get("providers") or {}).get(provider_name) or {}
+    model = block.get("model") or provider_name
+    # Safe filename fragment
+    return re.sub(r"[^\w.-]+", "_", str(model))
 
-    cases = load_cases(cases_path)
+
+def resolve_report_path(provider: str, suite: str, report_path: Path | None) -> Path:
+    if report_path is not None:
+        return report_path
+    model = _model_slug(provider)
+    return EXPORT_DIR / f"{provider}_{model}_{suite}.json"
+
+
+def run_suite(
+    suite: str,
+    provider: str = "heuristic",
+    report_path: Path | None = None,
+    confirm_sealed: bool = False,
+    cases_path: Path | None = None,
+    db_path: Path | None = None,
+) -> dict:
+    if suite not in SUITE_SPECS:
+        raise ValueError(f"unknown suite {suite!r}; known: {sorted(SUITE_SPECS)}")
+    spec = SUITE_SPECS[suite]
+    if spec.get("requires_confirm") and not confirm_sealed:
+        raise SystemExit(
+            "Refusing to run sealed suite without --confirm-sealed "
+            "(answer key is author-owned; do not score until confirmed)."
+        )
+
+    set_llm_provider(provider)
+    out_path = resolve_report_path(provider, suite, report_path)
+    chosen_db = Path(db_path) if db_path else Path(spec["db"])
+    chosen_cases = Path(cases_path) if cases_path else Path(spec["cases"])
+    db_mod.DB_PATH = chosen_db
+
+    cases = load_cases(chosen_cases)
+    id_filter = spec.get("case_ids")
+    if id_filter is not None:
+        cases = [c for c in cases if c.get("id") in id_filter]
+
     cfg = load_eval_config()
     tolerance = cfg["numeric_tolerance_amt"]
     incomplete = find_incomplete(cases)
@@ -343,6 +420,16 @@ def run(
     passed = sum(1 for r in results if r["passed"])
     failed = len(results) - passed
     score = round(passed / max(len(results), 1), 4) if results else None
+    citation_error_count = sum(len(r.get("citation_errors") or []) for r in results)
+    fallback_count = sum(1 for r in results if r.get("fallback"))
+    latencies = [r["latency_ms"] for r in results if r.get("latency_ms") is not None]
+    total_tokens = 0
+    token_available = False
+    for r in results:
+        usage = r.get("usage") or {}
+        if usage.get("total_tokens") is not None:
+            token_available = True
+            total_tokens += int(usage["total_tokens"])
 
     status = "scored"
     if incomplete and not results:
@@ -350,11 +437,16 @@ def run(
     elif incomplete:
         status = "partial_answer_key"
 
+    model = _model_slug(provider)
     report = {
         "disclaimer": "SYNTHETIC DATA — Northwind Digital eval set only",
         "status": status,
+        "provider": provider,
+        "model": model,
+        "suite": suite,
+        "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "db_path": str(db_mod.DB_PATH),
-        "cases_path": str(cases_path),
+        "cases_path": str(chosen_cases),
         "numeric_tolerance_amt": tolerance,
         "cases_total": len(cases),
         "cases_scored": len(results),
@@ -362,6 +454,11 @@ def run(
         "passed": passed,
         "failed": failed,
         "score": score,
+        "citation_error_count": citation_error_count,
+        "fallback_count": fallback_count,
+        "latency_ms_total": round(sum(latencies), 1) if latencies else None,
+        "latency_ms_mean": round(sum(latencies) / len(latencies), 1) if latencies else None,
+        "token_usage_total": total_tokens if token_available else None,
         "results": results,
     }
     if incomplete:
@@ -376,43 +473,89 @@ def run(
     return report
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cases", type=Path, default=CASES_PATH)
-    parser.add_argument(
-        "--db",
-        type=Path,
-        default=None,
-        help="SQLite path (default: data/finance.db). Use holdout DB for holdout_cases.",
-    )
-    parser.add_argument(
-        "--report",
-        type=Path,
-        default=None,
-        help="Write JSON report here (default: exports/eval_report.json)",
-    )
-    args = parser.parse_args()
-    report = run(args.cases, db_path=args.db, report_path=args.report)
+def run(
+    cases_path: Path | None = None,
+    db_path: Path | None = None,
+    report_path: Path | None = None,
+    provider: str = "heuristic",
+    suite: str | None = None,
+    confirm_sealed: bool = False,
+) -> dict:
+    """Back-compat entry: single suite or legacy --cases/--db/--report."""
+    if suite is None:
+        # Legacy path: treat as a one-off custom run (suite label = custom)
+        suite_label = "custom"
+        set_llm_provider(provider)
+        if db_path is not None:
+            db_mod.DB_PATH = Path(db_path)
+        cases = load_cases(cases_path or (EVALS_DIR / "cases.yaml"))
+        cfg = load_eval_config()
+        tolerance = cfg["numeric_tolerance_amt"]
+        incomplete = find_incomplete(cases)
+        complete = [c for c in cases if not incomplete_fields(c)]
+        results = [score_case(c, tolerance=tolerance) for c in complete]
+        passed = sum(1 for r in results if r["passed"])
+        out_path = report_path or (EXPORT_DIR / "eval_report.json")
+        report = {
+            "disclaimer": "SYNTHETIC DATA — Northwind Digital eval set only",
+            "status": "scored" if results else "incomplete_answer_key",
+            "provider": provider,
+            "model": _model_slug(provider),
+            "suite": suite_label,
+            "date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "db_path": str(db_mod.DB_PATH),
+            "cases_path": str(cases_path or (EVALS_DIR / "cases.yaml")),
+            "numeric_tolerance_amt": tolerance,
+            "cases_total": len(cases),
+            "cases_scored": len(results),
+            "incomplete": incomplete,
+            "passed": passed,
+            "failed": len(results) - passed,
+            "score": round(passed / max(len(results), 1), 4) if results else None,
+            "citation_error_count": sum(
+                len(r.get("citation_errors") or []) for r in results
+            ),
+            "fallback_count": sum(1 for r in results if r.get("fallback")),
+            "results": results,
+        }
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        report["report_path"] = str(out_path)
+        return report
 
-    if report["incomplete"]:
+    return run_suite(
+        suite,
+        provider=provider,
+        report_path=report_path,
+        confirm_sealed=confirm_sealed,
+        cases_path=cases_path,
+        db_path=db_path,
+    )
+
+
+def _print_report(report: dict) -> None:
+    if report.get("incomplete"):
         print(
             f"Incomplete answer key ({len(report['incomplete'])} cases): "
             f"{[x['id'] for x in report['incomplete']]}"
         )
-    if not report["results"]:
-        print(json.dumps(
-            {
-                "status": report["status"],
-                "incomplete": report["incomplete"],
-                "message": report.get("message"),
-            },
-            indent=2,
-        ))
-        return 1
+    if not report.get("results"):
+        print(
+            json.dumps(
+                {
+                    "status": report["status"],
+                    "incomplete": report.get("incomplete"),
+                    "message": report.get("message"),
+                },
+                indent=2,
+            )
+        )
+        return
 
     print(
-        f"=== Per-case results (tol=${report['numeric_tolerance_amt']:,.0f}; "
-        f"db={report['db_path']}) ==="
+        f"=== {report.get('suite')} / {report.get('provider')} "
+        f"({report.get('model')}) tol=${report['numeric_tolerance_amt']:,.0f}; "
+        f"db={report['db_path']} ==="
     )
     for r in report["results"]:
         status = "PASS" if r["passed"] else "FAIL"
@@ -423,18 +566,94 @@ def main() -> int:
             f"[{mode}] — {why}"
         )
         if not r["passed"]:
-            print(f"     commentary: {r['commentary'][:220]}…")
+            print(f"     commentary: {(r.get('commentary') or '')[:220]}…")
 
     print(
         f"\n=== Overall (scored): {report['passed']}/{report['cases_scored']} "
         f"passed (score={report['score']}); "
-        f"{len(report['incomplete'])} incomplete / "
+        f"citation_errors={report.get('citation_error_count')}; "
+        f"fallbacks={report.get('fallback_count')}; "
+        f"{len(report.get('incomplete') or [])} incomplete / "
         f"{report['cases_total']} total ==="
     )
-    print(f"report: {report.get('report_path', REPORT_PATH)}")
-    if report["failed"] or report["incomplete"]:
-        return 1
-    return 0
+    print(f"report: {report.get('report_path')}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--provider",
+        default=None,
+        help="LLM provider (config/llm.yaml). Default: heuristic / LLM_PROVIDER",
+    )
+    parser.add_argument(
+        "--suite",
+        choices=("planted", "holdout", "hard", "sealed", "all"),
+        default=None,
+        help="Eval suite. Prefer this over --cases/--db for standard runs.",
+    )
+    parser.add_argument(
+        "--confirm-sealed",
+        action="store_true",
+        help="Required to run the sealed suite (author-owned answer key).",
+    )
+    parser.add_argument("--cases", type=Path, default=None)
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=None,
+        help="SQLite path override (default from suite).",
+    )
+    parser.add_argument(
+        "--report",
+        type=Path,
+        default=None,
+        help="Write JSON report here (default: exports/{provider}_{model}_{suite}.json)",
+    )
+    args = parser.parse_args()
+
+    provider = args.provider or load_llm_config().get("default_provider") or "heuristic"
+
+    suites: list[str]
+    if args.suite == "all":
+        suites = ["planted", "holdout", "hard"]
+        # sealed excluded from 'all' unless explicitly confirmed alone
+    elif args.suite:
+        suites = [args.suite]
+    else:
+        # Legacy: single custom run
+        report = run(
+            cases_path=args.cases,
+            db_path=args.db,
+            report_path=args.report,
+            provider=provider,
+            suite=None,
+            confirm_sealed=args.confirm_sealed,
+        )
+        _print_report(report)
+        if report.get("failed") or report.get("incomplete"):
+            return 1
+        return 0
+
+    exit_code = 0
+    for suite in suites:
+        try:
+            report = run_suite(
+                suite,
+                provider=provider,
+                report_path=args.report if len(suites) == 1 else None,
+                confirm_sealed=args.confirm_sealed,
+                cases_path=args.cases if len(suites) == 1 else None,
+                db_path=args.db if len(suites) == 1 else None,
+            )
+        except SystemExit as exc:
+            print(str(exc) or "refused", file=sys.stderr)
+            return 2
+        _print_report(report)
+        print()
+        if report.get("failed") or report.get("incomplete"):
+            exit_code = 1
+    return exit_code
 
 
 if __name__ == "__main__":

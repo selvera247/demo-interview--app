@@ -236,11 +236,12 @@
   **Finance Transformation, AI-native**, framed on fictional **Northwind Labs**
   (portfolio narrative). Close-agent SQLite seed remains **Northwind Digital** per SPEC.
   Structure: hero (synthetic badge + Run Close Agent / Open Deal Record) → Close Agent
-  walkthrough → Deal Record → governance diagram → “What I’d measure” → 30/60/90
-  playbook → about. FinDataGraph kept as a tertiary link (option B). Remove outcome-claim
+  walkthrough → Deal Record → FinDataGraph (Demo 3) → governance diagram → “What I’d
+  measure” → 30/60/90 playbook → about. FinDataGraph has a top-nav link to its case-study
+  page plus an in-flow Demo 3 section (not a footer tertiary). Remove outcome-claim
   metrics; footer: “Built independently with synthetic data. No employer information.”
   Scrub employer-adjacent styling cues from legacy root `index.html` (comment + accent).
 - **Why:** Owner brief for a clean, employer-safe showcase with metric thinking instead of
-  “saved X days” claims.
+  “saved X days” claims; FinDataGraph should sit with the demos, not at page bottom.
 - **Implications:** Case-study routes (`/projects/close-agent`, deal-record, findatagraph)
   unchanged; landing copy no longer leads with personal floor metrics.

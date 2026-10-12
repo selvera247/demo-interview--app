@@ -13,11 +13,13 @@ Demo showing an AI agent answering month-end close questions and drafting flux c
 - Do not add dependencies without asking.
 
 ## Stack
-Python 3.11+ (3.12 OK), SQLite, MCP Python SDK, pytest, Streamlit (review UI), PyYAML.
-Approved deps: mcp, streamlit, pandas, pyyaml, pytest. No DuckDB.
+Python 3.11+ (3.12 OK), SQLite, MCP Python SDK, pytest, Streamlit (review UI), PyYAML,
+FastAPI, Uvicorn, LangGraph (thin orchestration over existing tools).
+Approved deps: mcp, streamlit, pandas, pyyaml, pytest, fastapi, uvicorn, langgraph. No DuckDB.
 
 ## Scope (until SPEC DoD / slice 7)
-Only `finance-close-agent/` is in scope. Freeze portfolio and Deal Record; do not change them until explicitly unfrozen.
+Only `finance-close-agent/` is in scope. Freeze portfolio and Deal Record; do not change them
+until explicitly unfrozen — exception: unpublish premature eval scores to stay SPEC-compliant.
 
 ## Style
 Typed Python, small functions, clear docstrings. Config (thresholds, policies, confidence cutoffs) in YAML, never hardcoded.

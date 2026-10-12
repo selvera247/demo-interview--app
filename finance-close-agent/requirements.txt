@@ -6,4 +6,8 @@ pytest>=8.0
 openai>=1.40.0
 anthropic>=0.34.0
 python-dotenv>=1.0.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
+langgraph>=0.2.0
 # mcp 1.x uses FastMCP; mcp 2.x uses MCPServer — mcp_server.py supports both.
+# httpx is pulled by FastAPI TestClient / starlette.

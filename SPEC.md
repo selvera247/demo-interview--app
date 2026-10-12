@@ -3,6 +3,13 @@
 ## Purpose
 Agent answers close questions and drafts flux commentary over synthetic ERP data, with human review and measurable accuracy.
 
+## Orchestration (merged product spine)
+- **Core spine (required):** SQLite + MCP tools + `config/policy.yaml` + Streamlit review + evals.
+- **Optional API/workflow layer:** FastAPI exposes the same close pass; LangGraph stages
+  (`extract → flag → draft → approval_gate → summary`) call existing agent/tools — they must
+  not invent a second variance engine or sample GL.
+- Real vendor product names remain forbidden (`ERP` / `Billing` / `HRIS` / `Expense Tool` only).
+
 ## Synthetic data (company: Northwind Digital)
 - GL trial balance: 24 months, ~40 accounts, 2 entities (`ND-US`, `ND-EU`)
 - Storage: **SQLite** (not DuckDB — see DECISIONS.md)
@@ -41,9 +48,12 @@ Agent answers close questions and drafts flux commentary over synthetic ERP data
 ## Definition of done
 - Runs end to end from a fresh clone via documented commands
 - Tests pass, eval score published (only after hand-written cases), README with architecture diagram
-- Works in Claude Desktop via MCP
+- Works in Claude Desktop via MCP (`verify_mcp.py` smoke + documented stdio config)
+- FastAPI + LangGraph close workflow returns the same flagged set as `agent/close_agent.py`
+- GitHub Pages portfolio hosts Close Agent + Deal Record demos
 
-## Out of scope until DoD (slice 7 complete)
-- Portfolio landing page
-- Deal Record demo
-- Removing or changing `react-router-dom` / frontend routing (frozen)
+## Portfolio packaging (post–close-agent DoD)
+- Portfolio landing and Deal Record case framing may be polished for showcase
+- Prefer HashRouter; do not swap routing libraries without an explicit decision
+- External mirror repos remain out of scope (this monorepo is the sole home)
+- Personal hub `finance-portfolio.selveracj.workers.dev` may deep-link here; not required to host Python

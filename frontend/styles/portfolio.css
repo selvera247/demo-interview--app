@@ -84,6 +84,8 @@ select {
   color: inherit;
   cursor: pointer;
   padding: 0;
+  font: inherit;
+  text-decoration: none;
 }
 
 .site-nav .nav-links .linkish:hover,

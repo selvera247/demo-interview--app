@@ -106,6 +106,9 @@ export default function Portfolio() {
           <button type="button" className="linkish" onClick={() => scrollToSection("demo-deal")}>
             Deal Record
           </button>
+          <Link to="/projects/findatagraph" className="linkish">
+            FinDataGraph
+          </Link>
           <button type="button" className="linkish" onClick={() => scrollToSection("governance")}>
             Governance
           </button>
@@ -251,12 +254,59 @@ export default function Portfolio() {
             Open Deal Record
           </Link>
         </div>
+      </section>
 
-        <p className="tertiary-link">
-          Also available:{" "}
-          <Link to="/projects/findatagraph">FinDataGraph</Link> — continuous close control
-          plane (CRM↔GL matching) over synthetic data.
+      <section className="section" id="demo-findatagraph">
+        <div className="tag">Demo 3 · FinDataGraph</div>
+        <h2>Continuous close control plane</h2>
+        <p className="lede">
+          Hosted financial data graph for CRM invoice ↔ GL revenue matching — exception
+          lifecycle, dual-control corrections, and an append-only audit log. Synthetic
+          Meridian Retail tenant; login-gated live demo.
         </p>
+
+        <div className="deal-story">
+          <div className="deal-story-main">
+            <div className="illustrative-label">Live demo · password-gated</div>
+            <h3>Detect → investigate → resolve → report</h3>
+            <p>
+              Controllers run reconciliations, assign breaks, waive or correct with dual
+              control on material amounts, and review the same evidence trail on every
+              mutation.
+            </p>
+            <ul className="deal-meta">
+              <li>Match CRM invoices to GL revenue lines</li>
+              <li>Exception queue with assign / resolve / waive</li>
+              <li>Dual-control corrections above materiality</li>
+            </ul>
+          </div>
+          <ol className="deal-timeline">
+            <li>
+              <span className="deal-when">Login</span>
+              <strong>controller@findatagraph.demo</strong>
+              <p>password123 — synthetic demo tenant only.</p>
+            </li>
+            <li>
+              <span className="deal-when">Run</span>
+              <strong>Trigger a reconciliation</strong>
+              <p>Open exceptions surface with variance and entity scope.</p>
+            </li>
+            <li>
+              <span className="deal-when">Gate</span>
+              <strong>Approve or reject corrections</strong>
+              <p>Material actions require controller/admin; everything hits the audit log.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div className="hero-cta" style={{ marginTop: "1.5rem" }}>
+          <Link className="btn btn-primary" to="/projects/findatagraph">
+            Open FinDataGraph
+          </Link>
+          <Link className="btn btn-ghost" to="/projects/findatagraph/demo">
+            Launch live demo
+          </Link>
+        </div>
       </section>
 
       <section className="section" id="governance">
@@ -360,8 +410,8 @@ export default function Portfolio() {
           >
             Personal site
           </a>
-          <Link className="btn btn-ghost" to="/projects/findatagraph">
-            FinDataGraph
+          <Link className="btn btn-ghost" to="/projects/close-agent">
+            Run Close Agent
           </Link>
         </div>
       </section>

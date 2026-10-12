@@ -1,0 +1,82 @@
+# Hard-variant eval stubs (demo DB, seed 42). Answer key blank for the author.
+# Planted by generate_data.py (demo profile) alongside A1–C1.
+#
+# Score: python3 evals/run_evals.py --cases evals/hard_cases.yaml \
+#           --report exports/eval_report_hard.json
+
+cases:
+  - id: H1
+    account: "6300"
+    entity: ND-EU
+    period: "2026-06"
+    variance: 79836.32
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - ACCR-TRAVEL-NEAR-A-2026-06
+      - ACCR-TRAVEL-NEAR-B-2026-06
+    must_not_say: []
+    notes: >
+      Near-duplicate Travel accrual: same vendor, amounts $80,000 vs $80,500,
+      different references (not identical duplicate).
+
+  - id: H2
+    account: "6010"
+    entity: ND-US
+    period: "2026-07"
+    variance: -111812.94
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MOVE-6010-2026-07
+    must_not_say: []
+    notes: "Reclass Benefits → Other Opex with no 'reclass' memo language"
+
+  - id: H2B
+    account: "6900"
+    entity: ND-US
+    period: "2026-07"
+    variance: 109761.09
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MOVE-6900-2026-07
+    must_not_say: []
+    notes: "Paired side of H2"
+
+  - id: H3
+    account: "6400"
+    entity: ND-EU
+    period: "2026-09"
+    variance: 65074.04
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - JE-MANUAL-ADJUST
+    must_not_say: []
+    notes: >
+      Manual JE memo 'adjustment', no vendor — not blank, so unsupported_je
+      AND-rule may not fire.
+
+  - id: H4
+    account: "6700"
+    entity: ND-US
+    period: "2026-08"
+    variance: 88569.17
+    expected_flagged: true
+    expected_explanation: ""
+    expected_confidence: ""
+    required_facts: []
+    must_cite:
+      - INS-ANNUAL-2026-US-2026-08
+      - INS-RESIDUAL-UNMATCHED-2026-08
+    must_not_say: []
+    notes: "Partial 90%/10% on Depreciation (support contract); prefixes avoid SW-* C1 hooks"

@@ -33,6 +33,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools import draft_flux_commentary, reset_policy_cache  # noqa: E402
+import db as db_mod  # noqa: E402
 
 CASES_PATH = Path(__file__).resolve().parent / "cases.yaml"
 CONFIG_PATH = Path(__file__).resolve().parent / "config.yaml"
@@ -88,9 +89,20 @@ def is_false_positive_only(case: dict) -> bool:
     )
 
 
+def is_stub_structural(case: dict) -> bool:
+    """Planted stub: flagged expectation set, answer-key prose still blank."""
+    return case.get("expected_flagged") is not None and _blank(
+        case.get("expected_explanation")
+    )
+
+
 def incomplete_fields(case: dict) -> list[str]:
-    """Answer-key fields that must be filled before full scoring."""
-    if is_false_positive_only(case):
+    """Answer-key fields that must be filled before full / published scoring.
+
+    Stubs with ``expected_flagged`` set (true or false) are scorable on
+    structural checks (flagged + must_cite) without prose yet.
+    """
+    if is_stub_structural(case):
         return []
     missing: list[str] = []
     if _blank(case.get("expected_explanation")):
@@ -212,16 +224,29 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
                 f"(over_threshold={over_threshold}, unsupported_je={unsupported})"
             )
 
-    # False-positive-only stubs: flagged check is the whole score
-    if is_false_positive_only(case):
-        passed = checks.get("flagged", False)
+    # False-positive-only / structural stubs: limited checks until answer key filled
+    if is_stub_structural(case):
+        must_cite = list(case.get("must_cite") or [])
+        missing_cites = [
+            c for c in must_cite if not _contains_cite(c, citations, commentary)
+        ]
+        cite_ok = not missing_cites
+        checks["must_cite"] = cite_ok
+        if missing_cites:
+            reasons.append(f"missing citations: {missing_cites}")
+        passed = all(checks.values())
+        mode = (
+            "false_positive_only"
+            if case.get("expected_flagged") is False
+            else "stub_structural"
+        )
         return {
             "id": case.get("id"),
             "account": account,
             "entity": entity,
             "period": period,
             "passed": passed,
-            "checks": {"flagged": checks.get("flagged", False)},
+            "checks": checks,
             "reasons": reasons,
             "got_confidence": confidence,
             "expected_confidence": None,
@@ -229,7 +254,7 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
             "expected_flagged": expected_flagged,
             "citations": citations,
             "commentary": commentary,
-            "mode": "false_positive_only",
+            "mode": mode,
         }
 
     # (a) confidence
@@ -298,7 +323,16 @@ def score_case(case: dict, tolerance: float = DEFAULT_NUMERIC_TOLERANCE) -> dict
     }
 
 
-def run(cases_path: Path = CASES_PATH) -> dict:
+def run(
+    cases_path: Path = CASES_PATH,
+    db_path: Path | None = None,
+    report_path: Path | None = None,
+) -> dict:
+    out_path = report_path or REPORT_PATH
+    # Point tools at the requested DB without changing agent logic.
+    if db_path is not None:
+        db_mod.DB_PATH = Path(db_path)
+
     cases = load_cases(cases_path)
     cfg = load_eval_config()
     tolerance = cfg["numeric_tolerance_amt"]
@@ -319,6 +353,8 @@ def run(cases_path: Path = CASES_PATH) -> dict:
     report = {
         "disclaimer": "SYNTHETIC DATA — Northwind Digital eval set only",
         "status": status,
+        "db_path": str(db_mod.DB_PATH),
+        "cases_path": str(cases_path),
         "numeric_tolerance_amt": tolerance,
         "cases_total": len(cases),
         "cases_scored": len(results),
@@ -334,16 +370,29 @@ def run(cases_path: Path = CASES_PATH) -> dict:
             "scored complete / false-positive-only cases. Fill remaining stubs "
             "before publishing."
         )
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    report["report_path"] = str(out_path)
     return report
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", type=Path, default=CASES_PATH)
+    parser.add_argument(
+        "--db",
+        type=Path,
+        default=None,
+        help="SQLite path (default: data/finance.db). Use holdout DB for holdout_cases.",
+    )
+    parser.add_argument(
+        "--report",
+        type=Path,
+        default=None,
+        help="Write JSON report here (default: exports/eval_report.json)",
+    )
     args = parser.parse_args()
-    report = run(args.cases)
+    report = run(args.cases, db_path=args.db, report_path=args.report)
 
     if report["incomplete"]:
         print(
@@ -362,7 +411,8 @@ def main() -> int:
         return 1
 
     print(
-        f"=== Per-case results (tol=${report['numeric_tolerance_amt']:,.0f}) ==="
+        f"=== Per-case results (tol=${report['numeric_tolerance_amt']:,.0f}; "
+        f"db={report['db_path']}) ==="
     )
     for r in report["results"]:
         status = "PASS" if r["passed"] else "FAIL"
@@ -381,7 +431,7 @@ def main() -> int:
         f"{len(report['incomplete'])} incomplete / "
         f"{report['cases_total']} total ==="
     )
-    print(f"report: {REPORT_PATH}")
+    print(f"report: {report.get('report_path', REPORT_PATH)}")
     if report["failed"] or report["incomplete"]:
         return 1
     return 0

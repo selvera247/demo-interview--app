@@ -27,6 +27,11 @@ EXPECTED_DEFAULT_BREACHES = {
     ("ND-US", "6200", "2026-09"),
     ("ND-US", "6600", "2026-03"),
     ("ND-EU", "6100", "2026-08"),  # C1
+    ("ND-EU", "6300", "2026-06"),  # H1
+    ("ND-US", "6010", "2026-07"),  # H2
+    ("ND-US", "6900", "2026-07"),  # H2B
+    ("ND-EU", "6400", "2026-09"),  # H3
+    ("ND-US", "6700", "2026-08"),  # H4
 }
 
 
@@ -44,11 +49,19 @@ def _breach_keys(flagged):
     return {(f["entity"], f["account_id"], f["period_b"]) for f in flagged}
 
 
-def test_default_policy_flags_exactly_nine_breaches(db_conn):
+def test_default_policy_flags_exactly_fourteen_breaches(db_conn):
     policy = load_policy(DEFAULT_POLICY)
     flagged = flag_variances(policy, db_conn)
     assert _breach_keys(flagged) == EXPECTED_DEFAULT_BREACHES
-    assert len(flagged) == 9
+    assert len(flagged) == 14
+
+
+def test_s1_small_account_not_flagged(db_conn):
+    """S1: >10% MoM but <$50k — must not appear under AND thresholds."""
+    policy = load_policy(DEFAULT_POLICY)
+    keys = _breach_keys(flag_variances(policy, db_conn))
+    assert ("ND-EU", "6950", "2026-05") not in keys
+
 
 
 def test_raising_dollar_threshold_changes_flagged_set(db_conn, tmp_path):
@@ -87,7 +100,8 @@ def test_per_account_override_works(db_conn, tmp_path):
     assert ("ND-US", "6200", "2026-09") not in keys
     assert ("ND-US", "6310", "2026-09") in keys
     assert ("ND-EU", "6100", "2026-08") in keys  # C1 untouched by 6200 override
-    assert len(keys) == 8
+    assert ("ND-EU", "6300", "2026-06") in keys  # H1
+    assert len(keys) == 13  # default 14 minus B1 (6200)
 
 
 def test_invalid_yaml_fails_loudly(tmp_path):

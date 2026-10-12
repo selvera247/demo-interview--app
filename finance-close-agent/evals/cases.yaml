@@ -315,10 +315,10 @@ cases:
       Dollars above $50k, percent below 10%. Expect no flag (AND threshold).
 
   - id: N12
-    account: "6020"
+    account: "6950"
     entity: ND-EU
-    period: "2026-08"
-    variance: -962.41
+    period: "2026-05"
+    variance: 4547.95
     expected_flagged: false
     expected_confidence: high
     expected_explanation: >
@@ -329,7 +329,8 @@ cases:
       - JE-RCL-6020-2026-08
     must_not_say: ["duplicate", "cost savings", "headcount reduction"]
     notes: >
-      Closest high-pct/low-dollar stand-in; true >10%/<$50k unflagged MoM absent.
+      Planted S1: Misc opex MoM ~+19% / ~+$4.5k — clears percent threshold but
+      not dollar threshold; expected_flagged false under AND policy.
 
   - id: N13
     account: "4000"

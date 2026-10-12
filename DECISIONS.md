@@ -92,3 +92,176 @@
 - **Decision:** Add `generate_data.py --profile holdout --seed 43` writing `data/finance_holdout.db` with the **same anomaly types** remapped to different accounts/entities/periods and txn-id prefixes that avoid demo-specific agent hooks where possible. Add demo hard variants H1–H4 (near-dup, silent reclass, vague JE, 90/10 partial) and S1 (small account >10% / <$50k, not flagged). Ship `evals/holdout_cases.yaml` and `evals/hard_cases.yaml` as **stubs**. Replace N12 with S1. Agent/MCP/UI unchanged.
 - **Why:** The calibrated 9/9 on the original set is not enough for credibility; hold-out and hard variants show whether detection generalizes.
 - **Implications:** Report original / hold-out / hard scores separately. Hold-out answer key still author-owned.
+
+## 2026-10-09 — Merge cjs-ops narrative onto MCP spine (LangGraph + FastAPI)
+
+- **Decision:** Keep `finance-close-agent/` as the single product spine. Add a thin FastAPI + LangGraph
+  orchestration layer that calls `run_close_pass` / existing tools. Unpublish portfolio eval score
+  claims until adversarial answer keys (N01–N14) are complete. Do not mirror-push to
+  `cjs-ops/agentic-finance-ops-demo` from this environment (no write access); publish in this monorepo.
+- **Why:** Two repos told the same hiring story with divergent stacks; the MCP demo has the substance,
+  the LangGraph repo had packaging language but a toy variance path and broken files.
+- **Implications:** Approved deps add `fastapi`, `uvicorn`, `langgraph`. Portfolio/Deal Record remain
+  frozen except score unpublish. Docker deferred to a later slice.
+
+## 2026-10-09 — Unpublish premature eval score in portfolio UI
+
+- **Decision:** Remove published accuracy / pass-rate figures from the Close Agent case study and
+  interactive demo chrome. Keep `eval_score` in the static JSON as `null` / deferred notes only.
+- **Why:** SPEC forbids publishing scores before hand-written cases are complete; adversarial stubs
+  are still blank, so a 91.7% claim is misleading.
+- **Implications:** Case study copy points to the harness and “score pending”; demo toolbar no longer
+  shows a percentage.
+
+## 2026-10-09 — Docker Compose for API + Streamlit; drop external-repo focus
+
+- **Decision:** Ship `Dockerfile` + `docker-compose.yml` under `finance-close-agent/` (API :8000,
+  Streamlit :8501, shared `finance-data` volume, entrypoint generates SQLite if missing). Add
+  `evals/ANSWER_KEY_TEMPLATE.md` for the owner to fill/upgrade N01–N14. Stop tracking
+  `cjs-ops/agentic-finance-ops-demo` as a publish target.
+- **Why:** Single-repo demo; Docker is the remaining packaging slice from the merge plan.
+- **Implications:** `bash docker/verify_compose.sh` is the runnable verification. N-cases may stay
+  false-positive-only until the owner upgrades them to full written keys; portfolio score stays
+  unpublished until you choose to republish.
+
+## 2026-10-09 — Fill N01–N14 full answer keys (owner-authorized)
+
+- **Decision:** Populate full narrative keys for N01–N14 in `evals/cases.yaml` (A/B/C were already
+  complete). Keep portfolio UI score unpublished until explicitly republished.
+- **Why:** Owner requested keys filled; harness can now score all 23 cases in full mode.
+- **Implications:** `python evals/run_evals.py` → 23/23 (score=1.0). Republishing the portfolio %
+  remains a separate product decision.
+
+## 2026-10-09 — Republish portfolio eval score
+
+- **Decision:** Restore published accuracy / pass-rate in portfolio case study, interactive demo
+  chrome, and `finance-close-agent/README.md` from the completed harness: **23/23, score=1.0**.
+- **Why:** Owner authorized republish after answer keys were filled (SPEC gate cleared).
+- **Implications:** Static `closeAgentDemo.json` `eval_score` mirrors the deterministic runner;
+  re-run `python evals/run_evals.py` before claiming a different figure.
+
+## 2026-10-09 — GitHub Pages showcase path (not Cloudflare yet)
+
+- **Decision:** Use GitHub Pages as the public showcase for the static portfolio + Close Agent
+  in-browser demo. Fix HashRouter-safe section scrolling, add `.nojekyll`, document share URLs.
+  Defer Cloudflare Workers/Pages until explicitly requested.
+- **Why:** Pages already wired via Actions; hash routes work under `/demo-interview--app/`.
+- **Implications:** Merge to `main` deploys. Live Python/MCP/Docker remain local — not on Pages.
+
+## 2026-10-10 — Portfolio DoD packaging complete
+
+- **Decision:** Treat close-agent DoD as met for portfolio purposes: mermaid architecture diagram,
+  `verify_mcp.py` smoke, Deal Record case-study framing, Pages showcase links, personal-hub
+  deep-link target. Unfreeze portfolio/Deal Record packaging polish only (no router library swap).
+- **Why:** Owner wants all demos completed for the public portfolio.
+- **Implications:** Claude Desktop still requires local stdio config; Pages hosts static demos only.
+  Optional: add reverse link from `finance-portfolio.selveracj.workers.dev` to Pages URLs.
+
+## 2026-10-10 — Deal Record = CRM↔ERP PO discrepancy (generic labels)
+
+- **Decision:** Reframe Deal Record around a featured deal (`GE-2026-0422`) with a **$1.6M PO
+  discrepancy**: CRM closed-won $4.8M / 8 MW vs ERP PO-10491 $3.2M / 5 MW. Use generic
+  **CRM** / **ERP** labels only (not HubSpot/Oracle/NetSuite) per SPEC. Open demo on Sourcing tab.
+- **Why:** Owner asked for PO discrepancy between HubSpot and Oracle; SPEC forbids real vendor
+  product names, so the same failure mode ships under CRM↔ERP.
+- **Implications:** Seed scrubbed of HubSpot/NetSuite strings; portfolio + case study copy updated.
+  Legacy `index.html` / `intake_requests.csv` may still mention vendor names outside the React demo.
+
+## 2026-10-10 — Deal Record name + commercial object chain
+
+- **Decision:** Keep the product name **Deal Record**. Narrate the break across
+  **opportunity → contract → sales order → PO** (not rename the demo to “Opportunity” or
+  “Sales Order”). Case study and seed copy use those object names explicitly.
+- **Why:** Owner wants the portfolio title to stay Deal Record while making contract /
+  opportunity / sales order visible in the story.
+- **Implications:** Portfolio card title is “Deal Record”; kicker/stack show the chain.
+
+## 2026-10-10 — Forward-deployed portfolio elevation
+
+- **Decision:** Elevate Pages case studies to a fixed 10-section structure (context → …
+  demo), strengthen Close Agent architecture/eval/adoption/guardrails/trade-offs, align
+  Deal Record, and update home headline to forward-deployed finance engineer positioning.
+  Add governance + prototype→production sections; lighter “toolkit” cards for Collections /
+  revenue recon (no invented interactive demos).
+- **Why:** Owner SPEC for hiring-manager scannability and forward-deployed signal without
+  inventing metrics or claiming live ERP access.
+- **Implications:** Interactive demos preserved; all demo figures remain synthetic.
+
+## 2026-10-11 — Workato-shaped exception recipe on Deal Record
+
+- **Decision:** Add a **Workato-shaped** (not live Workato) commercial integrity exception
+  recipe to the Deal Record case study: synthetic JSON + interactive step runner (gap path
+  and ERP connector-failure → human queue). Close Agent gets a short **Integration spine**
+  callout that TB/subledger load/sync uses the same pattern, with a link to Deal Record.
+- **Why:** Show iPaaS / integration orchestration beside the AI agent without claiming a
+  Workato tenant, SDK, or vendor ownership — Deal Record’s $1.6M CRM↔ERP gap is the natural
+  recipe story.
+- **Implications:** `frontend/data/workatoExceptionRecipe.json` + `WorkatoRecipeRunner`;
+  verified by `frontend/scripts/verify_workato_recipe.mjs`. Disclaimer required on UI.
+
+## 2026-10-11 — Wire FinDataGraph as portfolio DEMO 03
+
+- **Decision:** Add HashRouter case study `/projects/findatagraph` and a DEMO 03 card on
+  the portfolio home, copied from `selvera247/agent@cursor/findatagraph-mvp-a395`
+  `portfolio-integration/ready/`. Live demo URL defaults to the Cloudflare quick tunnel
+  in that pack (`VITE_FINDATAGRAPH_DEMO_URL` override supported).
+- **Why:** Owner asked to surface the hosted FinDataGraph continuous-close control plane
+  beside Close Agent and Deal Record on GitHub Pages.
+- **Implications:** Case study copy uses synthetic **Meridian Retail** (from the ready
+  pack; not Northwind Digital). Demo remains login-gated and externally hosted; tunnel
+  URL may need updating after Render deploy.
+
+## 2026-10-11 — Refresh FinDataGraph Launch demo tunnel URL
+
+- **Decision:** Replace the dead `joyce-dealt-laden-cuts.trycloudflare.com` default with
+  a live Cloudflare quick tunnel backed by FinDataGraph on the agent VM (URL refreshed
+  when the prior tunnel expired; current default in `findatagraphDemo.ts`). Prefer
+  Render (`findatagraph.onrender.com`) when that blueprint is live.
+- **Why:** DEMO 03 Launch demo was NXDOMAIN; hiring-manager click path must open a
+  login-gated app. GitHub Pages only updates after this lands on `main`.
+- **Implications:** Quick tunnels are ephemeral with the agent VM — durable host remains
+  the Render one-click in `selvera247/agent` `deploy-render.md`.
+
+## 2026-10-11 — FinDataGraph Launch demo uses finance-named Pages path
+
+- **Decision:** Launch demo navigates to `/#/projects/findatagraph/demo` (iframe shell)
+  instead of opening the raw Cloudflare quick-tunnel hostname in a new tab.
+- **Why:** Quick-tunnel words are random and non-finance (`women-contract-…`); hiring
+  managers should see a generic finance path on GitHub Pages.
+- **Implications:** Backend origin stays configurable via `VITE_FINDATAGRAPH_DEMO_URL`;
+  swap to `https://findatagraph.onrender.com` when Render is live for a durable host.
+
+## 2026-10-11 — FinDataGraph demo offline fallback + tunnel refresh
+
+- **Decision:** Refresh the default Cloudflare quick-tunnel origin in
+  `findatagraphDemo.ts`, and make `/projects/findatagraph/demo` probe `/health` before
+  mounting the iframe. If the origin is down, show an explicit offline card (retry /
+  open origin / case study) instead of a blank black frame.
+- **Why:** Hiring managers hitting Launch demo saw credentials + empty pane when the
+  prior tunnel (`women-contract-…`) expired with the agent VM.
+- **Implications:** Quick tunnels remain ephemeral; durable fix is still Render
+  (`deploy-render.md` in `selvera247/agent`). Offline UX prevents silent blank demos.
+
+## 2026-10-12 — Portfolio single-page: Finance Transformation, AI-native
+
+- **Decision:** Rebuild the GitHub Pages landing as one scrollable page titled
+  **Finance Transformation, AI-native**, framed on fictional **Northwind Labs**
+  (portfolio narrative). Close-agent SQLite seed remains **Northwind Digital** per SPEC.
+  Structure: hero (synthetic badge + Run Close Agent / Open Deal Record) → Close Agent
+  walkthrough → Deal Record → FinDataGraph (Demo 3) → governance diagram → “What I’d
+  measure” → 30/60/90 playbook → about. FinDataGraph has a top-nav link to its case-study
+  page plus an in-flow Demo 3 section (not a footer tertiary). Remove outcome-claim
+  metrics; footer: “Built independently with synthetic data. No employer information.”
+  Scrub employer-adjacent styling cues from legacy root `index.html` (comment + accent).
+- **Why:** Owner brief for a clean, employer-safe showcase with metric thinking instead of
+  “saved X days” claims; FinDataGraph should sit with the demos, not at page bottom.
+- **Implications:** Case-study routes (`/projects/close-agent`, deal-record, findatagraph)
+  unchanged; landing copy no longer leads with personal floor metrics.
+
+## 2026-10-12 — Refresh FinDataGraph Cloudflare tunnel again
+
+- **Decision:** Point `FINDATAGRAPH_DEMO_URL` at a new live quick tunnel
+  (`suspected-generated-generations-carbon.trycloudflare.com`) after the prior hostname
+  went NXDOMAIN while the API remained healthy on the agent VM.
+- **Why:** Pages Launch demo showed the offline card again for hiring managers.
+- **Implications:** Still ephemeral; durable host remains Render when deployed.

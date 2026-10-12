@@ -190,7 +190,13 @@ export function toDealView(state: AppState, project: Project): DealView {
         : undefined;
       const blocked = Boolean(depends && (depends.status !== "confirmed" || !depends.value.trim()));
       let flag: string | null = null;
-      if (blocked && depends) {
+      if (project.id === "p-0422" && po?.poNumber === "PO-10491") {
+        flag =
+          "Opportunity OPP-0422 Closed Won $4.8M / 8 MW (contract signed) vs ERP SO-10491 + PO-10491 $3.2M / 5 MW — $1.6M gap. Hold further buy until opportunity, sales order, and PO match.";
+      } else if (project.id === "p-0422" && blocked) {
+        flag =
+          "Opportunity/contract expect this expansion ($1.6M / 3 MW) but ERP has no matching sales order or PO line. Blocked until the commercial chain reconciles.";
+      } else if (blocked && depends) {
         flag = `Cannot issue PO — BOM line depends on unresolved spec (${depends.label}). Blocked until that field is confirmed.`;
       } else if (po && leadTimeThreat({ project, po })) {
         const weeks = Math.round(po.leadTimeDays / 7);

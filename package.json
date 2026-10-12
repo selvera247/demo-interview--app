@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "verify:workato-recipe": "node frontend/scripts/verify_workato_recipe.mjs"
+    "verify:workato-recipe": "node frontend/scripts/verify_workato_recipe.mjs",
+    "verify:findatagraph-embedded": "node frontend/scripts/verify_findatagraph_embedded.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.544.0",

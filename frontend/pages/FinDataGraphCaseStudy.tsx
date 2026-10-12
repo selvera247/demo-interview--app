@@ -26,7 +26,8 @@ export default function FinDataGraphCaseStudy() {
         <h1>FinDataGraph</h1>
         <p className="disclaimer">
           Continuous close & reconciliation over a governed financial data graph —
-          synthetic Meridian Retail data only. Login-gated live demo.
+          synthetic Meridian Retail data only. Login-gated demo runs on GitHub Pages
+          (no external tunnel).
         </p>
 
         <div className="hero-cta" style={{ margin: "1.25rem 0 2rem" }}>
@@ -135,8 +136,9 @@ export default function FinDataGraphCaseStudy() {
         <section className="case-block" id="demo">
           <h2>Demo / Links</h2>
           <p className="disclaimer" style={{ marginBottom: "1rem" }}>
-            Live hosted app (API + UI). Synthetic data. Password-gated login. Launch opens
-            the finance-named portfolio path (not a random tunnel hostname).
+            Interactive control plane embedded in this portfolio (same patterns as the
+            Express/SQLite MVP). Synthetic data. Password-gated login. Always online on
+            GitHub Pages — no Cloudflare tunnel or Render dyno required.
           </p>
           <div className="hero-cta">
             <Link className="btn btn-primary" to={FINDATAGRAPH_DEMO_ROUTE}>
@@ -171,8 +173,8 @@ export default function FinDataGraphCaseStudy() {
             <li>
               Source:{" "}
               <code style={{ color: "var(--signal)" }}>selvera247/agent</code>{" "}
-              (FinDataGraph MVP). Backend loads inside the Pages shell — not as a
-              separate Cloudflare hostname in the address bar.
+              (FinDataGraph MVP). Portfolio demo uses an in-browser API mock so the
+              Pages path stays online for hiring managers.
             </li>
           </ul>
         </section>

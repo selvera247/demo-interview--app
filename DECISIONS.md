@@ -297,3 +297,12 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
   went NXDOMAIN while the API remained healthy on the agent VM.
 - **Why:** Pages Launch demo showed the offline card again for hiring managers.
 - **Implications:** Still ephemeral; durable host remains Render when deployed.
+
+## 2026-10-12 — Refresh FinDataGraph tunnel (Pages demo path)
+
+- **Decision:** Update `FINDATAGRAPH_DEMO_URL` to
+  `https://numerous-cabinet-named-counties.trycloudflare.com` so
+  `/#/projects/findatagraph/demo` on GitHub Pages iframes a live origin again.
+- **Why:** Prior quick-tunnel hostname expired; Pages showed Demo offline.
+- **Implications:** Route unchanged (`FINDATAGRAPH_DEMO_ROUTE`); only the backend
+  origin refreshes. Durable fix remains Render.

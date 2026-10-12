@@ -5,7 +5,7 @@
  */
 export const FINDATAGRAPH_DEMO_URL =
   import.meta.env.VITE_FINDATAGRAPH_DEMO_URL ||
-  "https://suspected-generated-generations-carbon.trycloudflare.com";
+  "https://numerous-cabinet-named-counties.trycloudflare.com";
 
 /** In-portfolio launch path — keeps the address bar on a finance-named Pages route. */
 export const FINDATAGRAPH_DEMO_ROUTE = "/projects/findatagraph/demo";

@@ -245,3 +245,11 @@
   “saved X days” claims; FinDataGraph should sit with the demos, not at page bottom.
 - **Implications:** Case-study routes (`/projects/close-agent`, deal-record, findatagraph)
   unchanged; landing copy no longer leads with personal floor metrics.
+
+## 2026-10-12 — Refresh FinDataGraph Cloudflare tunnel again
+
+- **Decision:** Point `FINDATAGRAPH_DEMO_URL` at a new live quick tunnel
+  (`suspected-generated-generations-carbon.trycloudflare.com`) after the prior hostname
+  went NXDOMAIN while the API remained healthy on the agent VM.
+- **Why:** Pages Launch demo showed the offline card again for hiring managers.
+- **Implications:** Still ephemeral; durable host remains Render when deployed.

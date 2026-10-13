@@ -20,6 +20,15 @@ assert.ok(
 assert.ok(fixtures.exceptions.length >= 4, "seeded exceptions");
 assert.ok(fixtures.summary.open_exceptions >= 1, "open exception KPI");
 assert.ok(fixtures.reconciliations[0]?.id, "reconciliation definition");
+assert.ok(fixtures.startingPoints?.length >= 2, "Spec Studio starting points");
+assert.ok(
+  fixtures.startingPoints.some((p) => p.id === "crm_to_accounting_revenue"),
+  "seeded CRM↔GL starting point",
+);
+assert.ok(
+  fixtures.startingPoints.some((p) => p.id === "cc_auth_settle_received"),
+  "CC auth generate starting point",
+);
 
 const types = new Set(fixtures.exceptions.map((e) => e.exception_type));
 for (const t of [

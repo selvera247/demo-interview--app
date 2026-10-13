@@ -9,6 +9,7 @@ import ExceptionDetailPage from "./pages/ExceptionDetailPage";
 import ExceptionsPage from "./pages/ExceptionsPage";
 import LoginPage from "./pages/LoginPage";
 import RunsPage from "./pages/RunsPage";
+import SpecStudioPage from "./pages/SpecStudioPage";
 import "./styles.css";
 
 function Protected({ children }: { children: ReactNode }) {
@@ -29,7 +30,9 @@ function FdgRoutes() {
           </Protected>
         }
       >
-        <Route index element={<DashboardPage />} />
+        <Route index element={<Navigate to={fdgPath("/studio")} replace />} />
+        <Route path="studio" element={<SpecStudioPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="exceptions" element={<ExceptionsPage />} />
         <Route path="exceptions/:id" element={<ExceptionDetailPage />} />
         <Route path="runs" element={<RunsPage />} />

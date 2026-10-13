@@ -3,7 +3,8 @@ import { useAuth } from "../auth";
 import { fdgPath } from "../demoBase";
 
 const links = [
-  { to: fdgPath(), label: "Dashboard", end: true },
+  { to: fdgPath("/studio"), label: "Spec Studio", end: true },
+  { to: fdgPath("/dashboard"), label: "Dashboard" },
   { to: fdgPath("/exceptions"), label: "Exceptions" },
   { to: fdgPath("/runs"), label: "Runs" },
   { to: fdgPath("/audit"), label: "Audit" },

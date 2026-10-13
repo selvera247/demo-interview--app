@@ -475,6 +475,113 @@
   color: var(--fdg-muted);
 }
 
+.fdg-credits-pill {
+  display: grid;
+  gap: 0.15rem;
+  text-align: right;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--fdg-line);
+  border-radius: var(--fdg-radius);
+  background: var(--fdg-panel);
+  font-size: 0.75rem;
+  color: var(--fdg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.fdg-credits-pill strong {
+  font-family: var(--fdg-display);
+  font-size: 1.35rem;
+  color: var(--fdg-ink);
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.fdg-studio-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.fdg-studio-chip {
+  text-align: left;
+  border: 1px solid var(--fdg-line);
+  border-radius: var(--fdg-radius);
+  background: #fff;
+  padding: 0.85rem 0.9rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fdg-studio-chip strong {
+  font-size: 0.95rem;
+}
+
+.fdg-studio-chip span {
+  color: var(--fdg-muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.fdg-studio-chip em {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fdg-teal);
+}
+
+.fdg-studio-chip.active,
+.fdg-studio-chip:hover {
+  border-color: var(--fdg-teal);
+  box-shadow: 0 0 0 1px rgba(15, 109, 106, 0.25);
+}
+
+.fdg-studio-form {
+  padding: 1rem 1.1rem 1.15rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.fdg-studio-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fdg-ink-soft);
+}
+
+.fdg-studio-form textarea {
+  border: 1px solid var(--fdg-line);
+  border-radius: var(--fdg-radius);
+  padding: 0.75rem;
+  min-height: 110px;
+  resize: vertical;
+}
+
+.fdg-studio-package {
+  padding: 1rem 1.1rem 1.2rem;
+}
+
+.fdg-studio-package h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--fdg-display);
+}
+
+.fdg-studio-package ul {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.1rem;
+  color: var(--fdg-ink-soft);
+}
+
+@media (max-width: 960px) {
+  .fdg-studio-chips {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 960px) {
   .fdg-app-shell {
     grid-template-columns: 1fr;

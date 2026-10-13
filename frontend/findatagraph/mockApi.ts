@@ -30,13 +30,35 @@ export type FdgAudit = {
 
 type Session = { token: string; user: FdgUser };
 
-const STORAGE_KEY = "findatagraph_embedded_v1";
+export type FdgStartingPoint = (typeof fixtures.startingPoints)[number];
+
+export type FdgSpec = {
+  id: string;
+  need: string;
+  starting_point_id: string | null;
+  path: string;
+  status: string;
+  definition_id: string | null;
+  package: {
+    name: string;
+    summary: string;
+    systems: string[];
+    controls: string[];
+    partial?: boolean;
+    partial_implemented?: boolean;
+  };
+  created_at: string;
+};
+
+const STORAGE_KEY = "findatagraph_embedded_v2";
 
 type Store = {
   exceptions: FdgException[];
   runs: (typeof fixtures.runs)[number][];
   audit: FdgAudit[];
   resolvedLast7: number;
+  specs: FdgSpec[];
+  usage: { credits_used: number; events: number };
 };
 
 function clone<T>(v: T): T {
@@ -55,6 +77,8 @@ function loadStore(): Store {
     runs: clone(fixtures.runs),
     audit: clone(fixtures.audit) as FdgAudit[],
     resolvedLast7: fixtures.summary.resolved_last_7_days,
+    specs: clone(fixtures.specs) as FdgSpec[],
+    usage: clone(fixtures.usage),
   };
 }
 
@@ -333,6 +357,88 @@ export async function api(
     return { data: clone(fixtures.users) };
   }
 
+  if (pathname === "/specs/starting-points" && method === "GET") {
+    return { data: clone(fixtures.startingPoints) };
+  }
+
+  if (pathname === "/specs/usage" && method === "GET") {
+    return { data: clone(store.usage) };
+  }
+
+  if (pathname === "/specs" && method === "GET") {
+    return { data: clone(store.specs) };
+  }
+
+  if (pathname === "/specs/generate" && method === "POST") {
+    const body = (opts.body || {}) as {
+      need?: string;
+      starting_point_id?: string;
+    };
+    const point =
+      fixtures.startingPoints.find((p) => p.id === body.starting_point_id) ||
+      fixtures.startingPoints.find((p) =>
+        (body.need || "").toLowerCase().includes("cc auth"),
+      ) ||
+      fixtures.startingPoints[0];
+    const need = (body.need || point.example_need).trim();
+    const seeded = point.path === "seeded";
+    const spec: FdgSpec = {
+      id: `spec_${Math.random().toString(16).slice(2, 12)}`,
+      need,
+      starting_point_id: point.id,
+      path: point.path,
+      status: "generated",
+      definition_id: seeded ? "rec_crm_gl_revenue" : null,
+      package: {
+        name: seeded ? "CRM↔GL continuous close" : `${point.label} agent`,
+        summary: need,
+        systems: seeded
+          ? ["Salesforce Billing", "NetSuite ERP"]
+          : ["Card auth", "Settlements", "Cash received"],
+        controls: ["RBAC", "Dual control ≥ $10k", "Append-only audit"],
+        partial: !seeded && point.id === "intercompany",
+      },
+      created_at: nowStamp(),
+    };
+    store.specs.unshift(spec);
+    store.usage.credits_used += seeded ? 1 : 3;
+    store.usage.events += 1;
+    audit(user, "spec_generate", "spec", spec.id, { path: point.path });
+    persist();
+    return { data: clone(spec) };
+  }
+
+  const implMatch = pathname.match(/^\/specs\/([^/]+)\/implement$/);
+  if (implMatch && method === "POST") {
+    if (user.role === "accountant") {
+      const err = new Error("Controller or admin required to implement");
+      (err as Error & { status: number }).status = 403;
+      throw err;
+    }
+    const spec = store.specs.find((s) => s.id === implMatch[1]);
+    if (!spec) {
+      const err = new Error("Spec not found");
+      (err as Error & { status: number }).status = 404;
+      throw err;
+    }
+    if (spec.package.partial) {
+      spec.status = "partial";
+      spec.package.partial_implemented = true;
+    } else {
+      spec.status = "implemented";
+      spec.definition_id =
+        spec.definition_id ||
+        (spec.path === "seeded"
+          ? "rec_crm_gl_revenue"
+          : `rec_${spec.id.slice(5)}`);
+    }
+    store.usage.credits_used += 2;
+    store.usage.events += 1;
+    audit(user, "spec_implement", "spec", spec.id, { status: spec.status });
+    persist();
+    return { data: clone(spec) };
+  }
+
   const err = new Error(`Unknown demo route ${method} ${pathname}`);
   (err as Error & { status: number }).status = 404;
   throw err;
@@ -346,5 +452,7 @@ export function resetFdgDemoStore() {
     runs: clone(fixtures.runs),
     audit: clone(fixtures.audit) as FdgAudit[],
     resolvedLast7: fixtures.summary.resolved_last_7_days,
+    specs: clone(fixtures.specs) as FdgSpec[],
+    usage: clone(fixtures.usage),
   };
 }

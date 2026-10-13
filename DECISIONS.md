@@ -332,3 +332,19 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
 - **Implications:** Public demo no longer proves the live Express/SQLite process;
   it proves the product UX + governance flows on synthetic Meridian Retail data.
   Durable Node host (Render) is still the path if we want a true remote API later.
+
+## 2026-10-13 — Spec Studio live host + Pages fallback
+
+- **Decision:** Point the live iframe at
+  `https://inn-promo-activated-agriculture.trycloudflare.com/studio` (agent repo Spec
+  Studio dual-path landing). Keep public CTAs on
+  `/#/projects/findatagraph/demo`. If `/health` fails, fall back to the Pages-native
+  embedded Spec Studio (not a hard offline card). Case study / Portfolio copy synced
+  to Spec Studio seeded + NL generate narrative from `selvera247/agent`
+  `portfolio-integration/ready`.
+- **Why:** Agent main shipped Spec Studio (`/studio` post-login); portfolio was still
+  control-plane-only. Visitors should see the new dual path when the preview host is
+  up, without losing the always-online Pages path when the tunnel expires.
+- **Implications:** Tunnel host remains ephemeral — update
+  `FINDATAGRAPH_DEMO_HOST` / `VITE_FINDATAGRAPH_DEMO_URL` when the preview URL changes;
+  durable host remains Render when deployed.

@@ -258,24 +258,24 @@ export default function Portfolio() {
 
       <section className="section" id="demo-findatagraph">
         <div className="tag">Demo 3 · FinDataGraph</div>
-        <h2>Continuous close control plane</h2>
+        <h2>Spec Studio + continuous close</h2>
         <p className="lede">
-          Hosted financial data graph for CRM invoice ↔ GL revenue matching — exception
-          lifecycle, dual-control corrections, and an append-only audit log. Synthetic
-          Meridian Retail tenant; login-gated demo on GitHub Pages (always online).
+          Spec Studio dual path (seeded CRM↔GL + NL-generated agents) over a financial
+          data graph — exceptions, dual-control corrections, and an append-only audit
+          log. Synthetic Meridian Retail tenant; login-gated demo on GitHub Pages.
         </p>
 
         <div className="deal-story">
           <div className="deal-story-main">
             <div className="illustrative-label">Live demo · password-gated</div>
-            <h3>Detect → investigate → resolve → report</h3>
+            <h3>Spec → implement → run → govern</h3>
             <p>
-              Controllers run reconciliations, assign breaks, waive or correct with dual
-              control on material amounts, and review the same evidence trail on every
-              mutation.
+              Controllers open Spec Studio, keep the seeded CRM↔GL pack or describe a
+              need (CC auth / settlements / received), then run the governed exception
+              loop with dual control on material amounts.
             </p>
             <ul className="deal-meta">
-              <li>Match CRM invoices to GL revenue lines</li>
+              <li>Spec Studio dual path (seeded + NL generate)</li>
               <li>Exception queue with assign / resolve / waive</li>
               <li>Dual-control corrections above materiality</li>
             </ul>
@@ -284,16 +284,16 @@ export default function Portfolio() {
             <li>
               <span className="deal-when">Login</span>
               <strong>controller@findatagraph.demo</strong>
-              <p>password123 — synthetic demo tenant only.</p>
+              <p>AUTH_MODE=clerk · local demo password123 → Spec Studio.</p>
             </li>
             <li>
-              <span className="deal-when">Run</span>
-              <strong>Trigger a reconciliation</strong>
-              <p>Open exceptions surface with variance and entity scope.</p>
+              <span className="deal-when">Studio</span>
+              <strong>Seeded pack or NL need</strong>
+              <p>Generate / implement an agent, then run into exceptions.</p>
             </li>
             <li>
               <span className="deal-when">Gate</span>
-              <strong>Approve or reject corrections</strong>
+              <strong>Assign, resolve, waive</strong>
               <p>Material actions require controller/admin; everything hits the audit log.</p>
             </li>
           </ol>

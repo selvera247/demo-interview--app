@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
 import {
+  FINDATAGRAPH_AUTH_MODE,
   FINDATAGRAPH_DEMO_ROUTE,
   FINDATAGRAPH_PUBLIC_DEMO_HREF,
 } from "../data/findatagraphDemo";
@@ -25,9 +26,9 @@ export default function FinDataGraphCaseStudy() {
         <div className="kicker">Case study · Demo 03 · Financial data graph</div>
         <h1>FinDataGraph</h1>
         <p className="disclaimer">
-          Continuous close & reconciliation over a governed financial data graph —
-          synthetic Meridian Retail data only. Login-gated demo runs on GitHub Pages
-          (no external tunnel).
+          Spec Studio dual path over a governed financial data graph — keep the seeded
+          CRM↔GL pack, or describe a need (e.g. CC auth / settlements / received).
+          Synthetic Meridian Retail data. Login-gated demo on the portfolio path.
         </p>
 
         <div className="hero-cta" style={{ margin: "1.25rem 0 2rem" }}>
@@ -75,12 +76,16 @@ export default function FinDataGraphCaseStudy() {
               corrections, audit log).
             </li>
             <li>
-              CRM invoice ↔ GL revenue matcher that opens typed exceptions (amount,
-              missing side, entity mismatch).
+              Spec Studio dual path: seeded CRM↔GL pack + NL generate/implement for new
+              agents (including CC auth ↔ settlements ↔ cash received).
             </li>
             <li>
-              HITL resolve / waive / correction flow with dual control above $10k and
-              immutable audit events.
+              CRM invoice ↔ GL revenue matcher and three-way card matcher that open typed
+              exceptions.
+            </li>
+            <li>
+              HITL resolve / waive / correction flow with dual control above $10k, audit
+              events, and per-action demo credits.
             </li>
             <li>RBAC: admin / controller / accountant with entity scope.</li>
           </ul>
@@ -107,7 +112,12 @@ export default function FinDataGraphCaseStudy() {
           <h2>Guardrails &amp; Evidence</h2>
           <CaseCallout title="Governance pattern">
             <ul>
-              <li>Login-gated demo (JWT); no anonymous write path</li>
+              <li>
+                Preferred IdP: <strong>Clerk</strong> (
+                <code>AUTH_MODE={FINDATAGRAPH_AUTH_MODE}</code>); Okta also supported;
+                local demo JWT kept for Jumpstart / Pages fallback
+              </li>
+              <li>Login-gated demo; no anonymous write path</li>
               <li>Entity-scoped visibility for accountants</li>
               <li>Dual control for material corrections (≥ $10,000)</li>
               <li>Append-only audit log: login, runs, assign, resolve, waive, decide</li>
@@ -124,6 +134,7 @@ export default function FinDataGraphCaseStudy() {
               "SQLite",
               "React",
               "Vite",
+              "Clerk",
               "JWT",
               "Docker",
               "Render",
@@ -136,9 +147,9 @@ export default function FinDataGraphCaseStudy() {
         <section className="case-block" id="demo">
           <h2>Demo / Links</h2>
           <p className="disclaimer" style={{ marginBottom: "1rem" }}>
-            Interactive control plane embedded in this portfolio (same patterns as the
-            Express/SQLite MVP). Synthetic data. Password-gated login. Always online on
-            GitHub Pages — no Cloudflare tunnel or Render dyno required.
+            Launch stays on the finance-named Pages path. When the live agent host is up,
+            Spec Studio loads in-frame from the latest <code>selvera247/agent</code> build;
+            if the host is down, the Pages-native Spec Studio demo keeps working.
           </p>
           <div className="hero-cta">
             <Link className="btn btn-primary" to={FINDATAGRAPH_DEMO_ROUTE}>
@@ -147,10 +158,20 @@ export default function FinDataGraphCaseStudy() {
           </div>
           <ul style={{ marginTop: "1.5rem" }}>
             <li>
-              Demo login:{" "}
+              Auth mode:{" "}
+              <code style={{ color: "var(--signal)" }}>
+                AUTH_MODE={FINDATAGRAPH_AUTH_MODE}
+              </code>{" "}
+              (Clerk preferred). Local demo login still available:{" "}
               <code style={{ color: "var(--signal)" }}>
                 controller@findatagraph.demo / password123
               </code>
+            </li>
+            <li>
+              After login you land on{" "}
+              <code style={{ color: "var(--signal)" }}>/studio</code> — try the seeded
+              CRM↔GL chip, then enter “reconcile CC auth, settlements, and what we
+              received”.
             </li>
             <li>
               Public demo (stay on GitHub Pages):{" "}
@@ -173,8 +194,7 @@ export default function FinDataGraphCaseStudy() {
             <li>
               Source:{" "}
               <code style={{ color: "var(--signal)" }}>selvera247/agent</code>{" "}
-              (FinDataGraph MVP). Portfolio demo uses an in-browser API mock so the
-              Pages path stays online for hiring managers.
+              (FinDataGraph + Spec Studio).
             </li>
           </ul>
         </section>

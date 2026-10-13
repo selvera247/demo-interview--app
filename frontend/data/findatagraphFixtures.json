@@ -275,5 +275,36 @@
     "controller@findatagraph.demo": "password123",
     "accountant@findatagraph.demo": "password123",
     "admin@findatagraph.demo": "password123"
+  },
+  "startingPoints": [
+    {
+      "id": "crm_to_accounting_revenue",
+      "label": "CRM \u2194 GL revenue (seeded)",
+      "hint": "Meridian Retail \u2014 Salesforce invoices vs NetSuite GL",
+      "path": "seeded",
+      "template_id": "crm_gl_revenue",
+      "example_need": "continuous CRM-to-accounting revenue reconciliation with SOX lineage"
+    },
+    {
+      "id": "cc_auth_settle_received",
+      "label": "CC auth \u2194 settlements \u2194 received",
+      "hint": "Three-way card recon \u2014 generate a new agent pack",
+      "path": "generate",
+      "template_id": "cc_auth_settle_cash",
+      "example_need": "reconcile CC auth, settlements, and what we received"
+    },
+    {
+      "id": "intercompany",
+      "label": "Intercompany balances",
+      "hint": "Template preview (partial implement in demo)",
+      "path": "generate",
+      "template_id": "intercompany",
+      "example_need": "reconcile intercompany balances with dual control"
+    }
+  ],
+  "specs": [],
+  "usage": {
+    "credits_used": 0,
+    "events": 0
   }
 }

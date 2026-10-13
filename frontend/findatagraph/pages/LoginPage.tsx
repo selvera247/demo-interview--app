@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (token) return <Navigate to={fdgPath()} replace />;
+  if (token) return <Navigate to={fdgPath("/studio")} replace />;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setError("");
     try {
       await login(email, password);
-      navigate(fdgPath());
+      navigate(fdgPath("/studio"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -67,7 +67,7 @@ export default function LoginPage() {
         <p className="fdg-hint">
           <Link to="/projects/findatagraph">← Case study</Link>
           {" · "}
-          Runs entirely on GitHub Pages (no external tunnel).
+          After login you land on Spec Studio (seeded CRM↔GL + NL generate).
         </p>
       </form>
     </div>

@@ -10,7 +10,7 @@
  * Override host with VITE_FINDATAGRAPH_DEMO_URL (origin only, or …/studio).
  */
 
-const DEFAULT_HOST = "https://worldwide-voices-unified-follows.trycloudflare.com";
+const DEFAULT_HOST = "https://electronics-variety-abilities-money.trycloudflare.com";
 
 function normalizeHost(raw: string): string {
   const trimmed = (raw || DEFAULT_HOST).trim().replace(/\/$/, "");

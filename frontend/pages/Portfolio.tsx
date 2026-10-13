@@ -284,7 +284,7 @@ export default function Portfolio() {
             <li>
               <span className="deal-when">Login</span>
               <strong>controller@findatagraph.demo</strong>
-              <p>password123 — lands on Spec Studio (/studio).</p>
+              <p>AUTH_MODE=clerk · local demo password123 → Spec Studio.</p>
             </li>
             <li>
               <span className="deal-when">Studio</span>

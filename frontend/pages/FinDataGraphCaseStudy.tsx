@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
 import {
+  FINDATAGRAPH_AUTH_MODE,
   FINDATAGRAPH_DEMO_ROUTE,
   FINDATAGRAPH_PUBLIC_DEMO_HREF,
 } from "../data/findatagraphDemo";
@@ -111,7 +112,12 @@ export default function FinDataGraphCaseStudy() {
           <h2>Guardrails &amp; Evidence</h2>
           <CaseCallout title="Governance pattern">
             <ul>
-              <li>Login-gated demo (JWT); no anonymous write path</li>
+              <li>
+                Preferred IdP: <strong>Clerk</strong> (
+                <code>AUTH_MODE={FINDATAGRAPH_AUTH_MODE}</code>); Okta also supported;
+                local demo JWT kept for Jumpstart / Pages fallback
+              </li>
+              <li>Login-gated demo; no anonymous write path</li>
               <li>Entity-scoped visibility for accountants</li>
               <li>Dual control for material corrections (≥ $10,000)</li>
               <li>Append-only audit log: login, runs, assign, resolve, waive, decide</li>
@@ -128,6 +134,7 @@ export default function FinDataGraphCaseStudy() {
               "SQLite",
               "React",
               "Vite",
+              "Clerk",
               "JWT",
               "Docker",
               "Render",
@@ -151,7 +158,11 @@ export default function FinDataGraphCaseStudy() {
           </div>
           <ul style={{ marginTop: "1.5rem" }}>
             <li>
-              Demo login:{" "}
+              Auth mode:{" "}
+              <code style={{ color: "var(--signal)" }}>
+                AUTH_MODE={FINDATAGRAPH_AUTH_MODE}
+              </code>{" "}
+              (Clerk preferred). Local demo login still available:{" "}
               <code style={{ color: "var(--signal)" }}>
                 controller@findatagraph.demo / password123
               </code>

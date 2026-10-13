@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FinDataGraphApp from "../findatagraph/App";
 import {
+  FINDATAGRAPH_AUTH_MODE,
   FINDATAGRAPH_DEMO_ROUTE,
   FINDATAGRAPH_LIVE_STUDIO_URL,
   FINDATAGRAPH_PUBLIC_DEMO_HREF,
@@ -75,7 +76,8 @@ export default function FinDataGraphDemo() {
         </div>
         <div className="fdg-demo-bar-right">
           <code className="fdg-demo-creds">
-            controller@findatagraph.demo / password123
+            AUTH_MODE={FINDATAGRAPH_AUTH_MODE} · controller@findatagraph.demo /
+            password123
           </code>
           {mode === "live" ? (
             <button type="button" className="btn btn-ghost" onClick={useEmbedded}>
@@ -117,7 +119,8 @@ export default function FinDataGraphDemo() {
 
       <p className="fdg-demo-footnote">
         Viewing <code>{FINDATAGRAPH_DEMO_ROUTE}</code> on GitHub Pages — Spec Studio
-        dual path (seeded CRM↔GL + NL generate). Address bar stays on{" "}
+        dual path · live host <code>AUTH_MODE={FINDATAGRAPH_AUTH_MODE}</code> (Clerk;
+        local demo login allowed). Address bar stays on{" "}
         <code className="fdg-no-autolink">selvera247.github.io</code>. Share:{" "}
         <code className="fdg-no-autolink">{FINDATAGRAPH_PUBLIC_DEMO_HREF}</code>
         {mode === "embedded" ? ` · ${detail}` : null}

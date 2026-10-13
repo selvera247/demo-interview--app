@@ -10,7 +10,7 @@
  * Override host with VITE_FINDATAGRAPH_DEMO_URL (origin only, or …/studio).
  */
 
-const DEFAULT_HOST = "https://inn-promo-activated-agriculture.trycloudflare.com";
+const DEFAULT_HOST = "https://worldwide-voices-unified-follows.trycloudflare.com";
 
 function normalizeHost(raw: string): string {
   const trimmed = (raw || DEFAULT_HOST).trim().replace(/\/$/, "");
@@ -21,6 +21,12 @@ function normalizeHost(raw: string): string {
 export const FINDATAGRAPH_DEMO_HOST = normalizeHost(
   import.meta.env.VITE_FINDATAGRAPH_DEMO_URL || DEFAULT_HOST,
 );
+
+/**
+ * Live agent host auth mode (selvera247/agent `AUTH_MODE`).
+ * Clerk is preferred for client tenancy; local demo login stays via AUTH_ALLOW_LOCAL.
+ */
+export const FINDATAGRAPH_AUTH_MODE = "clerk";
 
 /** Spec Studio path on the live host (post-login landing in selvera247/agent). */
 export const FINDATAGRAPH_LIVE_STUDIO_URL = `${FINDATAGRAPH_DEMO_HOST}/studio`;

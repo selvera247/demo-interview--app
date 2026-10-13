@@ -348,3 +348,18 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
 - **Implications:** Tunnel host remains ephemeral — update
   `FINDATAGRAPH_DEMO_HOST` / `VITE_FINDATAGRAPH_DEMO_URL` when the preview URL changes;
   durable host remains Render when deployed.
+
+## 2026-10-13 — Live FinDataGraph AUTH_MODE=clerk
+
+- **Decision:** Run the live preview API with `AUTH_MODE=clerk` and
+  `AUTH_ALLOW_LOCAL=1`. Portfolio surfaces `FINDATAGRAPH_AUTH_MODE=clerk` and refreshes
+  the iframe host to `worldwide-voices-unified-follows.trycloudflare.com`. Pages-native
+  fallback keeps local demo passwords. Could not push `AUTH_MODE` default into
+  `selvera247/agent` (403 for this integration).
+- **Why:** Agent PR #14 wired Clerk Option A; Jumpstart was still `AUTH_MODE=local`.
+  Hiring-manager story should show preferred IdP mode while local login remains for
+  demos without Clerk publishable keys in this environment.
+- **Implications:** Full Clerk `<SignIn />` needs `CLERK_PUBLISHABLE_KEY` /
+  `VITE_CLERK_PUBLISHABLE_KEY` (and JWKS issuer) from the agent `.env.local` created in
+  PR #14; without keys the login page reports clerk mode and still accepts local demo
+  users when `AUTH_ALLOW_LOCAL=1`.

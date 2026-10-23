@@ -1,9 +1,10 @@
-import { FIELD_CATALOG } from "../domain/field-catalog";
+import { getFieldCatalog } from "../domain/field-catalog";
 import type {
   ArPayment,
   BomItem,
   Customer,
   CustomerInvoice,
+  IntakeTemplate,
   LaborEntry,
   PoLine,
   Project,
@@ -43,8 +44,12 @@ type FieldDraft = {
   conflict?: string;
 };
 
-function fieldsFor(projectId: string, values: Record<string, FieldDraft>): SpecField[] {
-  return FIELD_CATALOG.map((entry) => {
+function fieldsFor(
+  projectId: string,
+  values: Record<string, FieldDraft>,
+  template: IntakeTemplate = "commercial"
+): SpecField[] {
+  return getFieldCatalog(template).map((entry) => {
     const override = values[entry.fieldKey];
     return {
       id: `${projectId}-${entry.fieldKey}`,
@@ -62,6 +67,47 @@ function fieldsFor(projectId: string, values: Record<string, FieldDraft>): SpecF
       updatedAt: now,
     };
   });
+}
+
+function commercialMeta(
+  project: Omit<
+    Project,
+    | "template"
+    | "requestName"
+    | "cycle"
+    | "entity"
+    | "requestCode"
+    | "impactType"
+    | "quantifiedImpact"
+    | "controlRisk"
+    | "downstreamEffect"
+  > &
+    Partial<
+      Pick<
+        Project,
+        | "requestName"
+        | "cycle"
+        | "entity"
+        | "requestCode"
+        | "impactType"
+        | "quantifiedImpact"
+        | "controlRisk"
+        | "downstreamEffect"
+      >
+    >
+): Project {
+  return {
+    ...project,
+    template: "commercial",
+    requestName: project.requestName ?? project.dealName,
+    cycle: project.cycle ?? "",
+    entity: project.entity ?? project.siteName,
+    requestCode: project.requestCode ?? project.projectCode,
+    impactType: project.impactType ?? "",
+    quantifiedImpact: project.quantifiedImpact ?? "",
+    controlRisk: project.controlRisk ?? "",
+    downstreamEffect: project.downstreamEffect ?? "",
+  };
 }
 
 const confirmed = (value: string, ownerId: string, source = "Sales"): FieldDraft => ({
@@ -86,6 +132,7 @@ export function createSeedState(): AppState {
     { id: "c-permian", name: "Permian Ridge Mining Co.", segment: "industrial" },
     { id: "c-cedar", name: "Cedar Point Data Partners", segment: "colo" },
     { id: "c-lakeside", name: "Lakeside Inference Co.", segment: "colo" },
+    { id: "c-northwind", name: "Northwind Digital", segment: "colo" },
   ];
 
   const cole = "u-cole";
@@ -97,7 +144,7 @@ export function createSeedState(): AppState {
 
   // Featured first: CRM↔ERP PO discrepancy (generic system labels only).
   const projects: Project[] = [
-    {
+    commercialMeta({
       id: "p-0422",
       projectCode: "GE-2026-0422",
       customerId: "c-lakeside",
@@ -119,10 +166,12 @@ export function createSeedState(): AppState {
       expectedOutcome:
         "One Deal Record: reconcile opportunity + contract to SO-10491 / PO-10491, freeze Phase 1, clear the $1.6M gap before more spend.",
       tags: ["Revenue", "Opportunity", "Contract", "Sales order", "PO"],
+      quantifiedImpact: "$1.6M opportunity vs SO/PO gap",
+      controlRisk: "Elevated — dual amounts fail commitment testing",
       createdAt: "2026-08-28T12:00:00.000Z",
       updatedAt: now,
-    },
-    {
+    }),
+    commercialMeta({
       id: "p-0417",
       projectCode: "GE-2026-0417",
       customerId: "c-northgate",
@@ -146,8 +195,8 @@ export function createSeedState(): AppState {
       tags: ["Urgent", "Revenue"],
       createdAt: "2026-07-20T12:00:00.000Z",
       updatedAt: now,
-    },
-    {
+    }),
+    commercialMeta({
       id: "p-0398",
       projectCode: "GE-2026-0398",
       customerId: "c-permian",
@@ -170,8 +219,8 @@ export function createSeedState(): AppState {
       tags: ["Revenue"],
       createdAt: "2026-06-02T12:00:00.000Z",
       updatedAt: now,
-    },
-    {
+    }),
+    commercialMeta({
       id: "p-0431",
       projectCode: "GE-2026-0431",
       customerId: "c-cedar",
@@ -193,6 +242,40 @@ export function createSeedState(): AppState {
       expectedOutcome: "Firm spec and delivery target established before this moves to engineering.",
       tags: ["Other"],
       createdAt: "2026-09-01T12:00:00.000Z",
+      updatedAt: now,
+    }),
+    {
+      id: "p-0501",
+      projectCode: "GE-2026-0501",
+      customerId: "c-northwind",
+      siteName: "ND-US",
+      dealName: "Month-end close — Subscription Revenue flux",
+      stage: "intake",
+      status: "active",
+      quotedRevenue: 0,
+      currency: "USD",
+      customerRequestedDeliveryDate: "2026-07-05",
+      commercialOwnerId: singh,
+      opsOwnerId: singh,
+      quoteFrozenAt: null,
+      bomLocked: false,
+      requestorName: "K. Singh",
+      requestorTeam: "OCFO — Controllership",
+      problemStatement:
+        "Account 4000 Subscription Revenue for ND-US swung −$400k MoM in Jun-2026. Controllership needs flux commentary with cited JEs before close package.",
+      expectedOutcome:
+        "Governed flux narrative with JE citations, materiality call, and dual-control path if an accrual/reclass is proposed.",
+      tags: ["Close", "Flux", "OCFO"],
+      template: "ocfo",
+      requestName: "Jun-2026 ND-US Subscription Revenue flux",
+      cycle: "2026-06",
+      entity: "ND-US",
+      requestCode: "FC-2026-0612",
+      impactType: "P&L variance / close commentary",
+      quantifiedImpact: "−$400,000 MoM on account 4000",
+      controlRisk: "Elevated — unexplained swing may fail flux review",
+      downstreamEffect: "Close package, FP&A flash, audit PBC",
+      createdAt: "2026-07-01T12:00:00.000Z",
       updatedAt: now,
     },
   ];
@@ -362,12 +445,56 @@ export function createSeedState(): AppState {
         "Controls"
       ),
     }),
+    ...fieldsFor(
+      "p-0501",
+      {
+        workflow_lane: confirmed("Close / flux analysis", singh, "OCFO"),
+        close_period: confirmed("2026-06", singh, "OCFO"),
+        entity_scope: confirmed("ND-US", singh, "OCFO"),
+        focal_object: confirmed("4000 Subscription Revenue", singh, "OCFO"),
+        exception_summary: {
+          value: "−$400k MoM; possible timing / extra credit vs prior accrual",
+          status: "conflicting",
+          ownerId: singh,
+          source: "ERP TB",
+          conflict:
+            "Trial balance swing exceeds policy (10% and $50k). Sub-ledger shows a large credit; no matching flux memo yet.",
+        },
+        proposed_treatment: {
+          value: "Draft flux commentary; propose accrual review if credit lacks contract support",
+          status: "unresolved",
+          ownerId: singh,
+          conflict: "Treatment pending controller review of cited JEs.",
+        },
+        evidence_refs: confirmed("JE-8841, JE-8842, INV-Cedar-0612 (Billing)", singh, "ERP / Billing"),
+        materiality: confirmed(">$50k and >10% MoM — in scope for flux package", contracts, "Policy"),
+        revenue_impact: confirmed("−$400,000 MoM on Subscription Revenue (ND-US)", singh),
+        audit_revrec_risk: confirmed(
+          "Elevated — unexplained revenue credit may fail flux and cutoff testing",
+          contracts,
+          "Controls"
+        ),
+        customer_impact: confirmed("Internal — Controllership / FP&A close stakeholders", singh),
+        complexity: confirmed("Medium — single account, multi-JE evidence pack", singh),
+        cross_functional_effort: confirmed("Controllership, FP&A, Billing ops", singh),
+        timeline_pressure: confirmed("High — close package due Jul 5", singh),
+        control_impact: confirmed("Flux sign-off blocked until commentary cites JEs", contracts, "Controls"),
+        downstream_dependencies: confirmed(
+          "Close package, FP&A flash, audit PBC request list",
+          contracts,
+          "Controls"
+        ),
+      },
+      "ocfo"
+    ),
   ];
 
   specFields.find((f) => f.id === "p-0417-customerPowerReady")!.conflictSummary =
     "Interconnection application status unknown — not yet confirmed with customer.";
   specFields.find((f) => f.id === "p-0431-load")!.conflictSummary =
     "Customer has not finalized their own capacity plan.";
+  specFields.find((f) => f.id === "p-0501-exception_summary")!.conflictSummary =
+    "Trial balance swing exceeds policy (10% and $50k). Sub-ledger shows a large credit; no matching flux memo yet.";
 
   const quoteSnapshots: QuoteSnapshot[] = [
     {

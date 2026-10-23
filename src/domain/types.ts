@@ -1,3 +1,5 @@
+export type ProjectTemplate = "commercial" | "ocfo";
+
 export type ProjectStage = "intake" | "engineering" | "sourcing" | "invoicing";
 
 export type ProjectStatus = "active" | "on_hold" | "cancelled";
@@ -59,6 +61,15 @@ export interface Project {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  template?: ProjectTemplate;
+  requestName?: string;
+  cycle?: string;
+  entity?: string;
+  requestCode?: string;
+  impactType?: string;
+  quantifiedImpact?: string;
+  controlRisk?: string;
+  downstreamEffect?: string;
 }
 
 export interface SpecField {

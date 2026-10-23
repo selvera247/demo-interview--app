@@ -1,10 +1,35 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import CaseCallout from "../components/CaseCallout";
 import WorkatoRecipeRunner from "../components/WorkatoRecipeRunner";
-import App from "../App";
+import App, { type DealAppFocus } from "../App";
+
+function scrollToLiveApp() {
+  document.getElementById("live-app")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 /** Deal Record: opportunity → contract → sales order → PO on one ID. */
 export default function DealRecordPage() {
+  const [params, setParams] = useSearchParams();
+  const focusParam = params.get("focus");
+  const focus: DealAppFocus = focusParam === "ocfo" ? "ocfo" : "commercial";
+  const openIntake = params.get("intake") === "1";
+
+  useEffect(() => {
+    if (focus !== "ocfo" && !openIntake) return;
+    const t = window.setTimeout(scrollToLiveApp, 80);
+    return () => window.clearTimeout(t);
+  }, [focus, openIntake]);
+
+  function showOcfoApp(options?: { intake?: boolean }) {
+    const next = new URLSearchParams(params);
+    next.set("focus", "ocfo");
+    if (options?.intake) next.set("intake", "1");
+    else next.delete("intake");
+    setParams(next, { replace: true });
+    window.setTimeout(scrollToLiveApp, 50);
+  }
+
   return (
     <div>
       <nav
@@ -32,14 +57,24 @@ export default function DealRecordPage() {
           <button
             type="button"
             className="linkish"
-            onClick={() =>
-              document
-                .getElementById("live-app")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.delete("focus");
+              next.delete("intake");
+              setParams(next, { replace: true });
+              scrollToLiveApp();
+            }}
             title="Interactive Deal Record app (Spec / Sourcing / Cost)"
           >
             Deal app
+          </button>
+          <button
+            type="button"
+            className="linkish"
+            onClick={() => showOcfoApp()}
+            title="OCFO finance intake — month-end flux seed on Spec"
+          >
+            OCFO intake
           </button>
         </div>
       </nav>
@@ -50,8 +85,18 @@ export default function DealRecordPage() {
         <p className="disclaimer">
           Synthetic ops demo — one project ID across the commercial chain when CRM and
           ERP disagree. Generic <strong>CRM</strong> / <strong>ERP</strong> labels;
-          Northwind-style data only.
+          Northwind-style data only. Spec intake also supports an <strong>OCFO</strong>{" "}
+          finance template (close / flux, O2C, P2P).
         </p>
+
+        <div className="hero-cta" style={{ margin: "1.25rem 0 2rem" }}>
+          <button type="button" className="btn btn-primary" onClick={scrollToLiveApp}>
+            Open commercial gap
+          </button>
+          <button type="button" className="btn btn-ghost" onClick={() => showOcfoApp()}>
+            Open OCFO flux request
+          </button>
+        </div>
 
         <section className="case-block">
           <h2>Context</h2>
@@ -77,7 +122,8 @@ export default function DealRecordPage() {
           <p>
             Deal owners, RevOps, and procurement leads who need opportunity / contract /
             sales order / PO conflicts visible on one project code before the next PO
-            goes out.
+            goes out. Controllership can use the same intake spine for OCFO finance
+            requests (month-end flux, invoice disputes, P2P exceptions).
           </p>
         </section>
 
@@ -94,6 +140,13 @@ export default function DealRecordPage() {
             <li>
               Sourcing flags: ERP PO-10491 ($3.2M) vs CRM opportunity ($4.8M); expansion
               line blocked with no matching SO/PO.
+            </li>
+            <li>
+              Reusable spec intake with <strong>Commercial</strong> (default) and{" "}
+              <strong>OCFO</strong> templates — same value / status / owner / note pattern.
+              Seeded finance request:{" "}
+              <code style={{ color: "var(--signal)" }}>FC-2026-0612</code> (Jun-2026
+              ND-US Subscription Revenue flux).
             </li>
           </ul>
 
@@ -113,9 +166,25 @@ export default function DealRecordPage() {
               sales order and PO match amount and MW.
             </p>
           </CaseCallout>
+
+          <CaseCallout title="OCFO intake template">
+            <p style={{ margin: "0 0 0.75rem", color: "var(--muted)" }}>
+              In the interactive app, open <strong>Spec</strong> on{" "}
+              <code style={{ color: "var(--signal)" }}>FC-2026-0612</code>, or hit{" "}
+              <strong>+</strong> and switch the template to OCFO for close / flux, O2C, or
+              P2P.
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => showOcfoApp({ intake: true })}
+            >
+              Try OCFO intake
+            </button>
+          </CaseCallout>
         </section>
 
-        <section className="case-block">
+        <section className="case-block" id="recipe-runner">
           <h2>Exception recipe (Workato-shaped)</h2>
           <p>
             When CRM hits Closed Won, a Workato-shaped exception recipe compares
@@ -192,6 +261,10 @@ export default function DealRecordPage() {
               Workato-shaped recipe makes the detect → exception → notify → block-buy loop
               runnable in the case study (gap path and ERP failure path).
             </li>
+            <li>
+              OCFO template shows the same intake discipline for month-end flux and adjacent
+              finance workflows.
+            </li>
           </ul>
         </section>
 
@@ -217,6 +290,7 @@ export default function DealRecordPage() {
               "Contract",
               "Sales order",
               "PO",
+              "OCFO intake",
             ].map((s) => (
               <span key={s}>{s}</span>
             ))}
@@ -230,7 +304,34 @@ export default function DealRecordPage() {
               Exception recipe runner above (synthetic Workato-shaped steps — Run recipe).
             </li>
             <li>
-              Interactive Deal Record app below (opens on Sourcing for the featured gap).
+              Interactive Deal Record app below — commercial gap opens on Sourcing; OCFO
+              flux opens on Spec (
+              <button
+                type="button"
+                className="linkish"
+                style={{
+                  color: "var(--signal)",
+                  padding: 0,
+                  display: "inline",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  font: "inherit",
+                }}
+                onClick={() => showOcfoApp()}
+              >
+                open OCFO flux
+              </button>
+              ).
+            </li>
+            <li>
+              Direct OCFO link:{" "}
+              <a
+                href="https://selvera247.github.io/demo-interview--app/#/projects/deal-record?focus=ocfo"
+                style={{ color: "var(--signal)" }}
+              >
+                Pages · Deal Record · OCFO
+              </a>
             </li>
             <li>
               Share:{" "}
@@ -261,12 +362,21 @@ export default function DealRecordPage() {
       <div id="live-app" className="deal-app-anchor">
         <div className="deal-app-label">
           <span className="deal-app-label-kicker">Interactive</span>
-          <span className="deal-app-label-title">Deal Record app</span>
+          <span className="deal-app-label-title">
+            {focus === "ocfo" ? "OCFO finance request" : "Deal Record app"}
+          </span>
           <span className="deal-app-label-hint">
-            Spec · Sourcing · Cost — not the recipe runner above
+            {focus === "ocfo"
+              ? "Spec · FC-2026-0612 month-end flux — use + for Commercial/OCFO intake"
+              : "Spec · Sourcing · Cost — not the recipe runner above"}
           </span>
         </div>
-        <App />
+        <App
+          key={`${focus}-${openIntake ? "intake" : "view"}`}
+          focus={focus}
+          openIntake={openIntake}
+          intakeTemplate={openIntake || focus === "ocfo" ? "ocfo" : "commercial"}
+        />
       </div>
 
       <div

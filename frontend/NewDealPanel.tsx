@@ -103,12 +103,14 @@ export default function NewDealPanel({
   nextCode,
   onClose,
   onSave,
+  initialTemplate = "commercial",
 }: {
   nextCode: string;
   onClose: () => void;
   onSave: (intake: NewDealIntake) => void;
+  initialTemplate?: IntakeTemplate;
 }) {
-  const [template, setTemplate] = useState<IntakeTemplate>("commercial");
+  const [template, setTemplate] = useState<IntakeTemplate>(initialTemplate);
   const [customerName, setCustomerName] = useState("");
   const [site, setSite] = useState("");
   const [dealName, setDealName] = useState("");
@@ -133,7 +135,7 @@ export default function NewDealPanel({
   const [controlImpact, setControlImpact] = useState("");
   const [downstreamDependencies, setDownstreamDependencies] = useState("");
   const [tags, setTags] = useState("");
-  const [systems, setSystems] = useState(() => emptyStructuredIntake("commercial"));
+  const [systems, setSystems] = useState(() => emptyStructuredIntake(initialTemplate));
   const [error, setError] = useState("");
 
   const catalog = useMemo(() => getFieldCatalog(template), [template]);

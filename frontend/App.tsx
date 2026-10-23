@@ -84,12 +84,31 @@ function statusText(status: string) {
   return "Unresolved";
 }
 
-export default function App() {
+export type DealAppFocus = "commercial" | "ocfo";
+
+export default function App({
+  focus = "commercial",
+  openIntake = false,
+  intakeTemplate = "commercial",
+}: {
+  /** Which seeded record to open. OCFO lands on Spec for the finance flux request. */
+  focus?: DealAppFocus;
+  /** Open the New Spec Intake modal (used with focus=ocfo from the case study CTA). */
+  openIntake?: boolean;
+  /** Template pre-selected when the intake modal opens. */
+  intakeTemplate?: "commercial" | "ocfo";
+} = {}) {
   const [state, setState] = useState(() => createSeedState());
   const deals = useMemo(() => toDealViews(state), [state]);
-  const [selectedId, setSelectedId] = useState(deals[0]?.id);
-  const [view, setView] = useState<"spec" | "sourcing" | "cost">("sourcing");
-  const [intakeOpen, setIntakeOpen] = useState(false);
+  const defaultDeal =
+    focus === "ocfo"
+      ? deals.find((d) => d.template === "ocfo") ?? deals[0]
+      : deals[0];
+  const [selectedId, setSelectedId] = useState(defaultDeal?.id);
+  const [view, setView] = useState<"spec" | "sourcing" | "cost">(
+    focus === "ocfo" ? "spec" : "sourcing"
+  );
+  const [intakeOpen, setIntakeOpen] = useState(openIntake);
   const selected = deals.find((d) => d.id === selectedId);
 
   const nextCode = useMemo(() => {
@@ -127,7 +146,9 @@ export default function App() {
           <div>
             <div className="text-[15px] font-semibold tracking-tight">Deal Record</div>
             <div className="text-[12px] text-[#8B9099]">
-              Opportunity → contract → sales order → PO on one project ID
+              {selected?.template === "ocfo"
+                ? "OCFO intake — close / flux · O2C · P2P on one request ID"
+                : "Opportunity → contract → sales order → PO on one project ID"}
             </div>
           </div>
         </div>
@@ -248,7 +269,12 @@ export default function App() {
       </div>
 
       {intakeOpen && (
-        <NewDealPanel nextCode={nextCode} onClose={() => setIntakeOpen(false)} onSave={saveIntake} />
+        <NewDealPanel
+          nextCode={nextCode}
+          initialTemplate={intakeTemplate}
+          onClose={() => setIntakeOpen(false)}
+          onSave={saveIntake}
+        />
       )}
     </div>
   );

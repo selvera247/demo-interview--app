@@ -378,3 +378,13 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
 - **Implications:** New templates = new catalogs in `field-catalog.ts`, not new apps.
   Verify with `npm run verify:ocfo-intake` and `npm run build`.
   Completes the earlier main stub that only added optional Project metadata fields.
+
+## 2026-10-23 — Surface OCFO on Deal Record Pages entry
+
+- **Decision:** Case study CTAs + `?focus=ocfo` deep link scroll to `#live-app`, select the
+  OCFO seed on Spec, and optionally open intake with the OCFO template pre-selected.
+  Nav gains “OCFO intake”. Commercial default (Sourcing on GE-2026-0422) unchanged.
+- **Why:** After merge to main, OCFO was in the bundle but easy to miss: long case-study
+  prose above the app, default view was commercial Sourcing.
+- **Implications:** Share
+  `…/#/projects/deal-record?focus=ocfo` for the finance path.

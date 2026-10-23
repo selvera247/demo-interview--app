@@ -369,3 +369,17 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
 - **Decision:** Update `FINDATAGRAPH_DEMO_HOST` to `https://electronics-variety-abilities-money.trycloudflare.com` after prior quick-tunnel hostname stopped resolving.
 - **Why:** Live preview must stay reachable for Spec Studio iframe; Pages fallback remains if tunnel dies.
 - **Implications:** Still ephemeral; `AUTH_MODE=clerk` + `AUTH_ALLOW_LOCAL=1` unchanged on the preview API.
+
+## 2026-10-23 — Spec intake templates (Commercial default + OCFO)
+
+- **Decision:** Keep one Deal Record intake pattern with a template selector. `commercial`
+  remains the default energy/deal catalog; `ocfo` swaps in a finance field catalog
+  (close/flux, O2C, P2P) while reusing the same section spine and
+  value/status/owner/note structured fields. Project model gains generic metadata
+  (`requestName`, `cycle`, `entity`, `requestCode`, `impactType`, `quantifiedImpact`,
+  `controlRisk`, `downstreamEffect`, `template`). Spec view renders by template.
+  Seed adds `GE-2026-0501` Northwind Digital month-end flux request.
+- **Why:** Controllership workflows need the same intake discipline as commercial deals
+  without forking the app or breaking the existing CRM↔ERP demo.
+- **Implications:** New templates = new catalogs in `field-catalog.ts`, not new apps.
+  Verify with `npm run verify:ocfo-intake` and `npm run build`.

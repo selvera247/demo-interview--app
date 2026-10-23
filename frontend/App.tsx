@@ -17,7 +17,9 @@ import {
   type DealView,
 } from "../src/data/deal-adapter";
 import { addDealFromIntake, type NewDealIntake } from "../src/data/create-deal";
+import { sectionLabel } from "../src/domain/field-catalog";
 import { formatProjectCode } from "../src/domain/ids";
+import type { SpecSection } from "../src/domain/types";
 import { createSeedState } from "../src/data/seed";
 import NewDealPanel from "./NewDealPanel";
 
@@ -62,17 +64,6 @@ function fmt(n: number) {
 function sumCost(costObj: Record<string, number>) {
   return Object.values(costObj).reduce((a, b) => a + b, 0);
 }
-
-const fieldLabels: Record<string, string> = {
-  voltage: "Voltage",
-  load: "Load",
-  phase: "Phase configuration",
-  coolingType: "Cooling type",
-  spaceConstraints: "Site / space constraints",
-  requestedDelivery: "Requested delivery",
-  customerPowerReady: "Customer power / interconnection status",
-  deliveryDefinition: 'Definition of "delivery"',
-};
 
 const stageLabels: Record<string, string> = {
   intake: "Intake",
@@ -210,14 +201,20 @@ export default function App() {
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[12px] text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                      {deal.id}
+                      {deal.meta.requestCode || deal.id}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1C1E22] border border-[#3a3d44] text-[#8B9099] uppercase tracking-wide">
-                      {stageLabels[deal.stage]}
+                      {deal.template === "ocfo" ? "OCFO" : stageLabels[deal.stage]}
                     </span>
                   </div>
-                  <div className="text-[13px] font-medium mb-0.5">{deal.customer}</div>
-                  <div className="text-[12px] text-[#8B9099] mb-2">{deal.site}</div>
+                  <div className="text-[13px] font-medium mb-0.5">
+                    {deal.template === "ocfo" ? deal.meta.requestName || deal.customer : deal.customer}
+                  </div>
+                  <div className="text-[12px] text-[#8B9099] mb-2">
+                    {deal.template === "ocfo"
+                      ? [deal.customer, deal.meta.entity || deal.site, deal.meta.cycle].filter(Boolean).join(" · ")
+                      : deal.site}
+                  </div>
                   <div className="flex gap-3 text-[11px]">
                     {conflicting > 0 && (
                       <span className="flex items-center gap-1 text-amber-500">
@@ -292,6 +289,55 @@ function CommercialGapBanner({
   );
 }
 
+function SpecFieldCard({ field }: { field: DealView["fields"][string] }) {
+  return (
+    <div
+      className={`rounded-md border px-4 py-3 ${
+        field.status === "conflicting"
+          ? "border-amber-500/30 bg-amber-500/[0.04]"
+          : field.status === "tbd"
+            ? "border-[#3a3d44] bg-[#24262b]"
+            : "border-[#2a2d33] bg-[#212327]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-2.5 min-w-0">
+          <div className="mt-0.5">
+            <StatusIcon status={field.status} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] text-[#8B9099] mb-0.5">{field.label}</div>
+            <div className={`text-[14px] ${field.value ? "text-[#E8E6E1]" : "text-[#6b7077] italic"}`}>
+              {field.value || "Not yet provided"}
+            </div>
+            {field.note && <div className="text-[12px] text-amber-400/90 mt-1.5 leading-snug">{field.note}</div>}
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div
+            className={`text-[10px] uppercase tracking-wide mb-1 ${
+              field.status === "confirmed"
+                ? "text-emerald-500"
+                : field.status === "conflicting"
+                  ? "text-amber-500"
+                  : "text-[#8B9099]"
+            }`}
+          >
+            {statusText(field.status)}
+          </div>
+          <div className="text-[11px] text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+            {field.owner}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function fieldsForSection(deal: DealView, section: SpecSection) {
+  return Object.values(deal.fields).filter((field) => field.section === section);
+}
+
 function SpecView({
   deal,
   onGoToSourcing,
@@ -299,90 +345,87 @@ function SpecView({
   deal: DealView;
   onGoToSourcing: () => void;
 }) {
+  const isOcfo = deal.template === "ocfo";
+
   return (
     <div className="flex-1 px-8 py-6 max-w-[760px] overflow-y-auto">
       <div className="mb-6">
-        <div className="text-[12px] text-[#8B9099] mb-1" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-          {deal.id}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-[12px] text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+            {deal.meta.requestCode || deal.id}
+          </div>
+          <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border border-[#3a3d44] text-[#8B9099]">
+            {isOcfo ? "OCFO" : "Commercial"}
+          </span>
         </div>
-        <h1 className="text-[22px] font-semibold tracking-tight mb-1">{deal.customer}</h1>
-        <div className="text-[13px] text-[#8B9099]">{deal.site}</div>
+        <h1 className="text-[22px] font-semibold tracking-tight mb-1">
+          {deal.meta.requestName || deal.customer}
+        </h1>
+        <div className="text-[13px] text-[#8B9099]">
+          {deal.customer}
+          {deal.meta.entity || deal.site ? ` · ${deal.meta.entity || deal.site}` : ""}
+          {deal.meta.cycle ? ` · ${deal.meta.cycle}` : ""}
+        </div>
       </div>
 
-      <CommercialGapBanner deal={deal} onGoToSourcing={onGoToSourcing} />
+      {!isOcfo && <CommercialGapBanner deal={deal} onGoToSourcing={onGoToSourcing} />}
 
       <SpecSection number="1" title="Request Basics">
         <MetaRow label="Requestor" value={`${deal.meta.requestor} · ${deal.meta.requestorTeam}`} />
+        {isOcfo && (
+          <>
+            <MetaRow label="Impact type" value={deal.meta.impactType || "—"} />
+            <MetaRow label="Quantified impact" value={deal.meta.quantifiedImpact || deal.meta.revenueImpact || "—"} />
+            <MetaRow label="Control risk" value={deal.meta.controlRisk || deal.meta.auditRisk || "—"} flag={Boolean(deal.meta.controlRisk?.startsWith("Elevated") || deal.meta.auditRisk?.startsWith("Elevated"))} />
+            <MetaRow label="Downstream effect" value={deal.meta.downstreamEffect || deal.meta.downstreamDependencies || "—"} multiline />
+          </>
+        )}
         <MetaRow label="Problem statement" value={deal.meta.problemStatement} multiline />
         <MetaRow label="Expected outcome" value={deal.meta.expectedOutcome} multiline />
       </SpecSection>
 
-      <SpecSection number="2" title="Business Impact">
-        <MetaRow label="Revenue impact" value={deal.meta.revenueImpact} />
-        <MetaRow label="Audit risk" value={deal.meta.auditRisk} flag={deal.meta.auditRisk?.startsWith("Elevated")} />
-        <MetaRow label="Customer impact" value={deal.meta.customerImpact} />
-      </SpecSection>
-
-      <SpecSection number="3" title="Systems & Data">
-        <div className="space-y-3">
-          {Object.entries(deal.fields).map(([key, field]) => (
-            <div
-              key={key}
-              className={`rounded-md border px-4 py-3 ${
-                field.status === "conflicting"
-                  ? "border-amber-500/30 bg-amber-500/[0.04]"
-                  : field.status === "tbd"
-                    ? "border-[#3a3d44] bg-[#24262b]"
-                    : "border-[#2a2d33] bg-[#212327]"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-2.5 min-w-0">
-                  <div className="mt-0.5">
-                    <StatusIcon status={field.status} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[11px] text-[#8B9099] mb-0.5">{fieldLabels[key]}</div>
-                    <div className={`text-[14px] ${field.value ? "text-[#E8E6E1]" : "text-[#6b7077] italic"}`}>
-                      {field.value || "Not yet provided"}
-                    </div>
-                    {field.note && <div className="text-[12px] text-amber-400/90 mt-1.5 leading-snug">{field.note}</div>}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div
-                    className={`text-[10px] uppercase tracking-wide mb-1 ${
-                      field.status === "confirmed"
-                        ? "text-emerald-500"
-                        : field.status === "conflicting"
-                          ? "text-amber-500"
-                          : "text-[#8B9099]"
-                    }`}
-                  >
-                    {statusText(field.status)}
-                  </div>
-                  <div className="text-[11px] text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-                    {field.owner}
-                  </div>
-                </div>
+      {isOcfo ? (
+        (["systems", "business_impact", "effort_timing", "controls"] as SpecSection[]).map(
+          (section, index) => (
+            <SpecSection key={section} number={String(index + 2)} title={sectionLabel("ocfo", section)}>
+              <div className="space-y-3">
+                {fieldsForSection(deal, section).map((field) => (
+                  <SpecFieldCard key={field.fieldKey} field={field} />
+                ))}
               </div>
+            </SpecSection>
+          )
+        )
+      ) : (
+        <>
+          <SpecSection number="2" title="Business Impact">
+            <MetaRow label="Revenue impact" value={deal.meta.revenueImpact} />
+            <MetaRow label="Audit risk" value={deal.meta.auditRisk} flag={deal.meta.auditRisk?.startsWith("Elevated")} />
+            <MetaRow label="Customer impact" value={deal.meta.customerImpact} />
+          </SpecSection>
+
+          <SpecSection number="3" title="Systems & Data">
+            <div className="space-y-3">
+              {fieldsForSection(deal, "systems").map((field) => (
+                <SpecFieldCard key={field.fieldKey} field={field} />
+              ))}
             </div>
-          ))}
-        </div>
-      </SpecSection>
+          </SpecSection>
 
-      <SpecSection number="4" title="Effort & Timing">
-        <MetaRow label="Complexity" value={deal.meta.complexity} />
-        <MetaRow label="Cross-functional effort" value={deal.meta.crossFunctionalEffort} />
-        <MetaRow label="Timeline pressure" value={deal.meta.timelinePressure} flag={deal.meta.timelinePressure?.startsWith("High")} />
-      </SpecSection>
+          <SpecSection number="4" title="Effort & Timing">
+            <MetaRow label="Complexity" value={deal.meta.complexity} />
+            <MetaRow label="Cross-functional effort" value={deal.meta.crossFunctionalEffort} />
+            <MetaRow label="Timeline pressure" value={deal.meta.timelinePressure} flag={deal.meta.timelinePressure?.startsWith("High")} />
+          </SpecSection>
 
-      <SpecSection number="5" title="Controls & Dependencies">
-        <MetaRow label="Control impact" value={deal.meta.controlImpact} multiline />
-        <MetaRow label="Downstream dependencies" value={deal.meta.downstreamDependencies} multiline />
-      </SpecSection>
+          <SpecSection number="5" title="Controls & Dependencies">
+            <MetaRow label="Control impact" value={deal.meta.controlImpact} multiline />
+            <MetaRow label="Downstream dependencies" value={deal.meta.downstreamDependencies} multiline />
+          </SpecSection>
+        </>
+      )}
 
-      <SpecSection number="6" title="Tags" last>
+      <SpecSection number={isOcfo ? "6" : "6"} title="Tags" last>
         <div className="flex gap-2 flex-wrap">
           {deal.meta.tags.map((tag) => (
             <span key={tag} className="text-[11px] px-2.5 py-1 rounded-full border border-[#3a3d44] bg-[#24262b] text-[#c7cce0]">
@@ -393,8 +436,9 @@ function SpecView({
       </SpecSection>
 
       <div className="mt-2 pt-5 border-t border-[#2a2d33] text-[12px] text-[#8B9099] leading-relaxed">
-        This record is the single reference downstream teams read from. Sourcing, cost tracking, and invoicing
-        systems point back to these fields rather than re-deriving the spec from email or conversation history.
+        {isOcfo
+          ? "This finance request is the single reference Controllership and ops teams read from. Close, O2C, and P2P actions point back to these fields rather than re-deriving the need from email."
+          : "This record is the single reference downstream teams read from. Sourcing, cost tracking, and invoicing systems point back to these fields rather than re-deriving the spec from email or conversation history."}
       </div>
     </div>
   );

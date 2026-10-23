@@ -6,6 +6,9 @@ export type FieldStatus = "confirmed" | "conflicting" | "unresolved";
 
 export type SpecSection = "systems" | "business_impact" | "effort_timing" | "controls";
 
+/** Intake / spec template. Commercial energy/deal remains the default. */
+export type IntakeTemplate = "commercial" | "ocfo";
+
 export type CostCategory = "materials" | "labor" | "engineering" | "freight";
 
 export type PoStatus =
@@ -57,6 +60,17 @@ export interface Project {
   problemStatement: string;
   expectedOutcome: string;
   tags: string[];
+  /** Spec intake template — commercial (default) or OCFO finance. */
+  template: IntakeTemplate;
+  /** Generic request identity / impact metadata (template-agnostic). */
+  requestName: string;
+  cycle: string;
+  entity: string;
+  requestCode: string;
+  impactType: string;
+  quantifiedImpact: string;
+  controlRisk: string;
+  downstreamEffect: string;
   createdAt: string;
   updatedAt: string;
 }

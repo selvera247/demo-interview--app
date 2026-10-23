@@ -1,5 +1,5 @@
-import { FIELD_CATALOG, SYSTEMS_FIELD_KEYS } from "./field-catalog";
-import type { SpecField } from "./types";
+import { getFieldCatalog, structuredFieldKeys } from "./field-catalog";
+import type { IntakeTemplate, SpecField } from "./types";
 
 export interface SpecReadiness {
   totalRequired: number;
@@ -20,9 +20,14 @@ function isConfirmed(field: SpecField | undefined): boolean {
   );
 }
 
-export function evaluateSpecReadiness(fields: SpecField[]): SpecReadiness {
+export function evaluateSpecReadiness(
+  fields: SpecField[],
+  template: IntakeTemplate = "commercial"
+): SpecReadiness {
   const requiredKeys = new Set(
-    FIELD_CATALOG.filter((entry) => entry.required).map((entry) => entry.fieldKey)
+    getFieldCatalog(template)
+      .filter((entry) => entry.required)
+      .map((entry) => entry.fieldKey)
   );
   const byKey = new Map(fields.map((field) => [field.fieldKey, field]));
   const blockingKeys: string[] = [];
@@ -52,16 +57,20 @@ export function evaluateSpecReadiness(fields: SpecField[]): SpecReadiness {
     conflictingRequired,
     percentConfirmed: totalRequired === 0 ? 0 : confirmedRequired / totalRequired,
     blockingKeys,
-    canLockBom: blockingKeys.length === 0,
+    canLockBom: template === "commercial" && blockingKeys.length === 0,
   };
 }
 
-export function summarizeSystemsFields(fields: SpecField[]): {
+export function summarizeSystemsFields(
+  fields: SpecField[],
+  template: IntakeTemplate = "commercial"
+): {
   unresolved: number;
   conflicting: number;
   complete: boolean;
 } {
-  const systems = fields.filter((field) => SYSTEMS_FIELD_KEYS.includes(field.fieldKey));
+  const keys = new Set(structuredFieldKeys(template));
+  const systems = fields.filter((field) => keys.has(field.fieldKey));
   const unresolved = systems.filter((field) => field.status === "unresolved").length;
   const conflicting = systems.filter((field) => field.status === "conflicting").length;
   return { unresolved, conflicting, complete: unresolved === 0 && conflicting === 0 };

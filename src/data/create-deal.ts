@@ -1,6 +1,9 @@
-import { FIELD_CATALOG } from "../domain/field-catalog";
+import {
+  getFieldCatalog,
+  structuredFieldKeys,
+} from "../domain/field-catalog";
 import { formatProjectCode } from "../domain/ids";
-import type { FieldStatus, SpecField, User } from "../domain/types";
+import type { FieldStatus, IntakeTemplate, SpecField, User } from "../domain/types";
 import type { AppState } from "./seed";
 
 export const SYSTEMS_INTAKE_KEYS = [
@@ -16,6 +19,11 @@ export const SYSTEMS_INTAKE_KEYS = [
 
 export type SystemsIntakeKey = (typeof SYSTEMS_INTAKE_KEYS)[number];
 
+/** All OCFO catalog keys use structured intake (value / status / owner / note). */
+export const OCFO_STRUCTURED_KEYS = structuredFieldKeys("ocfo");
+
+export type OcfoStructuredKey = (typeof OCFO_STRUCTURED_KEYS)[number];
+
 export type IntakeSystemField = {
   value: string;
   status: FieldStatus;
@@ -24,6 +32,7 @@ export type IntakeSystemField = {
 };
 
 export type NewDealIntake = {
+  template: IntakeTemplate;
   customerName: string;
   site: string;
   dealName: string;
@@ -32,6 +41,14 @@ export type NewDealIntake = {
   problemStatement: string;
   expectedOutcome: string;
   tags: string;
+  requestName: string;
+  cycle: string;
+  entity: string;
+  requestCode: string;
+  impactType: string;
+  quantifiedImpact: string;
+  controlRisk: string;
+  downstreamEffect: string;
   revenueImpact: string;
   auditRisk: string;
   customerImpact: string;
@@ -40,16 +57,29 @@ export type NewDealIntake = {
   timelinePressure: string;
   controlImpact: string;
   downstreamDependencies: string;
-  systems: Record<SystemsIntakeKey, IntakeSystemField>;
+  /** Structured value/status/owner/note fields for the template's systems section. */
+  systems: Record<string, IntakeSystemField>;
 };
 
-export function emptySystemsIntake(): Record<SystemsIntakeKey, IntakeSystemField> {
+function emptyStructured(keys: readonly string[]): Record<string, IntakeSystemField> {
   return Object.fromEntries(
-    SYSTEMS_INTAKE_KEYS.map((key) => [
+    keys.map((key) => [
       key,
       { value: "", status: "unresolved" as FieldStatus, ownerName: "", note: "" },
     ])
-  ) as Record<SystemsIntakeKey, IntakeSystemField>;
+  );
+}
+
+export function emptySystemsIntake(): Record<SystemsIntakeKey, IntakeSystemField> {
+  return emptyStructured(SYSTEMS_INTAKE_KEYS) as Record<SystemsIntakeKey, IntakeSystemField>;
+}
+
+export function emptyOcfoStructuredIntake(): Record<OcfoStructuredKey, IntakeSystemField> {
+  return emptyStructured(OCFO_STRUCTURED_KEYS) as Record<OcfoStructuredKey, IntakeSystemField>;
+}
+
+export function emptyStructuredIntake(template: IntakeTemplate): Record<string, IntakeSystemField> {
+  return emptyStructured(structuredFieldKeys(template));
 }
 
 function slug(value: string): string {
@@ -91,14 +121,42 @@ function narrativeStatus(value: string): FieldStatus {
   return value.trim() ? "confirmed" : "unresolved";
 }
 
+function resolveNarrative(
+  intake: NewDealIntake,
+  fieldKey: string
+): string {
+  if (fieldKey === "revenue_impact") {
+    return intake.revenueImpact.trim() || intake.quantifiedImpact;
+  }
+  if (fieldKey === "audit_revrec_risk") {
+    return intake.auditRisk.trim() || intake.controlRisk;
+  }
+  if (fieldKey === "customer_impact") {
+    return intake.customerImpact.trim() || intake.impactType;
+  }
+  if (fieldKey === "complexity") return intake.complexity;
+  if (fieldKey === "cross_functional_effort") return intake.crossFunctionalEffort;
+  if (fieldKey === "timeline_pressure") return intake.timelinePressure;
+  if (fieldKey === "control_impact") {
+    return intake.controlImpact.trim() || intake.controlRisk;
+  }
+  if (fieldKey === "downstream_dependencies") {
+    return intake.downstreamDependencies.trim() || intake.downstreamEffect;
+  }
+  return "";
+}
+
 export function addDealFromIntake(
   state: AppState,
   intake: NewDealIntake,
   nowIso: string
 ): { state: AppState; projectCode: string } {
+  const template: IntakeTemplate = intake.template || "commercial";
   const customerName = intake.customerName.trim();
   if (!customerName) {
-    throw new Error("Customer name is required.");
+    throw new Error(
+      template === "ocfo" ? "Organization / entity name is required." : "Customer name is required."
+    );
   }
 
   let users = [...state.users];
@@ -108,7 +166,9 @@ export function addDealFromIntake(
   if (!commercialOwnerId) {
     throw new Error("At least one user must exist to own the deal.");
   }
-  const opsOwnerId = users.find((user) => user.role === "engineering")?.id ?? commercialOwnerId;
+  const opsOwnerId =
+    users.find((user) => (template === "ocfo" ? user.role === "finance" : user.role === "engineering"))
+      ?.id ?? commercialOwnerId;
 
   const year = Number.isNaN(new Date(nowIso).getUTCFullYear())
     ? new Date().getUTCFullYear()
@@ -122,28 +182,11 @@ export function addDealFromIntake(
     .map((tag) => tag.trim())
     .filter(Boolean);
 
-  const specFields: SpecField[] = FIELD_CATALOG.map((entry) => {
-    const system = SYSTEMS_INTAKE_KEYS.includes(entry.fieldKey as SystemsIntakeKey)
-      ? intake.systems[entry.fieldKey as SystemsIntakeKey]
-      : null;
-    const narrativeValue =
-      entry.fieldKey === "revenue_impact"
-        ? intake.revenueImpact
-        : entry.fieldKey === "audit_revrec_risk"
-          ? intake.auditRisk
-          : entry.fieldKey === "customer_impact"
-            ? intake.customerImpact
-            : entry.fieldKey === "complexity"
-              ? intake.complexity
-              : entry.fieldKey === "cross_functional_effort"
-                ? intake.crossFunctionalEffort
-                : entry.fieldKey === "timeline_pressure"
-                  ? intake.timelinePressure
-                  : entry.fieldKey === "control_impact"
-                    ? intake.controlImpact
-                    : entry.fieldKey === "downstream_dependencies"
-                      ? intake.downstreamDependencies
-                      : "";
+  const catalog = getFieldCatalog(template);
+  const structuredKeys = new Set(structuredFieldKeys(template));
+
+  const specFields: SpecField[] = catalog.map((entry) => {
+    const system = structuredKeys.has(entry.fieldKey) ? intake.systems[entry.fieldKey] : null;
 
     if (system) {
       const owner = ensureUser(users, system.ownerName);
@@ -172,6 +215,7 @@ export function addDealFromIntake(
       };
     }
 
+    const narrativeValue = resolveNarrative(intake, entry.fieldKey);
     const owner = ensureUser(users, intake.requestorName);
     users = owner.users;
     return {
@@ -191,6 +235,10 @@ export function addDealFromIntake(
     };
   });
 
+  const dealName = intake.dealName.trim() || intake.requestName.trim() || customerName;
+  const requestName = intake.requestName.trim() || dealName;
+  const requestCode = intake.requestCode.trim() || projectCode;
+
   return {
     projectCode,
     state: {
@@ -198,7 +246,11 @@ export function addDealFromIntake(
       users,
       customers: [
         ...state.customers,
-        { id: customerId, name: customerName, segment: "colo" },
+        {
+          id: customerId,
+          name: customerName,
+          segment: template === "ocfo" ? "colo" : "colo",
+        },
       ],
       projects: [
         ...state.projects,
@@ -206,8 +258,8 @@ export function addDealFromIntake(
           id: projectId,
           projectCode,
           customerId,
-          siteName: intake.site.trim() || "Site TBD",
-          dealName: intake.dealName.trim() || customerName,
+          siteName: intake.site.trim() || intake.entity.trim() || "Site TBD",
+          dealName,
           stage: "intake",
           status: "active",
           quotedRevenue: 0,
@@ -218,10 +270,21 @@ export function addDealFromIntake(
           quoteFrozenAt: null,
           bomLocked: false,
           requestorName: intake.requestorName.trim() || "Unassigned",
-          requestorTeam: intake.requestorTeam.trim() || "Sales",
+          requestorTeam:
+            intake.requestorTeam.trim() || (template === "ocfo" ? "OCFO" : "Sales"),
           problemStatement: intake.problemStatement.trim(),
           expectedOutcome: intake.expectedOutcome.trim(),
           tags,
+          template,
+          requestName,
+          cycle: intake.cycle.trim(),
+          entity: intake.entity.trim() || intake.site.trim(),
+          requestCode,
+          impactType: intake.impactType.trim(),
+          quantifiedImpact: intake.quantifiedImpact.trim() || intake.revenueImpact.trim(),
+          controlRisk: intake.controlRisk.trim() || intake.auditRisk.trim(),
+          downstreamEffect:
+            intake.downstreamEffect.trim() || intake.downstreamDependencies.trim(),
           createdAt: nowIso,
           updatedAt: nowIso,
         },

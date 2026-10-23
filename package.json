@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "verify:workato-recipe": "node frontend/scripts/verify_workato_recipe.mjs",
-    "verify:findatagraph-embedded": "node frontend/scripts/verify_findatagraph_embedded.mjs"
+    "verify:findatagraph-embedded": "node frontend/scripts/verify_findatagraph_embedded.mjs",
+    "verify:ocfo-intake": "npx --yes tsx frontend/scripts/verify_ocfo_intake.ts"
   },
   "dependencies": {
     "lucide-react": "^0.544.0",

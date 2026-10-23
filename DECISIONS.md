@@ -363,3 +363,18 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
   `VITE_CLERK_PUBLISHABLE_KEY` (and JWKS issuer) from the agent `.env.local` created in
   PR #14; without keys the login page reports clerk mode and still accepts local demo
   users when `AUTH_ALLOW_LOCAL=1`.
+
+## 2026-10-23 — Spec intake templates (Commercial default + OCFO)
+
+- **Decision:** Keep one Deal Record intake pattern with a template selector. `commercial`
+  remains the default energy/deal catalog; `ocfo` swaps in a finance field catalog
+  (close/flux, O2C, P2P) while reusing the same section spine and
+  value/status/owner/note structured fields. Project model gains generic metadata
+  (`requestName`, `cycle`, `entity`, `requestCode`, `impactType`, `quantifiedImpact`,
+  `controlRisk`, `downstreamEffect`, `template`). Spec view renders by template.
+  Seed adds `GE-2026-0501` Northwind Digital month-end flux request.
+- **Why:** Controllership workflows need the same intake discipline as commercial deals
+  without forking the app or breaking the existing CRM↔ERP demo.
+- **Implications:** New templates = new catalogs in `field-catalog.ts`, not new apps.
+  Verify with `npm run verify:ocfo-intake` and `npm run build`.
+  Completes the earlier main stub that only added optional Project metadata fields.

@@ -1,7 +1,16 @@
 import { buildCostPosition } from "../domain/cost";
+import { fieldLabelMap, getFieldCatalog, structuredFieldKeys } from "../domain/field-catalog";
 import { leadTimeThreat } from "../domain/sourcing";
 import { summarizeSystemsFields } from "../domain/spec";
-import type { AmountByCategory, CostCategory, FieldStatus, Project, SpecField } from "../domain/types";
+import type {
+  AmountByCategory,
+  CostCategory,
+  FieldStatus,
+  IntakeTemplate,
+  Project,
+  SpecField,
+  SpecSection,
+} from "../domain/types";
 import type { AppState } from "./seed";
 
 export type DealViewStatus = "confirmed" | "conflicting" | "tbd";
@@ -11,6 +20,9 @@ export interface DealFieldView {
   status: DealViewStatus;
   owner: string;
   note?: string;
+  label: string;
+  section: SpecSection;
+  fieldKey: string;
 }
 
 export interface DealCostLog {
@@ -40,11 +52,20 @@ export interface DealView {
   customer: string;
   site: string;
   stage: Project["stage"];
+  template: IntakeTemplate;
   meta: {
     requestor: string;
     requestorTeam: string;
     problemStatement: string;
     expectedOutcome: string;
+    requestName: string;
+    cycle: string;
+    entity: string;
+    requestCode: string;
+    impactType: string;
+    quantifiedImpact: string;
+    controlRisk: string;
+    downstreamEffect: string;
     revenueImpact: string;
     auditRisk: string;
     customerImpact: string;
@@ -55,6 +76,7 @@ export interface DealView {
     downstreamDependencies: string;
     tags: string[];
   };
+  /** Structured fields for the active template (systems for commercial; full catalog for OCFO). */
   fields: Record<string, DealFieldView>;
   cost: {
     quoted: AmountByCategory;
@@ -67,17 +89,6 @@ export interface DealView {
     items: DealSourcingItem[];
   };
 }
-
-const SYSTEMS_ORDER = [
-  "voltage",
-  "load",
-  "phase",
-  "coolingType",
-  "spaceConstraints",
-  "requestedDelivery",
-  "customerPowerReady",
-  "deliveryDefinition",
-] as const;
 
 function toViewStatus(status: FieldStatus): DealViewStatus {
   if (status === "unresolved") return "tbd";
@@ -98,7 +109,12 @@ function fieldValue(fields: SpecField[], key: string): string {
 }
 
 export function projectSystemsSummary(state: AppState, projectId: string) {
-  return summarizeSystemsFields(state.specFields.filter((field) => field.projectId === projectId));
+  const project = state.projects.find((row) => row.id === projectId);
+  const template = project?.template ?? "commercial";
+  return summarizeSystemsFields(
+    state.specFields.filter((field) => field.projectId === projectId),
+    template
+  );
 }
 
 export function toDealViews(state: AppState): DealView[] {
@@ -106,12 +122,18 @@ export function toDealViews(state: AppState): DealView[] {
 }
 
 export function toDealView(state: AppState, project: Project): DealView {
+  const template: IntakeTemplate = project.template ?? "commercial";
   const fields = state.specFields.filter((field) => field.projectId === project.id);
   const customer = state.customers.find((row) => row.id === project.customerId);
+  const labels = fieldLabelMap(template);
   const systems: Record<string, DealFieldView> = {};
-  for (const key of SYSTEMS_ORDER) {
+  for (const key of structuredFieldKeys(template)) {
     const field = fields.find((row) => row.fieldKey === key);
+    const catalogEntry = getFieldCatalog(template).find((entry) => entry.fieldKey === key);
     systems[key] = {
+      fieldKey: key,
+      section: catalogEntry?.section ?? field?.section ?? "systems",
+      label: field?.label || labels[key] || key,
       value: field?.value?.trim() ? field.value : null,
       status: field ? toViewStatus(field.status) : "tbd",
       owner: ownerLabel(state, field?.ownerId ?? null),
@@ -221,11 +243,20 @@ export function toDealView(state: AppState, project: Project): DealView {
     customer: customer?.name ?? project.dealName,
     site: project.siteName,
     stage: project.stage,
+    template,
     meta: {
       requestor: project.requestorName,
       requestorTeam: project.requestorTeam,
       problemStatement: project.problemStatement,
       expectedOutcome: project.expectedOutcome,
+      requestName: project.requestName || project.dealName,
+      cycle: project.cycle || "",
+      entity: project.entity || project.siteName,
+      requestCode: project.requestCode || project.projectCode,
+      impactType: project.impactType || "",
+      quantifiedImpact: project.quantifiedImpact || fieldValue(fields, "revenue_impact"),
+      controlRisk: project.controlRisk || fieldValue(fields, "audit_revrec_risk"),
+      downstreamEffect: project.downstreamEffect || fieldValue(fields, "downstream_dependencies"),
       revenueImpact: fieldValue(fields, "revenue_impact"),
       auditRisk: fieldValue(fields, "audit_revrec_risk"),
       customerImpact: fieldValue(fields, "customer_impact"),

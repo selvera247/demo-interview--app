@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS projects (
   problem_statement TEXT NOT NULL DEFAULT '',
   expected_outcome TEXT NOT NULL DEFAULT '',
   tags TEXT NOT NULL DEFAULT '',
+  template TEXT NOT NULL DEFAULT 'commercial' CHECK(template IN ('commercial', 'ocfo')),
+  request_name TEXT NOT NULL DEFAULT '',
+  cycle TEXT NOT NULL DEFAULT '',
+  entity TEXT NOT NULL DEFAULT '',
+  request_code TEXT NOT NULL DEFAULT '',
+  impact_type TEXT NOT NULL DEFAULT '',
+  quantified_impact TEXT NOT NULL DEFAULT '',
+  control_risk TEXT NOT NULL DEFAULT '',
+  downstream_effect TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );

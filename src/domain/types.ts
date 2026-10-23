@@ -1,5 +1,3 @@
-export type ProjectTemplate = "commercial" | "ocfo";
-
 export type ProjectStage = "intake" | "engineering" | "sourcing" | "invoicing";
 
 export type ProjectStatus = "active" | "on_hold" | "cancelled";
@@ -7,6 +5,12 @@ export type ProjectStatus = "active" | "on_hold" | "cancelled";
 export type FieldStatus = "confirmed" | "conflicting" | "unresolved";
 
 export type SpecSection = "systems" | "business_impact" | "effort_timing" | "controls";
+
+/** Intake / spec template. Commercial energy/deal remains the default. */
+export type IntakeTemplate = "commercial" | "ocfo";
+
+/** @deprecated Prefer IntakeTemplate — kept for earlier main metadata stub. */
+export type ProjectTemplate = IntakeTemplate;
 
 export type CostCategory = "materials" | "labor" | "engineering" | "freight";
 
@@ -59,17 +63,19 @@ export interface Project {
   problemStatement: string;
   expectedOutcome: string;
   tags: string[];
+  /** Spec intake template — commercial (default) or OCFO finance. */
+  template: IntakeTemplate;
+  /** Generic request identity / impact metadata (template-agnostic). */
+  requestName: string;
+  cycle: string;
+  entity: string;
+  requestCode: string;
+  impactType: string;
+  quantifiedImpact: string;
+  controlRisk: string;
+  downstreamEffect: string;
   createdAt: string;
   updatedAt: string;
-  template?: ProjectTemplate;
-  requestName?: string;
-  cycle?: string;
-  entity?: string;
-  requestCode?: string;
-  impactType?: string;
-  quantifiedImpact?: string;
-  controlRisk?: string;
-  downstreamEffect?: string;
 }
 
 export interface SpecField {

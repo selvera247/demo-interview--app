@@ -674,6 +674,24 @@ select {
   scroll-margin-top: 4rem;
 }
 
+.deal-app-shell .deal-app-root {
+  min-height: calc(100vh - 3.25rem);
+}
+
+.deal-app-shell .site-nav {
+  border-bottom: 1px solid var(--line, #33363c);
+}
+
+@media (max-width: 768px) {
+  .deal-app-root .deal-app-body {
+    min-height: calc(100vh - 7.5rem) !important;
+  }
+
+  .deal-app-root .deal-app-sidebar {
+    max-height: 34vh;
+  }
+}
+
 .deal-app-label {
   display: flex;
   flex-wrap: wrap;

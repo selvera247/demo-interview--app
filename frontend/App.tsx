@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -90,6 +90,7 @@ export default function App({
   focus = "commercial",
   openIntake = false,
   intakeTemplate = "commercial",
+  onIntakeSettled,
 }: {
   /** Which seeded record to open. OCFO lands on Spec for the finance flux request. */
   focus?: DealAppFocus;
@@ -97,6 +98,8 @@ export default function App({
   openIntake?: boolean;
   /** Template pre-selected when the intake modal opens. */
   intakeTemplate?: "commercial" | "ocfo";
+  /** Parent clears `intake=1` from the URL after create/cancel so refresh does not reopen the modal. */
+  onIntakeSettled?: () => void;
 } = {}) {
   const [state, setState] = useState(() => createSeedState());
   const deals = useMemo(() => toDealViews(state), [state]);
@@ -111,6 +114,13 @@ export default function App({
   const [intakeOpen, setIntakeOpen] = useState(openIntake);
   const selected = deals.find((d) => d.id === selectedId);
 
+  // OCFO records have no BOM/cost loop — keep the user on Spec.
+  useEffect(() => {
+    if (selected?.template === "ocfo" && view !== "spec") {
+      setView("spec");
+    }
+  }, [selected?.template, view]);
+
   const nextCode = useMemo(() => {
     const year = new Date().getFullYear();
     let max = 0;
@@ -121,12 +131,17 @@ export default function App({
     return formatProjectCode(year, max + 1);
   }, [state.projects]);
 
+  function closeIntake() {
+    setIntakeOpen(false);
+    onIntakeSettled?.();
+  }
+
   function saveIntake(intake: NewDealIntake) {
     const result = addDealFromIntake(state, intake, new Date().toISOString());
     setState(result.state);
     setSelectedId(result.projectCode);
     setView("spec");
-    setIntakeOpen(false);
+    closeIntake();
   }
 
   const summarize = (deal: DealView) => {
@@ -136,34 +151,37 @@ export default function App({
     return { unresolved, conflicting };
   };
 
+  const isOcfoSelected = selected?.template === "ocfo";
+  const viewTabs = (
+    [
+      ["spec", "Spec", FileText],
+      ["sourcing", "Sourcing", Package],
+      ["cost", "Cost tracking", LayoutGrid],
+    ] as const
+  ).filter(([id]) => !(isOcfoSelected && (id === "sourcing" || id === "cost")));
+
   return (
-    <div className="min-h-screen bg-[#1C1E22] text-[#E8E6E1]" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-      <div className="border-b border-[#33363c] px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded bg-[#C9762E]/15 border border-[#C9762E]/40">
+    <div className="deal-app-root min-h-screen bg-[#1C1E22] text-[#E8E6E1]" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div className="border-b border-[#33363c] px-4 sm:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center justify-center w-8 h-8 rounded bg-[#C9762E]/15 border border-[#C9762E]/40 shrink-0">
             <Zap size={16} className="text-[#C9762E]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[15px] font-semibold tracking-tight">Deal Record</div>
-            <div className="text-[12px] text-[#8B9099]">
-              {selected?.template === "ocfo"
+            <div className="text-[12px] text-[#8B9099] truncate">
+              {isOcfoSelected
                 ? "OCFO intake — close / flux · O2C · P2P on one request ID"
                 : "Opportunity → contract → sales order → PO on one project ID"}
             </div>
           </div>
         </div>
         <div
-          className="flex gap-1 bg-[#212327] border border-[#33363c] rounded-md p-1"
+          className="flex gap-1 bg-[#212327] border border-[#33363c] rounded-md p-1 self-start sm:self-auto"
           role="tablist"
           aria-label="Deal Record views"
         >
-          {(
-            [
-              ["spec", "Spec", FileText],
-              ["sourcing", "Sourcing", Package],
-              ["cost", "Cost tracking", LayoutGrid],
-            ] as const
-          ).map(([id, label, Icon]) => {
+          {viewTabs.map(([id, label, Icon]) => {
             const active = view === id;
             return (
               <button
@@ -192,9 +210,9 @@ export default function App({
         </div>
       </div>
 
-      <div className="flex" style={{ minHeight: "calc(100vh - 65px)" }}>
-        <div className="w-[280px] border-r border-[#33363c] flex flex-col">
-          <div className="px-4 py-3 border-b border-[#33363c] flex items-center justify-between">
+      <div className="deal-app-body flex flex-col md:flex-row" style={{ minHeight: "calc(100vh - 65px)" }}>
+        <div className="deal-app-sidebar w-full md:w-[280px] md:border-r border-b md:border-b-0 border-[#33363c] flex flex-col max-h-[40vh] md:max-h-none">
+          <div className="px-4 py-3 border-b border-[#33363c] flex items-center justify-between shrink-0">
             <span className="text-[11px] uppercase tracking-wide text-[#8B9099]" style={{ fontFamily: "JetBrains Mono, monospace" }}>
               Active deals
             </span>
@@ -203,6 +221,7 @@ export default function App({
               type="button"
               aria-label="Add deal"
               onClick={() => setIntakeOpen(true)}
+              title="New spec intake"
             >
               <Plus size={16} />
             </button>
@@ -215,7 +234,10 @@ export default function App({
                 <button
                   key={deal.id}
                   type="button"
-                  onClick={() => setSelectedId(deal.id)}
+                  onClick={() => {
+                    setSelectedId(deal.id);
+                    setView(deal.template === "ocfo" ? "spec" : view === "spec" ? "spec" : view);
+                  }}
                   className={`w-full text-left px-4 py-3 border-b border-[#2a2d33] transition-colors ${
                     isSelected ? "bg-[#2A2D33]" : "hover:bg-[#24262b]"
                   }`}
@@ -260,7 +282,10 @@ export default function App({
         </div>
 
         {selected && view === "spec" && (
-          <SpecView deal={selected} onGoToSourcing={() => setView("sourcing")} />
+          <SpecView
+            deal={selected}
+            onGoToSourcing={() => setView(selected.template === "ocfo" ? "spec" : "sourcing")}
+          />
         )}
         {selected && view === "sourcing" && <SourcingView deal={selected} />}
         {selected && view === "cost" && (
@@ -271,8 +296,12 @@ export default function App({
       {intakeOpen && (
         <NewDealPanel
           nextCode={nextCode}
-          initialTemplate={intakeTemplate}
-          onClose={() => setIntakeOpen(false)}
+          initialTemplate={
+            intakeTemplate === "ocfo" || selected?.template === "ocfo" || focus === "ocfo"
+              ? "ocfo"
+              : "commercial"
+          }
+          onClose={closeIntake}
           onSave={saveIntake}
         />
       )}
@@ -524,6 +553,18 @@ const poStatusMeta: Record<string, { label: string; color: string; bg: string }>
 function SourcingView({ deal }: { deal: DealView }) {
   const [detailItem, setDetailItem] = useState<DealSourcingItem | null>(null);
 
+  if (deal.template === "ocfo") {
+    return (
+      <div className="flex-1 px-8 py-6 max-w-[760px]">
+        <DealHeader deal={deal} />
+        <div className="rounded-md border border-[#3a3d44] bg-[#24262b] px-4 py-5 text-[13px] text-[#8B9099] leading-relaxed">
+          Sourcing / PO tracking is for commercial energy deals. This OCFO request is governed on the{" "}
+          <strong className="text-[#E8E6E1]">Spec</strong> tab (close / flux, O2C, or P2P fields).
+        </div>
+      </div>
+    );
+  }
+
   if (!deal.sourcing.items.length) {
     return (
       <div className="flex-1 px-8 py-6 max-w-[760px]">
@@ -764,6 +805,18 @@ function CostView({
   deal: DealView;
   onGoToSourcing: () => void;
 }) {
+  if (deal.template === "ocfo") {
+    return (
+      <div className="flex-1 px-8 py-6 max-w-[720px]">
+        <DealHeader deal={deal} />
+        <div className="rounded-md border border-[#3a3d44] bg-[#24262b] px-4 py-5 text-[13px] text-[#8B9099] leading-relaxed">
+          Cost tracking is for commercial quotes and PO commits. This OCFO request lives on the{" "}
+          <strong className="text-[#E8E6E1]">Spec</strong> tab.
+        </div>
+      </div>
+    );
+  }
+
   const quotedTotal = sumCost(deal.cost.quoted);
   const committedTotal = sumCost(deal.cost.committed);
   const actualTotal = sumCost(deal.cost.actual);

@@ -388,3 +388,14 @@ General rules from the first honest heuristic run (planted 5/9, holdout 7/9, har
   prose above the app, default view was commercial Sourcing.
 - **Implications:** Share
   `…/#/projects/deal-record?focus=ocfo` for the finance path.
+
+## 2026-10-23 — OCFO app-first shell (functional Pages path)
+
+- **Decision:** `?focus=ocfo` renders a full-viewport Deal Record app (case study hidden),
+  Spec-only tabs for OCFO records, responsive sidebar, and clears `intake=1` after
+  create/cancel. Commercial case study page unchanged.
+- **Why:** Visitors called the OCFO deep link “not functional” — buried under case-study
+  chrome, mobile layout crushed Spec, and Sourcing/Cost looked broken with empty BOM.
+- **Implications:** Prefer
+  `…/#/projects/deal-record?focus=ocfo` (app shell) vs plain `/projects/deal-record`
+  (case study + commercial app below).
